@@ -3,7 +3,7 @@ import SlidingSupportersName from './SlidingSupportersName'
 
 const DashboardPage = () => {
   return (
-    <div className=''>
+    <div className="">
       <SlidingSupportersName />
     </div>
   )
