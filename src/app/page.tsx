@@ -1,101 +1,260 @@
-import Image from "next/image";
+import Image from 'next/image'
+import Button from './components/Button/Button'
+import Icon_right5 from './components/icons/Icon_right5'
+import WistiaPlayer from './components/WistiaPlayer'
+import child from '@/app/images/homepage/child-circle.png'
+import brandLogo from '@/app/images/homepage/brand-logo.svg'
+import logIn from '@/app/images/homepage/Receive.svg'
+import receive from '@/app/images/homepage/LogIn.svg'
+import register from '@/app/images/homepage/Register.svg'
+import PublicNavigationMenu from './components/this-website-only/navigation-menu/desktop/PublicNavigationMenu'
+import PublicFooter from './components/this-website-only/footer/PublicFooter'
+import Link from 'next/link'
 
-export default function Home() {
+const Homepage = () => {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      {/* Navigation Menu 2 */}
+      <PublicNavigationMenu />
+      {/* Section 2 */}
+      <div
+        className={
+          'pb-10 pt-10 md:pb-[67px] md:pt-[65px] border-4 border-r-0 border-[#B0E0F1] flex flex-col'
+        }
+      >
+        <div className={'container md:px-6 lg:px-10 xl:px-0'}>
+          <p
+            className={
+              'font-acuminCondensedBold text-2xl md:text-[35px] text-primary text-center'
+            }
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Connecting People Who Hurt With Those Who Care
+          </p>
+          <p
+            className={
+              'text-[17px] md:text-[19px] text-[#999] text-center mt-[13px] leading-tight'
+            }
           >
-            Read our docs
-          </a>
+            A Conduit for Expressions of Love and Support
+          </p>
+          <div
+            className={
+              'flex flex-col lg:flex-row gap-[62px] w-full mx-auto max-w-[920px] mt-8 md:mt-[61px]'
+            }
+          >
+            <div
+              className={
+                'shadow-custom1 rounded-lg flex gap-2 w-full lg:min-w-[631px]'
+              }
+            >
+              <WistiaPlayer
+                videoId={'ow4kttqlhy'}
+                containerStyle="shadow-lg bg-[#3082C4]"
+              />
+            </div>
+            <div className={'flex flex-col'}>
+              <div className={'relative mt-[2px] w-fit mx-auto lg:mx-[unset]'}>
+                <Image
+                  src={child}
+                  alt="child"
+                  quality={100}
+                  width={217.572}
+                  height={222.081}
+                  className="rounded-full ring-[6px] border-[5px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px]"
+                />
+                <Image
+                  src={brandLogo}
+                  alt="logo"
+                  width={67}
+                  height={68}
+                  quality={100}
+                  className="absolute -bottom-[4px] right-[4px]"
+                />
+              </div>
+              <p
+                className={
+                  'font-acuminCondensedBold text-primary text-[22px] mt-[27px] text-center'
+                }
+              >
+                Emotional Support Network
+              </p>
+              <p
+                className={
+                  'text-[13px] text-[#999] mt-[5px] leading-tight text-center lg:text-left'
+                }
+              >
+                Provided free of charge for families battling serious illness,
+                courtesy of the Love Transfusion community.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Register & Login */}
+        <div
+          className={'container md:px-6 lg:px-10 xl:px-0 mt-10 md:mt-[58px]'}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+          <div
+            className={
+              'flex flex-col md:flex-row md:divide-x md:divide-primary-200 gap-4 md:gap-[unset] justify-center'
+            }
+          >
+            <div className={'flex flex-col items-center px-[37px]'}>
+              <p
+                className={
+                  'text-xl md:text-[24px] text-primary font-acuminCondensedRegular text-center mb-2 md:mb-4'
+                }
+              >
+                NEW RECIPIENTS
+              </p>
+              <Link href={'https://www.lovetransfusion.org/submit-story'}>
+                <Button
+                  clVariant="outlined"
+                  className="border-none rounded-[4px] flex py-1 shadow-[0_0_15px_0_rgba(40,140,204,0.30)] w-[259px] h-[46px] items-center pr-5"
+                >
+                  <div
+                    className={
+                      'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
+                    }
+                  >
+                    <p
+                      className={
+                        'text-[21px] mx-auto text-center font-acuminProLight'
+                      }
+                    >
+                      Register
+                    </p>
+                    <div className={'pl-[19px]'}>
+                      <Icon_right5 className="size-[19px]" />
+                    </div>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+            <div className={'flex flex-col items-center px-[37px]'}>
+              <p
+                className={
+                  'text-xl md:text-[24px] text-primary font-acuminCondensedRegular text-center mb-2 md:mb-4'
+                }
+              >
+                RETURNING RECIPIENTS
+              </p>
+              <Link href={'/login'}>
+                <Button
+                  clVariant="outlined"
+                  className="border-none rounded-[4px] flex py-1 shadow-[0_0_15px_0_rgba(40,140,204,0.30)] w-[259px] h-[46px] items-center pr-5"
+                >
+                  <div
+                    className={
+                      'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
+                    }
+                  >
+                    <p
+                      className={
+                        'text-[21px] mx-auto text-center font-acuminProLight'
+                      }
+                    >
+                      Login
+                    </p>
+                    <div className={'pl-[19px]'}>
+                      <Icon_right5 className="size-[19px]" />
+                    </div>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+        {/* How it works */}
+        <div className={'container md:px-6 lg:px-10 xl:px-0 mt-[50px]'}>
+          <div
+            className={'flex items-center gap-3 md:gap-5 max-w-[920px] mx-auto'}
+          >
+            <div className={'flex border-t w-full h-[1px] mt-[6px]'} />
+            <p
+              className={
+                'text-nowrap font-acuminCondensedBold text-[#E6E6E6] text-[23px] md:text-[30px] tracking-[4px]'
+              }
+            >
+              HOW IT WORKS
+            </p>
+            <div className={'flex border-t w-full h-[1px] mt-[6px]'} />
+          </div>
+          <div
+            className={
+              'flex flex-col md:flex-row gap-8 md:gap-[unset] justify-between text-center mt-3 max-w-[808px] mx-auto relative'
+            }
+          >
+            <div className={'flex flex-col items-center'}>
+              <p
+                className={'font-acuminCondensedRegular text-3xl text-primary'}
+              >
+                Register
+              </p>
+              <p
+                className={
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                }
+              >
+                Tell Us About The Recipient
+              </p>
+              <Image src={register} alt="Register" quality={100} />
+            </div>
+            <div className={'flex flex-col items-center'}>
+              <p
+                className={'font-acuminCondensedRegular text-3xl text-primary'}
+              >
+                Login
+              </p>
+              <p
+                className={
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                }
+              >
+                Private, Secure and Easy To Use
+              </p>
+              <Image src={logIn} alt="Register" quality={100} />
+            </div>
+            <div className={'flex flex-col items-center'}>
+              <p
+                className={'font-acuminCondensedRegular text-3xl text-primary'}
+              >
+                Receive
+              </p>
+              <p
+                className={
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                }
+              >
+                Expressions of Love and Support
+              </p>
+              <Image src={receive} alt="Register" quality={100} />
+            </div>
+            <div
+              className={
+                'hidden md:flex border-t border-primary-100 absolute bottom-16 left-0 right-0 mx-auto md:max-w-[580px] lg:max-w-[680px] -z-10'
+              }
+            />
+          </div>
+          <p
+            className={
+              'italic text-primary text-[17px] text-center mt-[55px] font-acuminProLight'
+            }
+          >
+            {`"`}One word frees us of all the weight and pain in life. That word is
+            <span
+              className={`relative before:absolute before:bottom-[13px] before:left-[6px] before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
+            >
+              {' '}
+              Love
+            </span>
+            .{`"`} <span className="text-sm">~Sophocles</span>
+          </p>
+        </div>
+      </div>
+      {/* Footer */}
+      <PublicFooter />
+    </>
+  )
 }
+
+export default Homepage
