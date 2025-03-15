@@ -164,7 +164,7 @@ const Homepage = () => {
             </div>
           </div>
         </div>
-        {/* How it works */}
+        {/* How it workss */}
         <div className={'container md:px-6 lg:px-10 xl:px-0 mt-[50px]'}>
           <div
             className={'flex items-center gap-3 md:gap-5 max-w-[920px] mx-auto'}
