@@ -39,7 +39,7 @@ const NavigationMenu = () => {
             </p>
           </div>
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
-            <p className={'text-[#DFEEFA8F] mb-[18px]'}>MAIN MENU</p>
+            <p className={'text-[#DFEEFA8F] mb-[13px]'}>MAIN MENU</p>
             <Link href={'/dashboard'}>
               <div
                 className={
@@ -87,7 +87,7 @@ const NavigationMenu = () => {
             </Link>
           </div>
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
-            <p className={'text-[#DFEEFA8F] mb-[18px]'}>HELP & SUPPORT</p>
+            <p className={'text-[#DFEEFA8F] mb-[13px]'}>HELP & SUPPORT</p>
             <Link href={'/help-center'}>
               <div
                 className={
@@ -120,7 +120,7 @@ const NavigationMenu = () => {
             </Link>
           </div>
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
-            <p className={'text-[#DFEEFA8F] mb-[18px]'}>MORE</p>
+            <p className={'text-[#DFEEFA8F] mb-[13px]'}>MORE</p>
             <Link href={'/about-us'}>
               <div
                 className={

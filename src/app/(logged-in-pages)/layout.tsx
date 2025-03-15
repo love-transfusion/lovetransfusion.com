@@ -12,12 +12,12 @@ interface I_MembersLayout {
 const MembersLayout = ({ children }: I_MembersLayout) => {
   return (
     <>
-      <div className={'grid grid-cols-[273px_calc(100%-273px)]'}>
+      <div className={'grid grid-cols-[263px_calc(100%-263px)]'}>
         <NavigationMenu />
         <div className="h-full flex flex-col w-full">
           <div
             className={
-              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] h-[84px] pl-7 pr-11 flex items-center justify-between'
+              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] min-h-[84px] pl-7 pr-11 flex items-center justify-between'
             }
           >
             <div className={'flex gap-[98px] items-center'}>
