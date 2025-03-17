@@ -12,8 +12,20 @@ import mousePointer from './images/mousePointerIcon.svg'
 import Link from 'next/link'
 
 const NavigationMenu = () => {
+  const getFormattedDate = (): string => {
+    const today: Date = new Date()
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }
+    return today.toLocaleDateString('en-US', options)
+  }
+
   return (
-    <div className={'flex flex-col bg-black justify-start items-start'}>
+    <div
+      className={'hidden 2xl:flex flex-col bg-black justify-start items-start'}
+    >
       <div className="h-full w-full">
         <div className={'bg-[#2F8EDD] h-[84px]'} />
         <div
@@ -35,7 +47,8 @@ const NavigationMenu = () => {
             </p>
             <p className={'mt-[2px] mb-[19px]'}>Support Platform</p>
             <p className={'border-y border-[#92CCED] py-1 text-lg'}>
-              March 13, 2025
+              {/* March 13, 2025 */}
+              {getFormattedDate()}
             </p>
           </div>
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
