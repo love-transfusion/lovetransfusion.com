@@ -9,6 +9,7 @@ interface I_Input extends React.HTMLAttributes<HTMLInputElement> {
   clIconClassName?: string
   clVariant?: 'default' | 'input2'
   type?: string
+  clErrorMessage?: string | undefined
 }
 
 const getVariant = (
@@ -30,6 +31,7 @@ const Input = ({
   clLeftIcon,
   clVariant,
   clIconClassName,
+  clErrorMessage,
   clRightIcon,
   className,
   type,
@@ -64,6 +66,9 @@ const Input = ({
         placeholder={clPlaceholder}
         className={twMerge(``, variantStyles, className)}
       />
+      {clErrorMessage && (
+        <p className={'text-sm text-red-500'}>{clErrorMessage}</p>
+      )}
     </div>
   )
 }

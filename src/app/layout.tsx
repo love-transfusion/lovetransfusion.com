@@ -10,6 +10,7 @@ import {
   acuminProRegular,
   acuminCondensedRegular,
 } from './utilities/fonts/fonts'
+import GlobalToast from './GlobalToast'
 
 export const metadata: Metadata = {
   title: 'Love Transfusion',
@@ -26,7 +27,8 @@ export default function RootLayout({
       <body
         className={`${acuminCondensedBold.variable} ${acuminProThin.variable} ${acuminProRegular.className} ${acuminProMedium.variable} ${acuminProSemibold.variable} ${acuminProLight.variable} ${acuminProExtraLight.variable} ${acuminCondensedRegular.variable}`}
       >
-        {children}
+        <GlobalToast />
+        <div>{children}</div>
       </body>
     </html>
   )
