@@ -4,35 +4,47 @@ import MapChart from './MapChart'
 import RecipientProfilePicture from './RecipientProfilePicture'
 import ripple from './images/ripple.png'
 import arrow from './images/arrow.png'
-import carlo from './images/carlo.webp'
 import Image from 'next/image'
-import ltWebsiteIcon from './images/world-w.svg'
 import hugs from './images/hugs.png'
 import messages from './images/MESSAGES.png'
 import shares from './images/SHARES.png'
-import DividerText from '@/app/components/DividerText'
+import MostRecentEngagements from './MostRecentEngagements'
 import ShowOrHide from './ShowOrHide'
+import carlo from './images/carlo.webp'
+import DividerText from '@/app/components/DividerText'
+import HugsMessagesShares from './HugsMessagesShares'
 
 // EFF7FC
 const DashboardPage = () => {
   return (
     <div className="">
       <SlidingSupportersName />
+      {/* Profile and Map Section */}
       <div
         className={
-          'grid grid-cols-[208px_1fr_337px] pt-[46px] pb-[50px] pl-[45px] pr-[30px] border-b-4 border-[#B0E0F1]'
+          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1]'
         }
       >
-        <div className={'text-center'}>
+        <div
+          className={
+            'max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-5 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4'
+          }
+        >
           <RecipientProfilePicture />
-          <p className={'font-acuminProSemibold text-[26px] mt-2 text-primary'}>
-            Adley
-          </p>
-          <p className={'text-primary-200 text-xl'}>RECIPIENT</p>
-          <div className={'relative flex flex-col items-end w-full h-5'}>
+          <div className={'mt-2 text-left md:text-center'}>
+            <p
+              className={
+                'font-acuminProSemibold text-lg md:text-[26px] text-primary'
+              }
+            >
+              Adley
+            </p>
+            <p className={'text-primary-200 text-sm md:text-xl'}>RECIPIENT</p>
+          </div>
+          <div className={'relative flex flex-col items-end h-fit'}>
             <div
               className={
-                'grid grid-cols-[70px_1fr] w-fit text-white bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] rounded-lg gap-2 md:gap-4 px-[13px] py-[4px] mt-[90px] z-10 absolute right-0 left-0 mx-auto min-w-[172px]'
+                'grid grid-cols-[auto_1fr] md:grid-cols-[70px_1fr] w-fit text-white bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] shadow-[0px_0px_30px_0px_#288CCC47] rounded-lg gap-2 md:gap-4 px-2 md:px-[13px] py-[4px] md:mt-[90px] z-10 md:absolute right-0 left-0 mx-auto md:min-w-[172px] items-center text-left md:text-center'
               }
             >
               <Image
@@ -41,16 +53,16 @@ const DashboardPage = () => {
                 quality={100}
                 width={70}
                 height={68}
-                className="w-[70px] h-[68px]"
+                className="w-10 h-10 md:w-[70px] md:h-[68px]"
               />
               <div className={''}>
-                <p className={''}>TOTAL</p>
+                <p className={'max-sm:text-[12px]'}>TOTAL</p>
                 <p
                   className={
-                    'font-acuminProSemibold text-[36px] leading-tight -mt-[2px]'
+                    'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
                   }
                 >
-                  23,456
+                  1,234
                 </p>
               </div>
             </div>
@@ -58,129 +70,29 @@ const DashboardPage = () => {
               src={arrow}
               alt="arrow"
               quality={100}
-              className="absolute top-4 left-[79px] my-auto"
+              className=" max-sm:hidden absolute top-4 left-[79px] my-auto"
             />
-          </div>
-        </div>
-        <div className={'w-full pt-[26px]'}>
-          <MapChart />
-          <div className={'flex gap-6 pl-[15px] mt-16'}>
-            <div className={'text-center'}>
-              <p className={'uppercase text-2xl text-primary-300'}>hugs</p>
-              <div
-                className={
-                  'flex gap-3 items-center bg-white shadow-[0px_0px_20px_0px_#2FABDD9C] py-3 px-6 mt-5 rounded-lg'
-                }
-              >
-                <Image src={hugs} quality={100} alt="hugs" />
-                <p
-                  className={
-                    'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-[26px] pt-[6px] pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
-                  }
-                >
-                  23,456
-                </p>
-              </div>
-            </div>
-            <div className={'text-center'}>
-              <p className={'uppercase text-2xl text-primary-300'}>messages</p>
-              <div
-                className={
-                  'flex gap-3 items-center bg-white shadow-[0px_0px_20px_0px_#2FABDD9C] py-3 px-6 mt-5 rounded-lg'
-                }
-              >
-                <Image src={messages} quality={100} alt="hugs" />
-                <p
-                  className={
-                    'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-[26px] pt-[6px] pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
-                  }
-                >
-                  23,456
-                </p>
-              </div>
-            </div>
-            <div className={'text-center'}>
-              <p className={'uppercase text-2xl text-primary-300'}>shares</p>
-              <div
-                className={
-                  'flex gap-3 items-center bg-white shadow-[0px_0px_20px_0px_#2FABDD9C] py-3 px-6 mt-5 rounded-lg'
-                }
-              >
-                <Image src={shares} quality={100} alt="hugs" />
-                <p
-                  className={
-                    'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-[26px] pt-[6px] pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
-                  }
-                >
-                  23,456
-                </p>
-              </div>
-            </div>
           </div>
         </div>
         <div
           className={
-            'pl-[10px] pr-[18px] -mt-[6px] max-h-[586px] overflow-hidden relative'
+            'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] 2xl:pt-[26px]'
           }
         >
-          <div
-            className={
-              'h-32 w-full bg-gradient-to-t from-[#FFFFFF] to-[#FFFFFF00] absolute -bottom-4'
-            }
-          />
-          <p
-            className={
-              'mx-5 bg-gradient-to-b from-[#2F8FDD] to-[#2EB4DB] pt-2 pb-[6px] text-center text-white uppercase rounded-t-lg'
-            }
-          >
-            Most Recent
-          </p>
-          <div
-            className={
-              'bg-[#EEF6FC] rounded-lg text-sm shadow-[0px_0px_12px_0px_#288CCC45]'
-            }
-          >
-            <div
-              className={
-                'flex justify-between text-[12px] text-primary pl-16 px-6 leading-tight py-[7px]'
-              }
-            >
-              <p className={''}>NAME</p>
-              <p className={''}>SOURCE</p>
-            </div>
-            <div className={'divide-y divide-primary-200'}>
-              {new Array(13).fill(' ').map((item, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={
-                      'flex gap-2 justify-between px-4 py-[7px] first:bg-white first:scale-105 first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px]'
-                    }
-                  >
-                    <div className={'flex items-center gap-3'}>
-                      <Image
-                        src={carlo}
-                        alt="Profile picture of engager"
-                        quality={100}
-                        width={37.8}
-                        height={37.8}
-                        className="border-[3px] border-[#288CCC] rounded-full"
-                      />
-                      <p className={'text-[#009933]'}>Carlo Tubigon</p>
-                    </div>
-                    <Image
-                      src={ltWebsiteIcon}
-                      alt="LT Website Icon"
-                      quality={100}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+          <MapChart />
+          <div className={'hidden xl:block'}>
+            <HugsMessagesShares />
           </div>
         </div>
+        <div className={'mx-auto max-sm:w-full'}>
+          <div className={'xl:hidden'}>
+            <HugsMessagesShares />
+          </div>
+          <MostRecentEngagements />
+        </div>
       </div>
-      <div className={'flex items-start gap-[50px] py-7 px-10 bg-[#EFF7FC]'}>
+      {/* Messages Section */}
+      {/* <div className={'flex items-start gap-[50px] py-7 px-10 bg-[#EFF7FC]'}>
         <div className={'min-w-[900px]'}>
           <DividerText clBorderTopClassName="border-[#92CCED]">
             <p className={'text-nowrap text-2xl uppercase text-[#B3D8F3]'}>
@@ -282,7 +194,7 @@ const DashboardPage = () => {
             <div className="border-r-[35px] border-y-[25px] border-[#2F8EDD] border-y-transparent absolute -left-[35px] top-0 bottom-0 my-auto h-fit" />
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

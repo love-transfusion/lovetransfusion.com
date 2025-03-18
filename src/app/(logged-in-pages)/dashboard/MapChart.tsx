@@ -1,10 +1,12 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
-import * as echarts  from 'echarts'
+import * as echarts from 'echarts'
+import useDeviceSize from '@/app/hooks/useDeviceSize'
 
 const WorldMap = () => {
   const [option, setOption] = useState({})
+  const deviceSize = useDeviceSize()
 
   useEffect(() => {
     // Fetch world map JSON
@@ -71,7 +73,13 @@ const WorldMap = () => {
   }, [])
 
   return (
-    <ReactECharts option={option} style={{ height: '370px', width: '100%' }} />
+    <ReactECharts
+      option={option}
+      style={{
+        height: `${deviceSize === 'sm' ? '170px' : '370px'}`,
+        width: '100%',
+      }}
+    />
   )
 }
 
