@@ -18,7 +18,7 @@ const Toggle = ({
   return (
     <div
       className={twMerge(
-        'relative bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] w-[56px] p-1 rounded-full',
+        'relative bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] w-[56px] p-1 rounded-full cursor-pointer',
         clContainerStyle
       )}
       onClick={clToggle}
@@ -27,7 +27,7 @@ const Toggle = ({
         className={twMerge(
           `bg-[#E2F0FA] size-6 rounded-full ${
             clIsToggled ? 'ml-auto' : 'mr-auto'
-          } transition-all duration-500`,
+          }`,
           clToggleStyle
         )}
       />

@@ -4,11 +4,16 @@ import { twMerge } from 'tailwind-merge'
 interface I_DividerText {
   children: React.ReactNode
   clBorderTopClassName?: string
+  clContainerClassName?: string
 }
 
-const DividerText = ({ children, clBorderTopClassName }: I_DividerText) => {
+const DividerText = ({
+  children,
+  clBorderTopClassName,
+  clContainerClassName,
+}: I_DividerText) => {
   return (
-    <div className="w-full">
+    <div className={twMerge('w-full', clContainerClassName)}>
       <div className={'flex items-center gap-3 md:gap-5 mx-auto'}>
         <div
           className={twMerge(

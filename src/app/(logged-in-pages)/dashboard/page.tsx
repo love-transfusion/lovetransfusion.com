@@ -22,7 +22,7 @@ const DashboardPage = () => {
       {/* Profile and Map Section */}
       <div
         className={
-          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1]'
+          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1]'
         }
       >
         <div
@@ -69,16 +69,26 @@ const DashboardPage = () => {
         </div>
       </div>
       {/* Messages Section */}
-      {/* <div className={'flex items-start gap-[50px] py-7 px-10 bg-[#EFF7FC]'}>
-        <div className={'min-w-[900px]'}>
-          <DividerText clBorderTopClassName="border-[#92CCED]">
-            <p className={'text-nowrap text-2xl uppercase text-[#B3D8F3]'}>
-              messages
-            </p>
-          </DividerText>
+      <div
+        className={
+          'flex flex-col-reverse md:flex-row items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC]'
+        }
+      >
+        <div className={'lg:min-w-full xl:min-w-[900px]'}>
+          <div className={'flex gap-9'}>
+            <DividerText
+              clContainerClassName="hidden md:block"
+              clBorderTopClassName="border-[#92CCED]"
+            >
+              <p className={'text-nowrap md:text-2xl uppercase text-[#B3D8F3]'}>
+                messages
+              </p>
+            </DividerText>
+            <ShowOrHide clContainerClassName="hidden md:flex xl:hidden" />
+          </div>
           <div
             className={
-              'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] overflow-hidden mt-8'
+              'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] overflow-hidden mt-4 md:mt-8'
             }
           >
             <div
@@ -91,13 +101,23 @@ const DashboardPage = () => {
                 return (
                   <div
                     key={index}
-                    className={'px-9 even:bg-white odd:bg-[#F7FCFF] py-[23px]'}
+                    className={
+                      'px-9 even:bg-white odd:bg-[#F7FCFF] pt-6 pb-7 md:pt-[23px] md:pb-[23px]'
+                    }
                   >
-                    <div className={'flex justify-between items-center gap-6'}>
-                      <div className={'flex gap-6 items-center'}>
+                    <div
+                      className={
+                        'flex flex-col md:flex-row md:justify-between items-center gap-[21px] md:gap-6'
+                      }
+                    >
+                      <div
+                        className={
+                          'flex flex-col md:flex-row gap-6 items-center'
+                        }
+                      >
                         <div
                           className={
-                            'w-[60px] h-[60px] border-[3px] border-[#288CCC] rounded-full overflow-hidden relative'
+                            'min-w-[64px] min-h-[64px] md:min-w-[60px] md:min-h-[60px] border-[3px] border-[#288CCC] rounded-full overflow-hidden relative'
                           }
                         >
                           <Image
@@ -108,7 +128,7 @@ const DashboardPage = () => {
                             className="object-cover"
                           />
                         </div>
-                        <div className={''}>
+                        <div className={'text-center md:text-left'}>
                           <p
                             className={
                               'text-lg font-acuminProSemibold text-[#009933]'
@@ -141,11 +161,11 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
-        <div className={'w-full'}>
+        <div className={'w-full block md:hidden xl:block'}>
           <ShowOrHide />
           <div
             className={
-              'p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative'
+              'hidden xl:block p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative'
             }
           >
             <div
@@ -171,7 +191,15 @@ const DashboardPage = () => {
             <div className="border-r-[35px] border-y-[25px] border-[#2F8EDD] border-y-transparent absolute -left-[35px] top-0 bottom-0 my-auto h-fit" />
           </div>
         </div>
-      </div> */}
+        <DividerText
+          clContainerClassName="block md:hidden"
+          clBorderTopClassName="border-[#92CCED]"
+        >
+          <p className={'text-nowrap md:text-2xl uppercase text-[#B3D8F3]'}>
+            messages
+          </p>
+        </DividerText>
+      </div>
     </div>
   )
 }
