@@ -6,11 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "update-types": "npx supabase gen types typescript --project-id xbjzdshnnddfeqyninmm > src/types/database.types.ts",
+    "update-orgtypes": "supabase gen types typescript --project-id bnsyauupzwhhsloomymu > src/types/ltorgDatabase.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
+    "axios": "^1.8.4",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.3",
     "framer-motion": "^12.4.13",
@@ -22,6 +25,7 @@
     "react-hook-form": "^7.54.2",
     "swiper": "^11.2.5",
     "tailwind-merge": "^3.0.2",
+    "uuid": "^11.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
