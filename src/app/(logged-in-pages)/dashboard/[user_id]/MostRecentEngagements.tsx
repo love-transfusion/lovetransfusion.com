@@ -6,23 +6,6 @@ interface I_MostRecentEngagements {
   clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
 }
 
-// interface I_profile_picture {
-//   profile_picture: {
-//     blurDataURL: string, fullPath: string, id: UUID, path: string
-//   }
-// }
-
-// interface public_profiles extends Iprofi {
-//   avatar: string | null;
-//   bio: string | null;
-//   created_at: string;
-//   first_name: string | null;
-//   full_name: string | null;
-//   id: string;
-//   last_name: string | null;
-//   profile_picture: string | null;
-// }
-
 const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
   const comments = clRecipientOBj.comments.map(
     (recipient: I_supaorg_comments) => {
@@ -91,7 +74,7 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
               <div
                 key={index}
                 className={
-                  'flex gap-2 justify-between px-4 py-[7px] first:bg-white first:scale-105 first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px]'
+                  'flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] first:bg-white first:scale-105 first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px]'
                 }
               >
                 <div className={'flex items-center gap-3'}>
@@ -105,7 +88,7 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
                     quality={100}
                     width={37.8}
                     height={37.8}
-                    className="border-[3px] border-[#288CCC] rounded-full"
+                    className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
                   />
                   <p className={'text-[#009933]'}>
                     {item.name ?? 'Someone Who Cares'}

@@ -36,7 +36,6 @@ const Messages = ({ clRecipientObj }: I_Messages) => {
       />
       <div className={'divide-y divide-primary'}>
         {comments.map((item, index) => {
-          console.log('item', item)
           if (index > lastVisible) return
           const isLastItem = index === lastVisible
           return (

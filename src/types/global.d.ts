@@ -1,3 +1,4 @@
+import { analyticsdata_v1beta } from 'googleapis'
 import { Database as DB } from './database.types'
 import { Database as orgDB } from './ltorgDatabase.types'
 import { UUID } from './utils.types'
@@ -32,6 +33,9 @@ declare global {
 
   // Utilities
   type UUID = `${string}-${string}-${string}-${string}-${string}`
+
+  type I_AnalyticsData = analyticsdata_v1beta.Schema$RunReportResponse
+
   interface I_profile_picture {
     blurDataURL: string
     fullPath: string
@@ -42,18 +46,23 @@ declare global {
   // LT.org Database
 
   type I_supaorg_recipient = orgDB['public']['Tables']['recipients']['Row']
+
   type I_supaorg_public_profiles =
     | orgDB['public']['Tables']['public_profiles']['Row'] & {
         profile_picture: I_profile_picture | null
       }
+
   type I_supaorg_hug = orgDB['public']['Tables']['hugs']['Row'] & {
     public_profiles: I_supaorg_public_profiles | null
   }
+
   type I_supaorg_recipient_counters =
     orgDB['public']['Tables']['recipient_counters']['Row']
+
   type I_supaorg_comments = orgDB['public']['Tables']['comments']['Row'] & {
     public_profiles: I_supaorg_public_profiles | null
   }
+
   type I_supaorg_recipient_hugs_counters_comments =
     extended_supaorg_recipient & {
       hugs: I_supaorg_hug[]

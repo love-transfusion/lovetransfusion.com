@@ -10,12 +10,18 @@ import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { supa_select_recipient } from './actions'
 import MessagesSection from './MessagesSection'
+import { ga_selectGoogleAnalyticsData } from '@/app/utilities/googleAnalytics'
 
 type Params = Promise<{ user_id: string }>
 const DashboardPage = async (props: { params: Params }) => {
   const { user_id } = await props.params
   const { data: recipientRow } = await supa_select_recipient(user_id)
+  const analyticsData = await ga_selectGoogleAnalyticsData({
+    clSpecificPath: '/benny',
+  })
+
   if (!recipientRow) return
+
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
     unkRecipientObj as I_supaorg_recipient_hugs_counters_comments
@@ -60,7 +66,7 @@ const DashboardPage = async (props: { params: Params }) => {
             'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] 2xl:pt-[26px]'
           }
         >
-          <MapChart />
+          <MapChart clAnalyticsData={analyticsData} />
           <div className={'hidden xl:block'}>
             <HugsMessagesShares clRecipientObj={recipientObj} />
           </div>
