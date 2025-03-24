@@ -62,7 +62,7 @@ const Button = ({
       {...props}
       disabled={clDisabled}
       className={twMerge(
-        `group bg-[#38AADF] text transition-all duration-200`,
+        `group block bg-[#38AADF] text transition-all duration-200`,
         cssSize,
         cssTheme,
         className

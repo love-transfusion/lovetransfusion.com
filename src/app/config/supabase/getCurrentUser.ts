@@ -9,22 +9,21 @@ export const getCurrentUser = async () => {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (user) {
-    const getDefaultUserData = async () => {
-      // Return default
-      const { data, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-      return { data, error: userError?.message ?? null }
-    }
+  if (!user) return null
+  const getDefaultUserData = async () => {
+    // Return default
+    const { data, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+    return { data, error: userError?.message ?? null }
+  }
 
-    const { data } = await getDefaultUserData()
+  const { data } = await getDefaultUserData()
 
-    if (data) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { role, ...newUser } = user
-      return { ...data[0], ...newUser }
-    }
+  if (data) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { role, ...newUser } = user
+    return { ...data[0], ...newUser }
   }
 }

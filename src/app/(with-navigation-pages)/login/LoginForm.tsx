@@ -16,10 +16,11 @@ const LoginForm = () => {
   const {
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<I_Auth_LoginRequiredData>()
 
   const onSubmit = async (rawData: I_Auth_LoginRequiredData) => {
+    localStorage.setItem('dashboard-modal', 'true')
     const error = await supa_signin({ clRawData: rawData })
     if (error) {
       settoast({ clDescription: error, clStatus: 'error' })
@@ -58,16 +59,21 @@ const LoginForm = () => {
       </div>
 
       <Button
+        clDisabled={isSubmitting}
         clType="submit"
         clVariant="outlined"
-        className="border-none rounded-[4px] flex py-1 shadow-[0_0_15px_0_rgba(40,140,204,0.30)] h-[46px] items-center pr-5"
+        className={`border-none rounded-[4px] flex py-1 shadow-[0_0_15px_0_rgba(40,140,204,0.30)] h-[46px] items-center pr-5 ${
+          isSubmitting && 'bg-neutral-300 hover:bg-neutral-300'
+        }`}
       >
         <div
           className={
             'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
           }
         >
-          <p className={'mx-auto text-center font-acuminProLight'}>Login</p>
+          <p className={'mx-auto text-center font-acuminProLight'}>
+            {isSubmitting ? 'Logging in...' : 'Login'}
+          </p>
           <div className={'pl-[19px]'}>
             <Icon_right5 className="size-[19px]" />
           </div>

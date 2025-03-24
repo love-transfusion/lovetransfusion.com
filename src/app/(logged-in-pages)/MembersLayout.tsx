@@ -7,16 +7,22 @@ import Image from 'next/image'
 import Icon_menu from '../components/icons/Icon_menu'
 
 interface I_MembersLayout {
-  children: React.ReactNode
+  childrenData: React.ReactNode
+  recipientObj: I_supaorg_recipient_hugs_counters_comments
+  recipientRow: I_supa_users_data_website_row
 }
 
-const MembersLayout = ({ children }: I_MembersLayout) => {
+const MembersLayout = async ({
+  childrenData,
+  recipientObj,
+  recipientRow,
+}: I_MembersLayout) => {
   return (
     <>
       <div
         className={'grid grid-cols-1 2xl:grid-cols-[263px_calc(100%-263px)]'}
       >
-        <NavigationMenu />
+        <NavigationMenu clRecipientRow={recipientRow} />
         <div className="h-full flex flex-col w-full">
           <div
             className={
@@ -56,14 +62,20 @@ const MembersLayout = ({ children }: I_MembersLayout) => {
                 </p>
                 <Image src={doubleHeart} alt="dots" quality={100} />
               </div>
-              <div className={'2xl:text-xl text-[#ffffffad] flex gap-[10px] 2xl:pl-[110px]'}>
+              <div
+                className={
+                  '2xl:text-xl text-[#ffffffad] flex gap-[10px] 2xl:pl-[110px]'
+                }
+              >
                 <p className={''}>RECIPIENT:</p>
-                <p className="font-acuminProMedium tracking-[0.5px]">Benny</p>
+                <p className="font-acuminProMedium tracking-[0.5px]">
+                  {recipientObj.first_name}
+                </p>
               </div>
             </div>
           </div>
           <div className={'border-4 border-r-0 border-[#B0E0F1] h-full'}>
-            {children}
+            {childrenData}
           </div>
         </div>
       </div>

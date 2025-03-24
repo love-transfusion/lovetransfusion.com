@@ -3,9 +3,3 @@ export interface I_Auth_LoginRequiredData {
   password: string
 }
 
-/**
- * Defines the possible roles for authenticated users.
- *
- * - `'admin'` → Has full access to the system.
- * - `'editor'` → Can edit content but has limited permissions.
- */

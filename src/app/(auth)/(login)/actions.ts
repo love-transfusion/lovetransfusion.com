@@ -1,6 +1,8 @@
 'use server'
 
+import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { createServer } from '@/app/config/supabase/supabaseServer'
+import { isAdmin } from '@/app/lib/adminCheck'
 import { I_Auth_LoginRequiredData } from '@/types/auth.types'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -22,12 +24,20 @@ export async function supa_signin({
     email,
     password,
   })
-  console.log('data', data)
   if (error) {
     return error.message
   }
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role })
+
   revalidatePath('/', 'layout')
   if (!clDisableRedirect) {
-    redirect(clRedirectTo ? `/${clRedirectTo}` : '/dashboard')
+    redirect(
+      clRedirectTo
+        ? `/${clRedirectTo}`
+        : isadmin
+        ? '/admin'
+        : `/dashboard/${data.user.id}`
+    )
   }
 }

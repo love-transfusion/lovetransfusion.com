@@ -5,95 +5,40 @@ import Icon_right from '@/app/components/icons/Icon_right'
 import Icon_search from '@/app/components/icons/Icon_search'
 import Icon_trash from '@/app/components/icons/Icon_trash'
 import Input from '@/app/components/inputs/basic-input/Input'
-import React from 'react'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
 import Engagements from './Engagements'
+// import { fetchDataFromLTOrg } from './actions'
 import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
-import axios from 'axios'
+import { supa_admin_select_paginated_recipients } from './[recipient]/actions'
+import Icon_edit from '@/app/components/icons/Icon_edit'
 
-// const getDataFromLTOrg = async () => {
-//   const myHeaders = new Headers()
-//   myHeaders.append('Content-Type', 'application/json')
-//   const requestOptions: RequestInit = {
-//     method: 'POST',
-//     headers: myHeaders,
-//     // redirect: 'manual',
-//     body: JSON.stringify({ limit: 2 }),
-//   }
-//   return await fetch(
-//     'https://www.lovetransfusion.org/api/recipients2',
-//     // 'http://localhost:3003/api/recipients2',
-//     requestOptions
-//   )
-//     .then((response) => response.json()) // Convert response to JSON
-//     .then((data) => {
-//       console.log('data', data)
-//       return data
-//     }) // Log the response
-//     .catch((error) => console.error('Error:', error))
-// }
-
-const getDataFromLTOrg = async () => {
-  try {
-    const response = await axios.post(
-      // 'https://www.lovetransfusion.org/api/recipients2',
-      'http://localhost:3003/api/recipients2',
-      '', // Request body
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-
-    console.log('data', response.data)
-    return response.data
-  } catch (error) {
-    console.error('Error:', error)
-  }
-}
-
-type I_data =
-  | {
-      recipients: I_supaorg_recipient[]
-    }
-  | undefined
-
-const Dashboard = async () => {
+const AdminDashboard = async () => {
   const user = await getCurrentUser()
-  const isadmin = isAdmin(user?.role, true)
-  console.log('isadmin', isadmin)
+  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
 
-  const data: I_data = await getDataFromLTOrg()
-
-  if (!data?.recipients) return
-
-  const formattedRecipients: {
-    recipient: I_supa_users_data_website_insert['recipient']
-    id: I_supa_users_data_website_insert['id']
-  }[] = data.recipients.map((recipient: I_supaorg_recipient) => {
-    return { recipient, id: recipient.id }
-  })
+  const { data: comRecipients } = await supa_admin_select_paginated_recipients()
 
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
-        {/* <pre>{JSON.stringify(data.recipients, null, 2)}</pre> */}
         <div
           className={
             'flex flex-col md:flex-row justify-between items-center gap-2 pt-10 md:pt-[68px] pb-5'
           }
         >
           <p className={'text-2xl md:text-[32px] font-bold'}>User Management</p>
-          <Input
-            clPlaceholder="Search..."
-            clVariant="input2"
-            clLeftIcon={<Icon_search />}
-            clIconClassName="text-neutral-400"
-            className="shadow-inner max-w-[255px]"
-          />
+          <div className={'flex gap-2 items-center'}>
+            <Input
+              clPlaceholder="Search..."
+              clVariant="input2"
+              clLeftIcon={<Icon_search />}
+              clIconClassName="text-neutral-400"
+              className="shadow-inner"
+            />
+            <UpdateButton />
+          </div>
         </div>
         <div className={'overflow-hidden shadow-lg rounded-lg md:rounded-xl'}>
           <div className={'overflow-x-auto pb-4'}>
@@ -110,44 +55,71 @@ const Dashboard = async () => {
                 </tr>
               </thead>
               <tbody>
-                {data.recipients.map((recipient) => {
-                  return (
-                    <tr
-                      key={recipient.id}
-                      className="even:bg-[#F3F3F3] border-y border-neutral-200"
-                    >
-                      <td className="py-[6px] px-3">
-                        <p className={''}>{recipient.parent_name}</p>
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <p className={''}>{recipient.email}</p>
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <p className={''}>{recipient.first_name}</p>
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <p className={''}>{recipient.relationship}</p>
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <p className={''}>
-                          {new Date(recipient.created_at).toLocaleDateString()}
-                        </p>
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <Engagements recipient={recipient} />
-                      </td>
-                      <td className="py-[6px] px-3">
-                        <div className={'flex gap-2'}>
-                          <Icon_refresh className="size-5" />
-                          <Link href={`/admin/${recipient.id}`}>
-                            <Icon_eyes className="size-5 text-primary" />
-                          </Link>
-                          <Icon_trash className="size-5 text-red-500" />
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
+                {comRecipients
+                  .sort((a, b) => {
+                    const recA = a.recipient as unknown
+                    const recB = b.recipient as unknown
+                    const recipientA =
+                      recA as I_supaorg_recipient_hugs_counters_comments
+                    const recipientB =
+                      recB as I_supaorg_recipient_hugs_counters_comments
+                    const dateA = new Date(recipientA.created_at).getTime()
+                    const dateB = new Date(recipientB.created_at).getTime()
+                    return dateB - dateA
+                  })
+                  .map((comRecipient) => {
+                    const recipientData = comRecipient.recipient as unknown
+                    const recipient =
+                      recipientData as I_supaorg_recipient_hugs_counters_comments
+                    return (
+                      <tr
+                        key={recipient.id}
+                        className="even:bg-[#F3F3F3] border-y border-neutral-200"
+                      >
+                        <td className="py-[6px] px-3">
+                          <p className={''}>{recipient.parent_name}</p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <p className={''}>{recipient.email}</p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <p className={''}>{recipient.first_name}</p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <p className={''}>{recipient.relationship}</p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <p className={''}>
+                            {new Date(
+                              recipient.created_at
+                            ).toLocaleDateString()}
+                          </p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <Engagements recipient={recipient} />
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <div className={'flex gap-2 justify-start'}>
+                            {comRecipient.user_id ? (
+                              <Link href={`/dashboard/${comRecipient.user_id}`}>
+                                <Icon_refresh className="size-5" />
+                              </Link>
+                            ) : (
+                              <div className={'flex size-5'} />
+                            )}
+                            <Link href={`/admin/${recipient.id}`}>
+                              {comRecipient.user_id ? (
+                                <Icon_edit className="size-5 text-primary" />
+                              ) : (
+                                <Icon_eyes className="size-5 text-primary" />
+                              )}
+                            </Link>
+                            <Icon_trash className="size-5 text-red-500" />
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
               </tbody>
             </table>
           </div>
@@ -167,10 +139,9 @@ const Dashboard = async () => {
             <Icon_right className="size-5" />
           </div>
         </div>
-        <UpdateButton formattedRecipients={formattedRecipients} />
       </div>
     </>
   )
 }
 
-export default Dashboard
+export default AdminDashboard

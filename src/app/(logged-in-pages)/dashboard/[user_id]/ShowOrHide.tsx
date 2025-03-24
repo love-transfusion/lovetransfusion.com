@@ -1,16 +1,19 @@
 'use client'
 import Toggle from '@/app/components/Toggle'
-import useToggle from '@/app/hooks/useToggle'
 import React from 'react'
 import { twMerge } from 'tailwind-merge'
 
 interface I_ShowOrHide {
   clContainerClassName?: string
+  clToggle: () => void
+  clisToggled: boolean
 }
 
-const ShowOrHide = ({ clContainerClassName }: I_ShowOrHide) => {
-  const { clisToggled, clToggle } = useToggle()
-  console.log('clisToggled', clisToggled)
+const ShowOrHide = ({
+  clContainerClassName,
+  clisToggled,
+  clToggle,
+}: I_ShowOrHide) => {
   return (
     <div
       className={twMerge(

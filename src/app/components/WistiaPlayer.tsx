@@ -40,11 +40,9 @@ const WistiaPlayer = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const handleLoad = () => {
-    console.log({ showData, window })
     if (showData && window.Wistia) {
       const wistia = window.Wistia
       const player = wistia.api(videoId)
-      console.log({ wistia, player })
 
       player.bind('play', () => {
         if (intervalRef.current) {
@@ -66,7 +64,12 @@ const WistiaPlayer = ({
     }
   }
   return (
-    <div className={twMerge('rounded-md overflow-hidden flex-1 flex items-center w-full', containerStyle)}>
+    <div
+      className={twMerge(
+        'rounded-md overflow-hidden flex-1 flex items-center w-full',
+        containerStyle
+      )}
+    >
       <Script
         strategy="lazyOnload"
         src="//fast.wistia.com/assets/external/E-v1.js"

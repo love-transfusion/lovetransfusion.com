@@ -11,14 +11,18 @@
     "update-orgtypes": "supabase gen types typescript --project-id bnsyauupzwhhsloomymu > src/types/ltorgDatabase.types.ts"
   },
   "dependencies": {
+    "@google-analytics/data": "^5.1.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
+    "@types/nodemailer": "^6.4.17",
     "axios": "^1.8.4",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.3",
     "framer-motion": "^12.4.13",
+    "googleapis": "^148.0.0",
     "immer": "^10.1.1",
     "next": "15.1.7",
+    "nodemailer": "^6.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-fast-marquee": "^1.6.5",

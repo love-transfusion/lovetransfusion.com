@@ -1,11 +1,23 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import hugs from './images/hugs.png'
 import messages from './images/MESSAGES.png'
 import shares from './images/SHARES.png'
 import ripple from './images/ripple.png'
+import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
 
-const HugsMessagesShares = () => {
+interface I_HugsMessagesShares {
+  clRecipientObj: I_supaorg_recipient
+}
+
+const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {
+  const {
+    hugs: totalHugs,
+    comments: totalComments,
+    shares: totalShares,
+    total,
+  } = useEngagementsFromWeb(clRecipientObj)
   return (
     <div
       className={
@@ -34,7 +46,7 @@ const HugsMessagesShares = () => {
               'rounded-lg text-white ring-[1px] ring-primary-300 text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            999,999,999
+            {total}
           </p>
         </div>
       </div>
@@ -53,7 +65,7 @@ const HugsMessagesShares = () => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            1,000
+            {totalHugs}
           </p>
         </div>
       </div>
@@ -72,7 +84,7 @@ const HugsMessagesShares = () => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            100
+            {totalComments}
           </p>
         </div>
       </div>
@@ -91,7 +103,7 @@ const HugsMessagesShares = () => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            10
+            {totalShares}
           </p>
         </div>
       </div>

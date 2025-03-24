@@ -1,9 +1,59 @@
 import React from 'react'
-import carlo from './images/carlo.webp'
+import anonymous from './images/user.webp'
 import Image from 'next/image'
 import ltWebsiteIcon from './images/world-w.svg'
+interface I_MostRecentEngagements {
+  clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
+}
 
-const MostRecentEngagements = () => {
+// interface I_profile_picture {
+//   profile_picture: {
+//     blurDataURL: string, fullPath: string, id: UUID, path: string
+//   }
+// }
+
+// interface public_profiles extends Iprofi {
+//   avatar: string | null;
+//   bio: string | null;
+//   created_at: string;
+//   first_name: string | null;
+//   full_name: string | null;
+//   id: string;
+//   last_name: string | null;
+//   profile_picture: string | null;
+// }
+
+const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
+  const comments = clRecipientOBj.comments.map(
+    (recipient: I_supaorg_comments) => {
+      const { location, id, public_profiles, created_at, name } = recipient
+      // const profilePicture = recipient.public_profiles.profile_picture
+      return {
+        location,
+        id,
+        public_profiles,
+        created_at,
+        name,
+      }
+    }
+  )
+  const hugs = clRecipientOBj.hugs.map((recipient) => {
+    // const public_profiles = recipient.public_profiles
+    const { location, id, created_at, public_profiles } = recipient
+    const name = recipient.public_profiles?.full_name
+    return {
+      location,
+      id,
+      public_profiles,
+      created_at,
+      name,
+    }
+  })
+  const combinedEngagements = [...comments, ...hugs].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime()
+    const dateB = new Date(b.created_at).getTime()
+    return dateB - dateA
+  })
   return (
     <div
       className={
@@ -36,7 +86,7 @@ const MostRecentEngagements = () => {
           <p className={''}>SOURCE</p>
         </div>
         <div className={'divide-y divide-primary-200'}>
-          {new Array(13).fill(' ').map((item, index) => {
+          {combinedEngagements.map((item, index) => {
             return (
               <div
                 key={index}
@@ -46,14 +96,20 @@ const MostRecentEngagements = () => {
               >
                 <div className={'flex items-center gap-3'}>
                   <Image
-                    src={carlo}
+                    src={
+                      item.public_profiles?.profile_picture?.fullPath
+                        ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.public_profiles?.profile_picture?.fullPath}`
+                        : anonymous
+                    }
                     alt="Profile picture of engager"
                     quality={100}
                     width={37.8}
                     height={37.8}
                     className="border-[3px] border-[#288CCC] rounded-full"
                   />
-                  <p className={'text-[#009933]'}>Carlo Tubigon</p>
+                  <p className={'text-[#009933]'}>
+                    {item.name ?? 'Someone Who Cares'}
+                  </p>
                 </div>
                 <Image
                   src={ltWebsiteIcon}

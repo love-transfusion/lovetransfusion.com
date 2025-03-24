@@ -62,7 +62,9 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     if (url.pathname === '/login' || url.pathname === '/signup') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(
+        new URL(`/dashboard/${user.id}`, request.url)
+      )
     }
   } else if (
     (!user && url.pathname === '/login') ||

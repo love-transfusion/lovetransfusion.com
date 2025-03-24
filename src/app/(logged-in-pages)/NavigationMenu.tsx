@@ -10,8 +10,13 @@ import aboutUsIcon from './images/about-us-icon.svg'
 import messageIcon from './images/messageIcon.svg'
 import mousePointer from './images/mousePointerIcon.svg'
 import Link from 'next/link'
+import SignoutContainerComponent from '../(auth)/signout/SignoutContainerComponent'
 
-const NavigationMenu = () => {
+interface I_NavigationMenu {
+  clRecipientRow: I_supa_users_data_website_row
+}
+
+const NavigationMenu = ({ clRecipientRow }: I_NavigationMenu) => {
   const getFormattedDate = (): string => {
     const today: Date = new Date()
     const options: Intl.DateTimeFormatOptions = {
@@ -53,7 +58,7 @@ const NavigationMenu = () => {
           </div>
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
             <p className={'text-[#DFEEFA8F] mb-[13px]'}>MAIN MENU</p>
-            <Link href={'/dashboard'}>
+            <Link href={`/dashboard/${clRecipientRow.user_id}`}>
               <div
                 className={
                   'flex gap-[7px] items-center text-xl font-acuminProLight'
@@ -175,7 +180,9 @@ const NavigationMenu = () => {
                 quality={100}
                 className="size-[43px]"
               />
-              <p className={''}>Logout</p>
+              <SignoutContainerComponent>
+                <p className={'active:text-primary-300 select-none'}>Logout</p>
+              </SignoutContainerComponent>
             </div>
           </div>
         </div>

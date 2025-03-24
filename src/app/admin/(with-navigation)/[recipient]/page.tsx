@@ -8,22 +8,28 @@ import pinterest from './images/pinterest.webp'
 import twitter from './images/twitter.webp'
 import Image from 'next/image'
 import Input from '@/app/components/inputs/basic-input/Input'
-import Button from '@/app/components/Button/Button'
-import Icon_right5 from '@/app/components/icons/Icon_right5'
-import benny from './images/benny-profile-pic.jpg'
 import Link from 'next/link'
-import { createServer } from '@/app/config/supabase/supabaseServer'
+import { fetchDataFromLTOrg } from '../actions'
+import { supa_admin_select_recipient_data } from './actions'
+import CreateAccountButton from './CreateAccountButton'
 import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
-import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
+
+type Params = Promise<{ recipient: UUID }>
 
 const RecipientPage = async (props: { params: Params }) => {
-  const params = await props.params
-  console.log(params)
   const user = await getCurrentUser()
-  const isadmin = isAdmin(user?.role, true)
-  const supabase = isadmin ? await createAdmin() : await createServer()
+  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
 
+  const { recipient } = await props.params
+  const { data: foundRecipient } = await supa_admin_select_recipient_data(
+    recipient
+  )
+
+  const recipientData: {
+    recipients: I_supaorg_recipient_hugs_counters_comments[]
+  } = await fetchDataFromLTOrg(recipient)
+  const recipientObject = recipientData.recipients[0]
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] h-full 2xl:h-[calc(100vh-85px)]">
       <div className={'w-fit'}>
@@ -34,7 +40,7 @@ const RecipientPage = async (props: { params: Params }) => {
       </div>
       <div
         className={
-          'flex px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 max-sm:pt-[120px] md:pl-[195px] lg:pl-[191px] text-white relative'
+          'flex px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 max-sm:pt-[120px] md:pl-[195px] lg:pl-[191px] text-white relative animate-slide-up'
         }
       >
         <div
@@ -44,11 +50,11 @@ const RecipientPage = async (props: { params: Params }) => {
         >
           <div
             className={
-              'overflow-hidden relative w-full h-full rounded-full border-4 border-white bg-primary text-center'
+              'overflow-hidden relative w-full h-full rounded-full border-4 border-white bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-center'
             }
           >
             <Image
-              src={benny}
+              src={`${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObject.profile_picture.fullPath}`}
               alt={`Benny's Profile Picture`}
               fill
               quality={100}
@@ -88,7 +94,7 @@ const RecipientPage = async (props: { params: Params }) => {
       </div>
       <div
         className={
-          'flex flex-col items-start shadow-[0px_0px_20px_0px_#0000004D] pt-10 p-6 rounded-lg gap-[26px] bg-white'
+          'flex flex-col items-start shadow-[0px_0px_20px_0px_#0000004D] pt-10 p-6 rounded-lg gap-[26px] bg-white animate-slide-up'
         }
       >
         <div
@@ -176,7 +182,13 @@ const RecipientPage = async (props: { params: Params }) => {
               clPlaceholder="Type URL"
               className="placeholder:text-neutral-400 border-black py-2"
               clVariant="input2"
-              clContainerClassName="w-full"
+              defaultValue={
+                recipientObject.path_url
+                  ? `https://www.lovetransfusion.org/${recipientObject.path_url}`
+                  : ''
+              }
+              clDisabled={true}
+              clContainerClassName="w-full text-neutral-400"
             />
           </div>
           <div className={'flex gap-4 w-full'}>
@@ -194,23 +206,11 @@ const RecipientPage = async (props: { params: Params }) => {
             />
           </div>
         </div>
-        <Button
-          clVariant="outlined"
-          className="flex py-1 shadow-custom1 w-[259px] h-[46px] items-center pr-5 rounded-[4px] max-sm:w-full ml-auto mb-[18px]"
-        >
-          <div
-            className={
-              'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
-            }
-          >
-            <p className={'text-lg mx-auto text-center font-acuminProLight'}>
-              Create Account
-            </p>
-            <div className={'pl-[19px]'}>
-              <Icon_right5 className="size-[19px]" />
-            </div>
-          </div>
-        </Button>
+        <CreateAccountButton
+          orgRecipient={recipientObject}
+          foundRecipient={foundRecipient}
+          uuid={recipient}
+        />
       </div>
     </div>
   )

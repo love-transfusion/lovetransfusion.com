@@ -1,9 +1,12 @@
 import Image from 'next/image'
 import React from 'react'
-import adleyPic from './images/adley-profile-pic.jpg'
 import brandLogo from '@/app/images/homepage/brand-logo.svg'
 
-const RecipientProfilePicture = () => {
+const RecipientProfilePicture = ({
+  recipientObj,
+}: {
+  recipientObj: I_supaorg_recipient_hugs_counters_comments
+}) => {
   return (
     <div
       className={
@@ -16,7 +19,7 @@ const RecipientProfilePicture = () => {
         }
       >
         <Image
-          src={adleyPic}
+          src={`${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObj.profile_picture.fullPath}`}
           alt="Profile picture of adley"
           quality={100}
           fill

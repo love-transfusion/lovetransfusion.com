@@ -1,8 +1,15 @@
+'use client'
 import Image from 'next/image'
 import React from 'react'
 import ripple from './images/ripple.png'
+import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
 
-const TotalEngagements = () => {
+const TotalEngagements = ({
+  clRecipientOBj,
+}: {
+  clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
+}) => {
+  const { total } = useEngagementsFromWeb(clRecipientOBj)
   return (
     <div
       className={
@@ -24,7 +31,7 @@ const TotalEngagements = () => {
             'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
           }
         >
-          1,234
+          {total}
         </p>
       </div>
     </div>
