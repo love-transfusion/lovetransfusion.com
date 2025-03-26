@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { twMerge } from 'tailwind-merge'
 
 interface I_LoadingComponent {
-  clContainerClassName: string
+  clContainerClassName?: string
 }
 
 const LoadingComponent = ({ clContainerClassName }: I_LoadingComponent) => {

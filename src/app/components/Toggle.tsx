@@ -26,7 +26,7 @@ const Toggle = ({
       <div
         className={twMerge(
           `bg-[#E2F0FA] size-6 rounded-full ${
-            clIsToggled ? 'ml-auto' : 'mr-auto'
+            clIsToggled ? 'mr-auto' : 'ml-auto'
           }`,
           clToggleStyle
         )}
