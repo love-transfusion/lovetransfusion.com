@@ -52,16 +52,35 @@ declare global {
         profile_picture: I_profile_picture | null
       }
 
-  type I_supaorg_hug = orgDB['public']['Tables']['hugs']['Row'] & {
+  type I_orgLocation = {
+    IP: string
+    city: string
+    country: string
+    country_code: string
+    region: string
+    latitude: number
+    longitude: number
+    cityId: undefined
+    countryId: undefined
+  } | null | undefined
+
+  interface I_supaorg_hug extends I_unextended_supaorg_hug {
+    location: I_orgLocation | null
+  }
+  type I_unextended_supaorg_hug = orgDB['public']['Tables']['hugs']['Row'] & {
     public_profiles: I_supaorg_public_profiles | null
   }
 
   type I_supaorg_recipient_counters =
     orgDB['public']['Tables']['recipient_counters']['Row']
 
-  type I_supaorg_comments = orgDB['public']['Tables']['comments']['Row'] & {
-    public_profiles: I_supaorg_public_profiles | null
+  interface I_supaorg_comments extends I_unextended_supaorg_comments {
+    location: I_orgLocation | null
   }
+  type I_unextended_supaorg_comments =
+    orgDB['public']['Tables']['comments']['Row'] & {
+      public_profiles: I_supaorg_public_profiles | null
+    }
 
   type I_supaorg_recipient_hugs_counters_comments =
     extended_supaorg_recipient & {

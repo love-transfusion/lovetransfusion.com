@@ -28,10 +28,9 @@ export const resend_signupConfirmation = async (
   await transport.sendMail({
     from: {
       name: 'Kevin Lengkeek',
-      address: 'onboarding@resend.dev',
+      address: 'kevinl@lovetransfusion.com',
     },
-    // to: email,
-    to: 'cltubigon@gmail.com',
+    to: email,
     subject: 'Your LoveTransfusion Account Info',
     html: `
     <!DOCTYPE html>

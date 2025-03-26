@@ -1,0 +1,30 @@
+{
+  "vila,ad": {
+    "city": "Vila",
+    "country": "ad",
+    "state": "Encamp",
+    "lat": 42.53176,
+    "lng": 1.56654
+  },
+  "el tarter,ad": {
+    "city": "El Tarter",
+    "country": "us",
+    "state": "Canillo",
+    "lat": 42.57952,
+    "lng": 1.65362
+  },
+  "butuan city ,ph": {
+    "city": "El Tarter",
+    "country": "us",
+    "state": "Canillo",
+    "lat": 42.57952,
+    "lng": 1.65362
+  },
+  "cagayan de oro city,ph": {
+    "city": "El Tarter",
+    "country": "us",
+    "state": "Canillo",
+    "lat": 42.57952,
+    "lng": 1.65362
+  }
+}

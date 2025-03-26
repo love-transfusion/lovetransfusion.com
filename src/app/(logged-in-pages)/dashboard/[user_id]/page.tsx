@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import SlidingSupportersName from './SlidingSupportersName'
 import MapChart from './MapChart'
 import RecipientProfilePicture from './RecipientProfilePicture'
@@ -10,13 +10,20 @@ import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { supa_select_recipient } from './actions'
 import MessagesSection from './MessagesSection'
-import { ga_selectGoogleAnalyticsData } from '@/app/utilities/googleAnalytics'
+import {
+  ga_selectGoogleAnalyticsData,
+  I_SearchLocationType,
+} from '@/app/utilities/analytics/googleAnalytics'
+import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
+import { mapAnalyticsToGeoPoints } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
 
 type Params = Promise<{ user_id: string }>
 const DashboardPage = async (props: { params: Params }) => {
   const { user_id } = await props.params
   const { data: recipientRow } = await supa_select_recipient(user_id)
-  const analyticsData = await ga_selectGoogleAnalyticsData({
+  const searchLocationType: I_SearchLocationType = 'city'
+
+  const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
     clSpecificPath: '/benny',
   })
 
@@ -25,6 +32,16 @@ const DashboardPage = async (props: { params: Params }) => {
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
     unkRecipientObj as I_supaorg_recipient_hugs_counters_comments
+
+  const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
+    clGoogleAnalytics,
+    clRecipient: recipientObj,
+    clSearchLocationType: searchLocationType,
+  })
+  const mappedData =
+    analyticsWithCountryPathTotal &&
+    (await mapAnalyticsToGeoPoints(analyticsWithCountryPathTotal))
+
   return (
     <div className="">
       <WelcomeMessage />
@@ -66,7 +83,9 @@ const DashboardPage = async (props: { params: Params }) => {
             'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] 2xl:pt-[26px]'
           }
         >
-          <MapChart clAnalyticsData={analyticsData} />
+          <Suspense fallback={<p className={''}>Loading...</p>}>
+            <MapChart mappedData={mappedData} />
+          </Suspense>
           <div className={'hidden xl:block'}>
             <HugsMessagesShares clRecipientObj={recipientObj} />
           </div>
