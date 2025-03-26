@@ -1,13 +1,6 @@
 'use server'
 import { google, analyticsdata_v1beta } from 'googleapis'
 
-export type I_SearchLocationType =
-  | 'city'
-  | 'cityId'
-  | 'country'
-  | 'countryId'
-  | 'region'
-
 interface I_googleAnalytics {
   clSpecificPath: string
 }

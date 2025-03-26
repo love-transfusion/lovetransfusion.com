@@ -1,7 +1,5 @@
 'use server'
 
-import { I_SearchLocationType } from './googleAnalytics'
-
 export interface I_CountryPathTotalFormat {
   clRegion: string
   clCountry: string
@@ -15,21 +13,17 @@ export interface I_CountryPathTotalFormat {
 type I_getAnalyticsCountryPathTotal = {
   clGoogleAnalytics: I_AnalyticsData
   clRecipient: I_supaorg_recipient_hugs_counters_comments
-  clSearchLocationType: I_SearchLocationType
 }
 
 const getAnalyticsCountryPathTotal = async ({
   clGoogleAnalytics,
   clRecipient,
-}: // clSearchLocationType,
-I_getAnalyticsCountryPathTotal) => {
+}: I_getAnalyticsCountryPathTotal) => {
   const analytics: I_CountryPathTotalFormat[] =
     (clGoogleAnalytics.rows &&
       clGoogleAnalytics.rows.map((row) => {
-        // const clPath =
-        //   (row.dimensionValues && row.dimensionValues[0].value) ?? ''
         const clCity =
-          (row.dimensionValues && row.dimensionValues[1].value) ?? '' // City
+          (row.dimensionValues && row.dimensionValues[1].value) ?? ''
         const clCountryCode =
           (row.dimensionValues && row.dimensionValues[4].value) ?? ''
         const clCountry =
