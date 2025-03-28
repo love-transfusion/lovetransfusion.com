@@ -24,7 +24,7 @@ const PublicFooter = () => {
         <p className={'text-center mt-[7px]'}>
           1201 N. Orange Street, Suite 799, Wilmington DE 19801
         </p>
-        <p className={'text-center mt-2'}>
+        <p className={'text-center mt-[6px] text-base'}>
           501(c)3 Nonprofit Organization | Tax ID #27-2829895
         </p>
         <p className={'mt-2 md:mt-8 text-center'}>

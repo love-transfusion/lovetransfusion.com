@@ -35,13 +35,13 @@ const PublicNavigationMenu = () => {
             }
           >
             <Link href={'/about-us'}>
-              <p className={'px-[5px]'}>About Us</p>
+              <p className={'px-[10px]'}>About Us</p>
             </Link>
             <Link href={'/help-center'}>
-              <p className={'px-[5px]'}>FAQ</p>
+              <p className={'px-[10px]'}>FAQ</p>
             </Link>
             <Link href={'/contact-us'}>
-              <p className={'px-[5px]'}>Contact Us</p>
+              <p className={'px-[10px]'}>Contact Us</p>
             </Link>
           </div>
           <Link href={'/login'}>

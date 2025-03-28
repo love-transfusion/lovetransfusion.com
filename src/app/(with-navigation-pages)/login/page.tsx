@@ -26,7 +26,7 @@ const LoginPage = () => {
         </div>
         <p
           className={
-            'italic text-primary text-[18px] text-center mt-9 md:mt-[49px] font-acuminProLight'
+            'italic text-primary text-[18px] text-center mt-9 md:mt-[49px] font-acuminProMedium'
           }
         >
           {`"`}One word frees us of all the weight and pain in life. That word

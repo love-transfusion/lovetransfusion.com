@@ -39,7 +39,7 @@ const Homepage = () => {
           </p>
           <div
             className={
-              'flex flex-col lg:flex-row gap-[62px] w-full mx-auto max-w-[920px] mt-8 md:mt-[61px]'
+              'flex flex-col lg:flex-row gap-[60px] w-full mx-auto max-w-[920px] mt-8 md:mt-[61px]'
             }
           >
             <div
@@ -80,7 +80,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[13px] text-[#999] mt-[5px] leading-tight text-center lg:text-left'
+                  'text-[15px] text-[#999] mt-[5px] leading-tight text-center lg:text-left'
                 }
               >
                 Provided free of charge for families battling serious illness,
@@ -237,7 +237,7 @@ const Homepage = () => {
           </div>
           <p
             className={
-              'italic text-primary text-[17px] text-center mt-[55px] font-acuminProLight'
+              'italic text-primary text-[17px] text-center mt-[55px] font-acuminProMedium'
             }
           >
             {`"`}One word frees us of all the weight and pain in life. That word is
