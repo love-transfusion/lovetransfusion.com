@@ -1,5 +1,5 @@
 netstat -ano | findstr :3000
 --> To check what's using port 3000
 
-taskkill /PID 3232 /F
+taskkill /PID 7024 /F
 -- > TCP    127.0.0.1:3000     0.0.0.0:0     LISTENING     1234
