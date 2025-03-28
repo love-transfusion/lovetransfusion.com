@@ -1,34 +1,32 @@
 'use client'
 import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
-import Input from '@/app/components/inputs/basic-input/Input'
-import Link from 'next/link'
-import React, { useState } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
-import { supa_reset_password_for_email } from './actions'
+import { supa_update_password_action } from './actions'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
+import PasswordField from '../login/PasswordField'
 
-interface I_ForgotPassword {
-  email: string
+interface I_password {
+  password: string
+  confirmPassword: string
 }
 
-const ForgotPassword = () => {
+const ResetPasswordPage = () => {
   const { settoast } = useStore(utilityStore)
-  const [isSuccessful, setisSuccessful] = useState<boolean>(false)
-  const { handleSubmit, register, formState } = useForm<I_ForgotPassword>()
-  const { isSubmitting } = formState
-
-  const onSubmit = async (payload: I_ForgotPassword) => {
-    const error = await supa_reset_password_for_email(payload)
+  const {
+    handleSubmit,
+    register,
+    formState: { isSubmitting },
+  } = useForm<I_password>()
+  const onSubmit = async (rawData: I_password) => {
+    if (rawData.password !== rawData.confirmPassword) return
+    localStorage.setItem('dashboard-modal', 'true')
+    const { error } = await supa_update_password_action(rawData.password)
     if (error) {
+      localStorage.removeItem('dashboard-modal')
       settoast({ clDescription: error, clStatus: 'error' })
-    } else {
-      setisSuccessful(true)
-      settoast({
-        clDescription: 'Confirmation email sent.',
-        clStatus: 'success',
-      })
     }
   }
   return (
@@ -40,7 +38,7 @@ const ForgotPassword = () => {
               'text-2xl md:text-[35px] font-acuminCondensedBold text-primary leading-tight'
             }
           >
-            Forgot Password
+            Reset Password
           </p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -50,36 +48,28 @@ const ForgotPassword = () => {
             }
           >
             <div className={'flex flex-col gap-6'}>
-              <p className={'text-primary text-lg text-center'}>
-                {`${
-                  !isSuccessful
-                    ? 'Please Enter Your Email to Receive Confirmation Email'
-                    : 'We sent a verification email to confirm your identity.'
-                }`}
-              </p>
               <div className={'flex flex-col gap-1'}>
                 <label className="text-[#999]" htmlFor="email">
-                  Email *
+                  New password *
                 </label>
-                <Input
-                  clDisabled={isSuccessful}
-                  clPlaceholder="Email address"
-                  {...register('email')}
-                  className={
-                    isSuccessful
-                      ? 'bg-neutral-200 text-neutral-400 border-neutral-200'
-                      : ''
-                  }
+                <PasswordField clRegister={register} fieldName="password" />
+              </div>
+              <div className={'flex flex-col gap-1'}>
+                <label className="text-[#999]" htmlFor="email">
+                  Confirm password *
+                </label>
+                <PasswordField
+                  clRegister={register}
+                  fieldName="confirmPassword"
                 />
               </div>
 
               <Button
                 clType="submit"
                 clVariant="outlined"
-                clDisabled={isSubmitting || isSuccessful}
+                clDisabled={isSubmitting}
                 className={`border-none rounded-[4px] flex py-1 shadow-[0_0_15px_0_rgba(40,140,204,0.30)] h-[46px] items-center pr-5 ${
-                  (isSubmitting || isSuccessful) &&
-                  'bg-neutral-300 hover:bg-neutral-300'
+                  isSubmitting && 'bg-neutral-300 hover:bg-neutral-300'
                 }`}
               >
                 <div
@@ -88,18 +78,13 @@ const ForgotPassword = () => {
                   }
                 >
                   <p className={'mx-auto text-center font-acuminProLight'}>
-                    Send OTP
+                    Update Password
                   </p>
                   <div className={'pl-[19px]'}>
                     <Icon_right5 className="size-[19px]" />
                   </div>
                 </div>
               </Button>
-              <p className={'text-[#6b7280] text-[14px] text-center'}>
-                <Link href={'/login'} className="text-primary">
-                  Back to Login
-                </Link>
-              </p>
             </div>
           </div>
         </form>
@@ -123,4 +108,4 @@ const ForgotPassword = () => {
   )
 }
 
-export default ForgotPassword
+export default ResetPasswordPage

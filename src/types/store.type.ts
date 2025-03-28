@@ -7,7 +7,16 @@ interface I_ToastObject {
   clRedirect?: string
 }
 
+interface I_user {
+  id: string
+  recipient_id: string
+  parent_name: string
+  first_name: string
+}
+
 export interface I_Store_Utility {
   toast: I_ToastObject | null
   settoast: (data: I_ToastObject | null) => void
+  userInStore: I_user | null
+  setuserInStore: (data: I_user | null) => void
 }

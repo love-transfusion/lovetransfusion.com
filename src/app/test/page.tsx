@@ -1,9 +1,9 @@
 import React from 'react'
-import { runParse } from '../lib/geonames/parseCities'
+import { util_fetchFacebookCampaigns } from '../utilities/facebook/fb_generateAppSecretProof'
 
 const Test = async () => {
-  await runParse()
-  return <div></div>
+  const campaigns = await util_fetchFacebookCampaigns()
+  return <pre>{JSON.stringify(campaigns, null, 2)}</pre>
 }
 
 export default Test

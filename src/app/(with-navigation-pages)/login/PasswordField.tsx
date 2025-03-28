@@ -2,26 +2,35 @@
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import Icon_eyes2 from '@/app/components/icons/Icon_eyes2'
 import Input from '@/app/components/inputs/basic-input/Input'
-import { I_Auth_LoginRequiredData } from '@/types/auth.types'
 import React, { useState } from 'react'
-import { FieldErrors, UseFormRegister } from 'react-hook-form'
+import {
+  FieldErrors,
+  UseFormRegister,
+  FieldValues,
+  Path,
+} from 'react-hook-form'
 
-interface I_PasswordField {
-  clRegister: UseFormRegister<I_Auth_LoginRequiredData>
-  errors: FieldErrors<I_Auth_LoginRequiredData>
+interface I_PasswordField<T extends FieldValues> {
+  clRegister: UseFormRegister<T>
+  errors?: FieldErrors<T>
+  fieldName: Path<T> // 👈 Accepts 'password' or nested fields like 'user.password'
 }
 
-const PasswordField = ({ clRegister, errors }: I_PasswordField) => {
-  const [isVisible, setisVisible] = useState<boolean>(false)
+const PasswordField = <T extends FieldValues>({
+  clRegister,
+  errors,
+  fieldName,
+}: I_PasswordField<T>) => {
+  const [isVisible, setIsVisible] = useState(false)
+  const handleClick = () => setIsVisible((prev) => !prev)
 
-  const handleClick = () => {
-    setisVisible((prev) => !prev)
-  }
+  const fieldError = errors?.[fieldName] as { message?: string }
+
   return (
     <Input
       clPlaceholder="*****"
       type={isVisible ? 'text' : 'password'}
-      id="password"
+      id={fieldName}
       clRightIcon={
         isVisible ? (
           <Icon_eyes
@@ -35,10 +44,10 @@ const PasswordField = ({ clRegister, errors }: I_PasswordField) => {
           />
         )
       }
-      {...clRegister('password', {
+      {...clRegister(fieldName, {
         required: 'Password field is required',
       })}
-      clErrorMessage={errors.password?.message}
+      clErrorMessage={fieldError?.message}
       clIconClassName="right-3"
       className="pr-9"
     />

@@ -1,9 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
 import ltLogo from './images/Logo Icon.svg'
-import dashboard from './images/dashboard-icon.svg'
-import profile from './images/profile.svg'
-import privacy from './images/privacy.svg'
 import helpCenter from './images/help-center-icon.svg'
 import questionMark from './images/questionMark.svg'
 import aboutUsIcon from './images/about-us-icon.svg'
@@ -11,12 +8,13 @@ import messageIcon from './images/messageIcon.svg'
 import mousePointer from './images/mousePointerIcon.svg'
 import Link from 'next/link'
 import SignoutContainerComponent from '../(auth)/signout/SignoutContainerComponent'
+import SubMenu from './SubMenu'
 
-interface I_NavigationMenu {
-  clRecipientRow: I_supa_users_data_website_row
-}
+// interface I_NavigationMenu {
+//   clRecipientRow: I_supa_users_data_website_row
+// }
 
-const NavigationMenu = ({ clRecipientRow }: I_NavigationMenu) => {
+const NavigationMenu = () => {
   const getFormattedDate = (): string => {
     const today: Date = new Date()
     const options: Intl.DateTimeFormatOptions = {
@@ -56,54 +54,7 @@ const NavigationMenu = ({ clRecipientRow }: I_NavigationMenu) => {
               {getFormattedDate()}
             </p>
           </div>
-          <div className={'mt-[60px] flex flex-col gap-[5px]'}>
-            <p className={'text-[#DFEEFA8F] mb-[13px]'}>MAIN MENU</p>
-            <Link href={`/dashboard/${clRecipientRow.user_id}`}>
-              <div
-                className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
-                }
-              >
-                <Image
-                  src={dashboard}
-                  alt="heart"
-                  quality={100}
-                  className="size-[43px]"
-                />
-                <p className={''}>Dashboard</p>
-              </div>
-            </Link>
-            <Link href={'/#'}>
-              <div
-                className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
-                }
-              >
-                <Image
-                  src={profile}
-                  alt="heart"
-                  quality={100}
-                  className="size-[43px]"
-                />
-                <p className={''}>Profile</p>
-              </div>
-            </Link>
-            <Link href={'/privacy-policy'}>
-              <div
-                className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
-                }
-              >
-                <Image
-                  src={privacy}
-                  alt="heart"
-                  quality={100}
-                  className="size-[43px]"
-                />
-                <p className={''}>Privacy</p>
-              </div>
-            </Link>
-          </div>
+          <SubMenu />
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
             <p className={'text-[#DFEEFA8F] mb-[13px]'}>HELP & SUPPORT</p>
             <Link href={'/help-center'}>

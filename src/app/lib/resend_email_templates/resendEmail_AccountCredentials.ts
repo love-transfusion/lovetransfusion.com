@@ -21,7 +21,7 @@ type SendEmailProps = {
   parent_name: string
 }
 
-export const resend_signupConfirmation = async (
+export const resendEmail_AccountCredentials = async (
   data: SendEmailProps
 ): Promise<void> => {
   const { email, password, parent_name } = data

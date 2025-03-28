@@ -7,6 +7,7 @@ interface I_TextArea extends React.HTMLAttributes<HTMLTextAreaElement> {
   clVariant?: 'default' | 'textarea2'
   /**This will determine the height of the text area */
   clRows?: number
+  clDisabled?: boolean
 }
 
 const getVariant = (variant: I_TextArea['clVariant']): string => {
@@ -22,10 +23,14 @@ const TextArea = ({
   className,
   clVariant,
   clRows = 3,
+  clDisabled,
+  ...props
 }: I_TextArea) => {
   const variantStyles = getVariant(clVariant)
   return (
     <textarea
+      {...props}
+      disabled={clDisabled}
       placeholder={clPlaceholder ?? 'Text here...'}
       className={twMerge('resize-none row-span-12', variantStyles, className)}
       rows={clRows}

@@ -1,5 +1,3 @@
-'use client'
-
 import Icon_heart from '@/app/components/icons/Icon_heart'
 import React from 'react'
 import Marquee from 'react-fast-marquee'

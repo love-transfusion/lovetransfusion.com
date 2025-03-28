@@ -77,6 +77,5 @@ export const ga_selectGoogleAnalyticsData = async ({
   //       0
   //   ) ?? []
   // const total = arrValues?.reduce((a, b) => a + b)
-  // console.log({ total, response })
   return response.data
 }

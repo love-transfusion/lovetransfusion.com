@@ -1,6 +1,6 @@
 'use server'
 
-import { resend_signupConfirmation } from '@/app/(auth)/signup/resendActions'
+import { resendEmail_AccountCredentials } from '@/app/lib/resend_email_templates/resendEmail_AccountCredentials'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { revalidatePath } from 'next/cache'
 import { v4 as uuid } from 'uuid'
@@ -43,7 +43,7 @@ export const supa_admin_create_account = async (rawData: I_signupData) => {
     user_metadata: { parent_name },
   })
   if (!error) {
-    resend_signupConfirmation({ email, parent_name, password })
+    resendEmail_AccountCredentials({ email, password, parent_name })
   }
   revalidatePath('/admin')
   return { data, error: error?.message ?? null }

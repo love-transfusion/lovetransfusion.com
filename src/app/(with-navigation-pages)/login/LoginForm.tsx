@@ -51,7 +51,11 @@ const LoginForm = () => {
           Password *
         </label>
         <div className={''}>
-          <PasswordField clRegister={register} errors={errors} />
+          <PasswordField
+            clRegister={register}
+            errors={errors}
+            fieldName="password"
+          />
           <p className={'text-[12px] text-primary text-right mt-1 mb-[2px]'}>
             <Link href={'/forgot-password'}>Forgot password?</Link>
           </p>

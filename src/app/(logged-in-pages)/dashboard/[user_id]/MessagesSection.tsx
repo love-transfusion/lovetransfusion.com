@@ -10,7 +10,7 @@ const MessagesSection = ({ clRecipientObj }: I_Messages) => {
   return (
     <div
       className={
-        'flex flex-col-reverse md:flex-row items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px]'
+        'flex flex-col-reverse md:flex-row items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px] max-w-[1440px]'
       }
     >
       <div className={'md:min-w-full xl:min-w-[900px]'}>

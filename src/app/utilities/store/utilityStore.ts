@@ -11,6 +11,12 @@ const utilityStore = create(
         state.toast = dataObj || null
       })
     },
+    userInStore: null,
+    setuserInStore: (dataObj) => {
+      set((state) => {
+        state.userInStore = dataObj || null
+      })
+    },
   }))
 )
 

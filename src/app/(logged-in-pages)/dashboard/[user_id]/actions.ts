@@ -2,6 +2,11 @@
 
 import { createServer } from '@/app/config/supabase/supabaseServer'
 
+export interface I_userData {
+  id: string
+  recipient: I_supaorg_recipient
+}
+
 export const supa_select_recipient = async (user_id: string) => {
   const supabase = await createServer()
   const { data, error } = await supabase
