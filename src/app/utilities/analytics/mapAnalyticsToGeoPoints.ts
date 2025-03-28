@@ -1,7 +1,8 @@
 'use server'
-import fs from 'fs'
-import path from 'path'
+// import fs from 'fs'
+// import path from 'path'
 import { I_CountryPathTotalFormat } from './getAnalyticsCountryPathTotal'
+import rawCities from '@/app/lib/geonames/cities.json'
 
 type CityEntry = {
   city: string
@@ -10,6 +11,8 @@ type CityEntry = {
   lat: number
   lng: number
 }
+
+const cities = rawCities as Record<string, CityEntry>
 
 export type GeoPoint = {
   name: string
@@ -27,12 +30,6 @@ const formatReadyToSearchRemoveCity = (str: string) => {
 export const mapAnalyticsToGeoPoints = async (
   analytics: I_CountryPathTotalFormat[]
 ): Promise<GeoPoint[]> => {
-  const filePath = path.join(process.cwd(), 'src/app/lib/geonames/cities.json')
-  const cities = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<
-    string,
-    CityEntry
-  >
-
   const resultMap = new Map<string, GeoPoint>()
 
   for (const entry of analytics) {
@@ -62,7 +59,7 @@ export const mapAnalyticsToGeoPoints = async (
     const match = cities[matchedKey]
     const lng = parseFloat(match.lng.toFixed(6))
     const lat = parseFloat(match.lat.toFixed(6))
-    const key = `${lng},${lat}` // use lng-lat as a unique key
+    const key = `${lng},${lat}`
 
     if (resultMap.has(key)) {
       const existing = resultMap.get(key)!
@@ -77,6 +74,5 @@ export const mapAnalyticsToGeoPoints = async (
     }
   }
 
-  const result = Array.from(resultMap.values())
-  return result
+  return Array.from(resultMap.values())
 }
