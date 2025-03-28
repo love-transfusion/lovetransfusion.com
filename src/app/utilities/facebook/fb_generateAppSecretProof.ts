@@ -2,7 +2,7 @@ import axios from 'axios'
 import crypto from 'crypto'
 
 const accessToken =
-  'EAARZAo3JNZBTIBOxQUiheTK2gzZAqWKHfTyQ6boo6FfkZAPZCqFdxm5KIeN7W8ZChj4hUZCoBOjH56rlzcOBicsPgqWGysIVSTTNsuzlKKvuDb17xIEhhYxsUihfaYEz4ZBrfbrA9VaL7xvkDsd5gMpv9a9O9uQoFTQUxiit3sKLTe3fLzfagvIdUPJ1dPG00ZAiW77P1gQZDZD'!
+  'EAARZAo3JNZBTIBOyG5Dcy0YXw5ZBzdg7srlek0dNMrahDZBGvQ60KXn4ZCUFLLLneJCN3KWyhwAzZCW0agT3FRiKqWaiWzKx366iQLZCIgXn2CuXNQCrx2U7ZBXta42EiBAyXyVCmrGaeJ2bvkn0wvtjnxGjhY0ZBZB5l5loqtZAFzfkOa65SfZA1MBqUU3sVITf55iLF5CZAoAZDZD'!
 const appSecret = '67a182b4525202f51a6d6604bc5e7d66'!
 const adAccountId = '3519590174999724'!
 
