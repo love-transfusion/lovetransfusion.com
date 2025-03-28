@@ -12,7 +12,7 @@ const PublicFooter = () => {
   return (
     <div
       className={
-        'pb-10 pt-10 md:pb-5 md:pt-[39px] bg-primary text-white font-acuminProExtraLight text-sm md:text-[17px] px-4 lg:px-0'
+        'pb-10 pt-10 md:pb-5 md:pt-[39px] bg-primary text-white font-acuminProExtraLight text-sm md:text-base px-4 lg:px-0'
       }
     >
       <div className={'max-w-[1120px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
@@ -21,13 +21,13 @@ const PublicFooter = () => {
             <Image src={footerLogo} alt="Love Transfusion Logo" quality={100} />
           </Link>
         </div>
-        <p className={'text-center mt-[7px]'}>
+        <p className={'text-center mt-[5px]'}>
           1201 N. Orange Street, Suite 799, Wilmington DE 19801
         </p>
-        <p className={'text-center mt-[6px] text-base'}>
+        <p className={'text-center mt-1'}>
           501(c)3 Nonprofit Organization | Tax ID #27-2829895
         </p>
-        <p className={'mt-2 md:mt-8 text-center'}>
+        <p className={'mt-2 md:mt-[30px] text-center'}>
           <Link href={'/about-us'}>About Us</Link> |{' '}
           <Link href={'/help-center'}>FAQ</Link> |{' '}
           <Link href={'/contact-us'}>Contact Us</Link> |{' '}
@@ -36,7 +36,7 @@ const PublicFooter = () => {
         </p>
         <div
           className={
-            'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-[39px] gap-4'
+            'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-[36px] gap-4'
           }
         >
           <p className={''}>
