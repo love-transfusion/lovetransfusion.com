@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
-import { I_userData } from '../(logged-in-pages)/dashboard/[user_id]/actions'
+import { I_Recipient_Data } from '../(logged-in-pages)/dashboard/[user_id]/actions'
 import { supa_admin_upsert_list_of_recipients } from '../admin/(with-navigation)/actions'
 
-const useUpdateRecipientDatabase = (userData: I_userData) => {
-  console.log({ userData })
+const useUpdateRecipientDatabase = (userData: I_Recipient_Data) => {
   const updateRecipient = async () => {
     await supa_admin_upsert_list_of_recipients([
       {

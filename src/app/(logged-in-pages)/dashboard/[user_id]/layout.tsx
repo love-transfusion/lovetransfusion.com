@@ -7,7 +7,7 @@ import MostRecentEngagements from './MostRecentEngagements'
 import HugsMessagesShares from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
-import { supa_select_recipient } from './actions'
+import { filter_comments, supa_select_recipient } from './actions'
 import MessagesSection from './MessagesSection'
 
 type Params = Promise<{ user_id: string }>
@@ -23,10 +23,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { map, updateSlot } = props
   const { data: recipientRow } = await supa_select_recipient(user_id)
   if (!recipientRow) return
-
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
     unkRecipientObj as I_supaorg_recipient_hugs_counters_comments
+    const clMessages = await filter_comments(recipientObj.comments, recipientRow.receipients_deleted_messages)
   return (
     <div className="">
       <WelcomeMessage />
@@ -84,7 +84,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         </div>
       </div>
       {/* Messages Section */}
-      <MessagesSection clRecipientObj={recipientObj} />
+      <MessagesSection
+        clRecipientObj={{...recipientObj, comments: clMessages}}
+        clUser_id={user_id}
+      />
       {updateSlot}
     </div>
   )

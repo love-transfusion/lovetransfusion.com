@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      receipients_deleted_messages: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          recipient_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipients_deleted_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "users_data_website"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipients_deleted_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar: string | null

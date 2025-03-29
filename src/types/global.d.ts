@@ -23,6 +23,14 @@ declare global {
   type I_supa_users_data_website_row =
     DB['public']['Tables']['users_data_website']['Row']
 
+  // receipients_deleted_messages table
+  type I_supa_receipients_deleted_messages_insert =
+    DB['public']['Tables']['receipients_deleted_messages']['Insert']
+  type I_supa_receipients_deleted_messages_update =
+    DB['public']['Tables']['receipients_deleted_messages']['Update']
+  type I_supa_receipients_deleted_messages_row =
+    DB['public']['Tables']['receipients_deleted_messages']['Row']
+
   // users table
   type I_supa_users_insert = DB['public']['Tables']['users']['Insert']
   type I_supa_users_update = DB['public']['Tables']['users']['Update']
@@ -52,17 +60,20 @@ declare global {
         profile_picture: I_profile_picture | null
       }
 
-  type I_orgLocation = {
-    IP: string
-    city: string
-    country: string
-    country_code: string
-    region: string
-    latitude: number
-    longitude: number
-    cityId: undefined
-    countryId: undefined
-  } | null | undefined
+  type I_orgLocation =
+    | {
+        IP: string
+        city: string
+        country: string
+        country_code: string
+        region: string
+        latitude: number
+        longitude: number
+        cityId: undefined
+        countryId: undefined
+      }
+    | null
+    | undefined
 
   interface I_supaorg_hug extends I_unextended_supaorg_hug {
     location: I_orgLocation | null

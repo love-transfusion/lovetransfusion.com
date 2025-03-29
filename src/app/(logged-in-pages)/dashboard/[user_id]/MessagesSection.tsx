@@ -4,7 +4,10 @@ import ShowOrHide from './ShowOrHide'
 import Messages, { I_Messages } from './Messages'
 import useToggle from '@/app/hooks/useToggle'
 
-const MessagesSection = ({ clRecipientObj }: I_Messages) => {
+const MessagesSection = ({
+  clRecipientObj,
+  clUser_id,
+}: I_Messages) => {
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
   return (
@@ -29,7 +32,12 @@ const MessagesSection = ({ clRecipientObj }: I_Messages) => {
             clContainerClassName="hidden md:flex xl:hidden"
           />
         </div>
-        {showMessages && <Messages clRecipientObj={clRecipientObj} />}
+        {showMessages && (
+          <Messages
+            clRecipientObj={clRecipientObj}
+            clUser_id={clUser_id}
+          />
+        )}
       </div>
       <div className={'w-full block md:hidden xl:block'}>
         <ShowOrHide clToggle={setshowMessages} clisToggled={showMessages} />

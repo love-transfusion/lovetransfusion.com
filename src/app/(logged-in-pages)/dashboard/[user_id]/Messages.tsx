@@ -2,14 +2,22 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import anonymousImg from './images/user.webp'
+import { supa_insert_deleted_messages } from './actions'
 
 export interface I_Messages {
   clRecipientObj: I_supaorg_recipient_hugs_counters_comments
+  clUser_id: string
 }
 
-const Messages = ({ clRecipientObj }: I_Messages) => {
+const Messages = ({ clRecipientObj, clUser_id }: I_Messages) => {
   const [lastVisible, setlastVisible] = useState<number>(6)
-  const comments = clRecipientObj.comments
+
+  // const filterComments = () => {}
+
+  const [comments, setcomments] = useState<I_supaorg_comments[]>(
+    clRecipientObj.comments
+  )
+  comments
     .map((recipient: I_supaorg_comments) => {
       const { id, public_profiles, created_at, name, comment } = recipient
       return { id, public_profiles, created_at, name, comment }
@@ -20,8 +28,19 @@ const Messages = ({ clRecipientObj }: I_Messages) => {
       return dateB - dateA
     })
 
+  console.log({ comments })
   const handleLoadMore = () => {
     setlastVisible((prev) => prev + 10)
+  }
+  const handleDelete = async (
+    item: I_supa_receipients_deleted_messages_insert
+  ) => {
+    setcomments((prev) => {
+      return prev.filter((comment) => {
+        return comment.id !== item.id
+      })
+    })
+    await supa_insert_deleted_messages(item)
   }
   return (
     <div
@@ -37,6 +56,7 @@ const Messages = ({ clRecipientObj }: I_Messages) => {
       <div className={'divide-y divide-primary'}>
         {comments.map((item, index) => {
           if (index > lastVisible) return
+          console.log({ item })
           const isLastItem = index === lastVisible
           return (
             <div key={item.id} className="even:bg-white odd:bg-[#F7FCFF]">
@@ -80,8 +100,15 @@ const Messages = ({ clRecipientObj }: I_Messages) => {
                       </div>
                     </div>
                     <p
+                      onClick={() =>
+                        handleDelete({
+                          id: item.id,
+                          recipient_id: clRecipientObj.id,
+                          user_id: clUser_id,
+                        })
+                      }
                       className={
-                        'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px]'
+                        'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
                       }
                     >
                       hide message
