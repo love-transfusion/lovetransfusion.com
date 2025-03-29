@@ -14,7 +14,7 @@ const LoginPage = () => {
             Welcome To Love Transfusion!
           </p>
           <p className={'text-lg md:text-xl text-[#999] mt-[3px]'}>
-            Log in to your account...
+            Log into your account...
           </p>
         </div>
         <div

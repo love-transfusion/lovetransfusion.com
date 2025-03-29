@@ -39,7 +39,7 @@ const Homepage = () => {
           </p>
           <div
             className={
-              'flex flex-col lg:flex-row gap-[58px] w-full mx-auto max-w-[935px] mt-8 md:mt-[61px]'
+              'flex flex-col lg:flex-row gap-[56px] w-full mx-auto max-w-[935px] mt-8 md:mt-[61px]'
             }
           >
             <div
@@ -60,7 +60,7 @@ const Homepage = () => {
                   quality={100}
                   width={217.572}
                   height={222.081}
-                  className="rounded-full ring-[6px] border-[5px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px]"
+                  className="rounded-full ml-[2px] ring-[6px] border-[5px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px]"
                 />
                 <Image
                   src={brandLogo}
@@ -68,12 +68,12 @@ const Homepage = () => {
                   width={67}
                   height={68}
                   quality={100}
-                  className="absolute -bottom-[4px] right-[4px]"
+                  className="absolute ml-[2px] -bottom-[4px] right-[4px]"
                 />
               </div>
               <p
                 className={
-                  'font-acuminCondensedBold text-primary text-2xl mt-[27px] text-center'
+                  'font-acuminCondensedBold text-primary text-[22px] mt-[27px]'
                 }
               >
                 Emotional Support Network
@@ -118,7 +118,7 @@ const Homepage = () => {
                   >
                     <p
                       className={
-                        'text-[21px] mx-auto text-center font-acuminProLight'
+                        'text-[22px] mx-auto text-center font-acuminProLight'
                       }
                     >
                       Register
@@ -150,7 +150,7 @@ const Homepage = () => {
                   >
                     <p
                       className={
-                        'text-[21px] mx-auto text-center font-acuminProLight'
+                        'text-[22px] mx-auto text-center font-acuminProLight'
                       }
                     >
                       Login
@@ -172,7 +172,7 @@ const Homepage = () => {
             <div className={'flex border-t w-full h-[1px] mt-[6px]'} />
             <p
               className={
-                'text-nowrap font-acuminCondensedBold text-[#E6E6E6] text-[23px] md:text-[30px] tracking-[4px]'
+                'text-nowrap font-acuminCondensedBold text-[#E6E6E6] text-[23px] md:text-[32px] tracking-[4px]'
               }
             >
               HOW IT WORKS
@@ -192,7 +192,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Tell Us About The Recipient
@@ -207,7 +207,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Private, Secure and Easy To Use
@@ -222,7 +222,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-tight'
+                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Expressions of Love and Support
