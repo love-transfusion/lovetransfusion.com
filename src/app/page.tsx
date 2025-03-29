@@ -53,14 +53,14 @@ const Homepage = () => {
               />
             </div>
             <div className={'flex flex-col'}>
-              <div className={'relative mt-[2px] w-fit mx-auto lg:mx-[unset]'}>
+              <div className={'relative mt-[2px] w-fit mx-auto'}>
                 <Image
                   src={child}
                   alt="child"
                   quality={100}
-                  width={217.572}
-                  height={222.081}
-                  className="rounded-full ml-[2px] ring-[6px] border-[5px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px]"
+                  // width={217.572}
+                  // height={222.081}
+                  className="rounded-full ring-[6px] border-[5px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px] min-w-[210px]"
                 />
                 <Image
                   src={brandLogo}
@@ -73,14 +73,14 @@ const Homepage = () => {
               </div>
               <p
                 className={
-                  'font-acuminCondensedBold text-primary text-[22px] mt-[27px]'
+                  'font-acuminCondensedBold text-primary text-[22px] mt-[27px] mb-1'
                 }
               >
                 Emotional Support Network
               </p>
               <p
                 className={
-                  'text-[#999] mt-[5px] leading-tight text-center lg:text-left'
+                  'text-[#999] mt-[5px] leading-[1.3em] text-center lg:text-left'
                 }
               >
                 Provided free of charge for families battling serious illness,
@@ -192,7 +192,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
+                  'text-[#4D4D4D] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Tell Us About The Recipient
@@ -207,7 +207,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
+                  'text-[#4D4D4D] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Private, Secure and Easy To Use
@@ -222,7 +222,7 @@ const Homepage = () => {
               </p>
               <p
                 className={
-                  'text-[#4D4D4D] tracking-[0.48px] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
+                  'text-[#4D4D4D] max-w-[190px] mt-[3px] mb-[10px] leading-[1.2em]'
                 }
               >
                 Expressions of Love and Support
