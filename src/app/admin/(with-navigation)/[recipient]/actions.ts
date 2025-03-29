@@ -8,12 +8,13 @@ import { formatDateToUTCString } from '@/app/utilities/date-and-time/formatDateT
 export const supa_admin_update_recipient_website = async (
   recipient: I_supa_users_data_website_update & { id: UUID }
 ) => {
-  const { id, ...recipientObj } = recipient
+  console.log({ recipient })
+  // const { id, ...recipientObj } = recipient
   const supabase = await createAdmin()
   const { data, error } = await supabase
     .from('users_data_website')
-    .update(recipientObj)
-    .eq('id', id)
+    .update(recipient)
+    .eq('id', recipient.id)
     .select()
   return { data, error: error?.message ?? null }
 }

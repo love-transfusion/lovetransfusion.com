@@ -4,6 +4,7 @@ import { resendEmail_AccountCredentials } from '@/app/lib/resend_email_templates
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { revalidatePath } from 'next/cache'
 import { v4 as uuid } from 'uuid'
+import { I_userData } from '@/app/(logged-in-pages)/dashboard/[user_id]/actions'
 
 /** Global search:(STRING) of either firstname | parent_name | recipient id | email */
 interface I_getDataFromLTOrg {
@@ -13,14 +14,10 @@ interface I_getDataFromLTOrg {
   limit?: number
 }
 
-interface I_userData {
-  id: string
-  recipient: I_supaorg_recipient
-}
-
 export const supa_admin_upsert_list_of_recipients = async (
   users_data: I_userData[]
 ) => {
+  console.log({ users_data })
   const supabase = await createAdmin()
   const { error } = await supabase.from('users_data_website').upsert(users_data)
 

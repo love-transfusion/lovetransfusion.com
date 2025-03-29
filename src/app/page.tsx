@@ -39,7 +39,7 @@ const Homepage = () => {
           </p>
           <div
             className={
-              'flex flex-col lg:flex-row gap-[60px] w-full mx-auto max-w-[920px] mt-8 md:mt-[61px]'
+              'flex flex-col lg:flex-row gap-[58px] w-full mx-auto max-w-[935px] mt-8 md:mt-[61px]'
             }
           >
             <div
@@ -73,14 +73,14 @@ const Homepage = () => {
               </div>
               <p
                 className={
-                  'font-acuminCondensedBold text-primary text-[22px] mt-[27px] text-center'
+                  'font-acuminCondensedBold text-primary text-2xl mt-[27px] text-center'
                 }
               >
                 Emotional Support Network
               </p>
               <p
                 className={
-                  'text-[15px] text-[#999] mt-[5px] leading-tight text-center lg:text-left'
+                  'text-[#999] mt-[5px] leading-tight text-center lg:text-left'
                 }
               >
                 Provided free of charge for families battling serious illness,
