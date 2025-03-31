@@ -62,8 +62,12 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     if (url.pathname === '/login' || url.pathname === '/signup') {
+      const isAdmin = [
+        '1d467d81-c908-4ab2-8c0d-ee9a4630ae65',
+        '62a5a2a6-ce55-4ce7-b7e2-b9e13809baf3',
+      ].includes(user.id)
       return NextResponse.redirect(
-        new URL(`/dashboard/${user.id}`, request.url)
+        new URL(isAdmin ? '/admin' : `/dashboard/${user.id}`, request.url)
       )
     }
   } else if (

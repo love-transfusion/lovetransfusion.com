@@ -16,6 +16,9 @@ module.exports = {
       },
     },
     extend: {
+      screens: {
+        '3xl': '1921px', // Add your custom breakpoint here
+      },
       boxShadow: {
         custom1: '0 0 23px 0 rgba(49, 144, 221, 0.53)',
         custom2: '0 0 25px 0 rgba(56, 170, 223, 0.25)',

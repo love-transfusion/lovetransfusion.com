@@ -1,9 +1,13 @@
 import SignoutContainerComponent from '@/app/(auth)/signout/SignoutContainerComponent'
+import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
+import { isAdmin } from '@/app/lib/adminCheck'
 import React from 'react'
 interface I_WithNavigationLayout {
   children: React.ReactNode
 }
-const WithNavigationLayout = ({ children }: I_WithNavigationLayout) => {
+const WithNavigationLayout = async ({ children }: I_WithNavigationLayout) => {
+  const user = await getCurrentUser()
+  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
   return (
     <>
       <div

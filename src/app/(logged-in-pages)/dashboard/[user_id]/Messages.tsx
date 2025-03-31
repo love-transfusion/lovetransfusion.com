@@ -28,7 +28,6 @@ const Messages = ({ clRecipientObj, clUser_id }: I_Messages) => {
       return dateB - dateA
     })
 
-  console.log({ comments })
   const handleLoadMore = () => {
     setlastVisible((prev) => prev + 10)
   }
@@ -56,7 +55,6 @@ const Messages = ({ clRecipientObj, clUser_id }: I_Messages) => {
       <div className={'divide-y divide-primary'}>
         {comments.map((item, index) => {
           if (index > lastVisible) return
-          console.log({ item })
           const isLastItem = index === lastVisible
           return (
             <div key={item.id} className="even:bg-white odd:bg-[#F7FCFF]">

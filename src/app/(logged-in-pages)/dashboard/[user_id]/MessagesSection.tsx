@@ -4,19 +4,16 @@ import ShowOrHide from './ShowOrHide'
 import Messages, { I_Messages } from './Messages'
 import useToggle from '@/app/hooks/useToggle'
 
-const MessagesSection = ({
-  clRecipientObj,
-  clUser_id,
-}: I_Messages) => {
+const MessagesSection = ({ clRecipientObj, clUser_id }: I_Messages) => {
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
   return (
     <div
       className={
-        'flex flex-col-reverse md:flex-row items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px] max-w-[1440px]'
+        'flex flex-col-reverse md:flex-row items-center md:items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px]'
       }
     >
-      <div className={'md:min-w-full xl:min-w-[900px]'}>
+      <div className={'md:min-w-full xl:min-w-[900px] w-full'}>
         <div className={'flex gap-9'}>
           <DividerText
             clContainerClassName="hidden md:block"
@@ -33,18 +30,15 @@ const MessagesSection = ({
           />
         </div>
         {showMessages && (
-          <Messages
-            clRecipientObj={clRecipientObj}
-            clUser_id={clUser_id}
-          />
+          <Messages clRecipientObj={clRecipientObj} clUser_id={clUser_id} />
         )}
       </div>
-      <div className={'w-full block md:hidden xl:block'}>
+      <div className={'block md:hidden xl:block'}>
         <ShowOrHide clToggle={setshowMessages} clisToggled={showMessages} />
         {showMessages && (
           <div
             className={
-              'hidden xl:block p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative'
+              'hidden xl:block p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative w-full md:w-[406px]'
             }
           >
             <div

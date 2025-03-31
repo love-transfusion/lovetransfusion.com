@@ -12,15 +12,10 @@ import Link from 'next/link'
 import { fetchDataFromLTOrg } from '../actions'
 import { supa_admin_select_recipient_data } from './actions'
 import CreateAccountButton from './CreateAccountButton'
-import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
-import { isAdmin } from '@/app/lib/adminCheck'
 
 type Params = Promise<{ recipient: UUID }>
 
 const RecipientPage = async (props: { params: Params }) => {
-  const user = await getCurrentUser()
-  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
-
   const { recipient } = await props.params
   const { data: foundRecipient } = await supa_admin_select_recipient_data(
     recipient

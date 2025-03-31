@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 
 interface I_DeviceSize {
-  deviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | null
+  deviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
 }
 
 const useDeviceSize = (): I_DeviceSize['deviceSize'] => {
@@ -19,8 +19,10 @@ const useDeviceSize = (): I_DeviceSize['deviceSize'] => {
       setdeviceSize('lg')
     } else if (window.innerWidth >= 1280 && window.innerWidth <= 1535) {
       setdeviceSize('xl')
-    } else if (window.innerWidth >= 1536) {
+    } else if (window.innerWidth >= 1536 && window.innerWidth <= 1920) {
       setdeviceSize('2xl')
+    } else if (window.innerWidth >= 1930) {
+      setdeviceSize('3xl')
     }
   }
 

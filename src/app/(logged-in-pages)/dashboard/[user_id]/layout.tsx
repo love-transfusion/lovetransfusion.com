@@ -9,6 +9,8 @@ import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { filter_comments, supa_select_recipient } from './actions'
 import MessagesSection from './MessagesSection'
+// import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
+// import { redirect } from 'next/navigation'
 
 type Params = Promise<{ user_id: string }>
 
@@ -21,12 +23,19 @@ interface I_userDashboardLayout extends Params {
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
   const { map, updateSlot } = props
+  // const user = await getCurrentUser()
+  // if (user?.id === user_id) {
+  //   redirect('/admin')
+  // }
   const { data: recipientRow } = await supa_select_recipient(user_id)
   if (!recipientRow) return
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
     unkRecipientObj as I_supaorg_recipient_hugs_counters_comments
-    const clMessages = await filter_comments(recipientObj.comments, recipientRow.receipients_deleted_messages)
+  const clMessages = await filter_comments(
+    recipientObj.comments,
+    recipientRow.receipients_deleted_messages
+  )
   return (
     <div className="">
       <WelcomeMessage />
@@ -34,7 +43,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       {/* Profile and Map Section */}
       <div
         className={
-          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1] max-w-[1440px]'
+          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1]'
         }
       >
         <div
@@ -85,7 +94,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       </div>
       {/* Messages Section */}
       <MessagesSection
-        clRecipientObj={{...recipientObj, comments: clMessages}}
+        clRecipientObj={{ ...recipientObj, comments: clMessages }}
         clUser_id={user_id}
       />
       {updateSlot}
