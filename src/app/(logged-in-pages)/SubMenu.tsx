@@ -15,7 +15,7 @@ const SubMenu = () => {
       <p className={'text-[#DFEEFA8F] mb-[13px]'}>MAIN MENU</p>
       <Link href={`/dashboard/${userInStore?.id}`}>
         <div
-          className={'flex gap-[7px] items-center text-xl font-acuminProLight'}
+          className={'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'}
         >
           <Image
             src={dashboard}
@@ -28,7 +28,7 @@ const SubMenu = () => {
       </Link>
       <Link href={'/#'}>
         <div
-          className={'flex gap-[7px] items-center text-xl font-acuminProLight'}
+          className={'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'}
         >
           <Image
             src={profile}
@@ -41,7 +41,7 @@ const SubMenu = () => {
       </Link>
       <Link href={'/privacy-policy'}>
         <div
-          className={'flex gap-[7px] items-center text-xl font-acuminProLight'}
+          className={'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'}
         >
           <Image
             src={privacy}

@@ -20,7 +20,7 @@ const TermsOfUsePage = () => {
         </div>
         <p
           className={
-            'font-acuminCondensedBold text-[23px] text-primary text-center mt-[14px] mb-[22px]'
+            'font-acumin-condensed text-[23px] text-primary text-center mt-[14px] mb-[22px]'
           }
         >
           Terms of Use

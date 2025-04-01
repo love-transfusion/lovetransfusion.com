@@ -18,7 +18,7 @@ const ContactPage = () => {
             <div className={'flex flex-col'}>
               <p
                 className={
-                  'font-acuminCondensedBold text-primary text-[28px] mb-[13px] -mt-[5px]'
+                  'font-acumin-condensed text-primary text-[28px] mb-[13px] -mt-[5px]'
                 }
               >
                 Message Us
@@ -34,7 +34,7 @@ const ContactPage = () => {
         >
           <p
             className={
-              'font-acuminCondensedBold text-primary text-center text-2xl md:text-[28px]'
+              'font-acumin-condensed text-primary text-center text-2xl md:text-[28px]'
             }
           >
             Frequently Asked Questions...

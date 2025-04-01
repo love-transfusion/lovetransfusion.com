@@ -33,7 +33,7 @@ const NavigationMenu = () => {
         <div className={'bg-[#2F8EDD] h-[84px]'} />
         <div
           className={
-            'bg-gradient-to-b from-[#2F8EDD] to-[#2FBADD] px-5 h-[calc(100%-20px)] text-[#DFEEFA] font-acuminProLight pb-10'
+            'bg-gradient-to-b from-[#2F8EDD] to-[#2FBADD] px-5 h-[calc(100%-20px)] text-[#DFEEFA] font-acumin-semi-condensed pb-10'
           }
         >
           <div className={'text-[#E9F5FE] text-center -mt-[64px]'}>
@@ -60,7 +60,7 @@ const NavigationMenu = () => {
             <Link href={'/help-center'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
+                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
                 }
               >
                 <Image
@@ -75,7 +75,7 @@ const NavigationMenu = () => {
             <Link href={'/help-center'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
+                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
                 }
               >
                 <Image
@@ -93,7 +93,7 @@ const NavigationMenu = () => {
             <Link href={'/about-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
+                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
                 }
               >
                 <Image
@@ -108,7 +108,7 @@ const NavigationMenu = () => {
             <Link href={'/contact-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acuminProLight'
+                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
                 }
               >
                 <Image
@@ -122,7 +122,7 @@ const NavigationMenu = () => {
             </Link>
             <div
               className={
-                'flex gap-[7px] items-center text-xl font-acuminProLight'
+                'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
               }
             >
               <Image

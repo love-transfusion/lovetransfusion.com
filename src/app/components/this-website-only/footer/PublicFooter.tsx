@@ -12,22 +12,29 @@ const PublicFooter = () => {
   return (
     <div
       className={
-        'pb-10 pt-10 md:pb-5 md:pt-[39px] bg-primary text-white font-acuminProExtraLight text-sm md:text-base px-4 lg:px-0'
+        'pb-10 pt-10 md:pb-[21px] md:pt-10 bg-primary text-white font-extralight text-sm md:text-base px-4 lg:px-0'
       }
     >
-      <div className={'max-w-[1120px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
+      <div className={'max-w-[1104px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
         <div className={'w-fit mx-auto'}>
           <Link href={'/'} className="">
-            <Image src={footerLogo} alt="Love Transfusion Logo" quality={100} />
+            <Image
+              src={footerLogo}
+              alt="Love Transfusion Logo"
+              quality={100}
+              width={353}
+              height={43}
+              className="w-[353px] h-[65px]"
+            />
           </Link>
         </div>
-        <p className={'text-center mt-[5px]'}>
+        <p className={'text-center mt-[7px] text-lg'}>
           1201 N. Orange Street, Suite 799, Wilmington DE 19801
         </p>
-        <p className={'text-center mt-1'}>
+        <p className={'text-center mt-[2px]'}>
           501(c)3 Nonprofit Organization | Tax ID #27-2829895
         </p>
-        <p className={'mt-2 md:mt-[30px] text-center'}>
+        <p className={'mt-2 md:mt-[28px] text-center'}>
           <Link href={'/about-us'}>About Us</Link> |{' '}
           <Link href={'/help-center'}>FAQ</Link> |{' '}
           <Link href={'/contact-us'}>Contact Us</Link> |{' '}
@@ -36,20 +43,20 @@ const PublicFooter = () => {
         </p>
         <div
           className={
-            'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-[36px] gap-4'
+            'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-10 gap-4'
           }
         >
           <p className={''}>
             © 2010-{new Date().getFullYear()} Love Transfusion Inc. All Rights
             Reserved.
           </p>
-          <div className={'flex gap-[15px] justify-center md:justify-start'}>
+          <div className={'flex gap-4 justify-center md:justify-start'}>
             <Link href={'https://www.lovetransfusion.org/'} target="_blank">
               <Image
                 src={webIcon}
                 alt="web icon"
                 quality={100}
-                className="size-[30px]"
+                className="w-[30px] h-[30px]"
               />
             </Link>
             <Link

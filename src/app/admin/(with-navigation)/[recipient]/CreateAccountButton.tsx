@@ -54,7 +54,7 @@ const CreateAccountButton = ({
           'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
         }
       >
-        <p className={'text-lg mx-auto text-center font-acuminProLight'}>
+        <p className={'text-lg mx-auto text-center font-acumin-semi-condensed'}>
           {foundRecipient?.user_id
             ? 'Update Account'
             : `${isLoading ? 'Creating Account...' : 'Create Account'}`}

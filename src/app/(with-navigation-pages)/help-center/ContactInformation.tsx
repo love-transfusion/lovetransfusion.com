@@ -28,7 +28,7 @@ const ContactInformation = ({
       {!clDisableHelpCenter && (
         <p
           className={
-            'font-acuminCondensedBold text-primary-200 text-[30px] mb-4 leading-tight -mt-[1px]'
+            'font-acumin-condensed text-primary-200 text-[30px] mb-4 leading-tight -mt-[1px]'
           }
         >
           HELP CENTER
@@ -37,14 +37,14 @@ const ContactInformation = ({
       <Image src={ltLogoColored} alt="Love Transfusion logo" quality={100} />
       <p
         className={
-          'font-acuminCondensedBold text-primary text-[22px] leading-tight mt-[15px]'
+          'font-acumin-condensed text-primary text-[22px] leading-tight mt-[15px]'
         }
       >
         Love Transfusion Inc.
       </p>
       <p
         className={
-          'font-acuminCondensedRegular text-primary text-[20px] leading-snug'
+          'font-acumin-condensed text-primary text-[20px] leading-snug'
         }
       >
         1201 N. Orange Street
@@ -55,7 +55,7 @@ const ContactInformation = ({
       </p>
       <div
         className={
-          'flex flex-col font-acuminCondensedRegular text-primary gap-2 mt-[18px]'
+          'flex flex-col font-acumin-condensed text-primary gap-2 mt-[18px]'
         }
       >
         <div className={'flex gap-[11px] w-fit'}>
@@ -188,7 +188,7 @@ const ContactInformation = ({
       </div>
       <p
         className={twMerge(
-          'font-acuminCondensedRegular text-primary mt-[5px]',
+          'font-acumin-condensed text-primary mt-[5px]',
           cl501ClassName
         )}
       >

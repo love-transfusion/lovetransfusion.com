@@ -11,7 +11,7 @@ const HelpCenterPage = () => {
       <div className={'max-w-[950px] mx-auto md:px-6 lg:px-10 xl:px-4'}>
         <p
           className={
-            'font-acuminCondensedBold text-primary-200 text-center text-[35px]'
+            'font-acumin-condensed text-primary-200 text-center text-[35px]'
           }
         >
           HELP CENTER
@@ -23,7 +23,7 @@ const HelpCenterPage = () => {
         >
           <p
             className={
-              'font-acuminCondensedBold text-primary text-center text-2xl md:text-[28px]'
+              'font-acumin-condensed text-primary text-center text-2xl md:text-[28px]'
             }
           >
             Frequently Asked Questions...
@@ -36,7 +36,7 @@ const HelpCenterPage = () => {
         <div className={'px-4 md:px-8 mt-8'}>
           <p
             className={
-              'font-acuminCondensedBold text-primary text-[28px] mb-[13px] pl-[26px]'
+              'font-acumin-condensed text-primary text-[28px] mb-[13px] pl-[26px]'
             }
           >
             Message Us
@@ -45,20 +45,16 @@ const HelpCenterPage = () => {
             <ContactMessageForm />
             <ContactInformation />
           </div>
-          <p
-            className={
-              'italic text-primary text-[18px] text-center mt-9 md:mt-[49px] font-acuminProMedium'
-            }
-          >
+          <p className={'italic text-primary text-lg text-center mt-[48px]'}>
             {`"`}One word frees us of all the weight and pain in life. That word
             is
             <span
-              className={`relative before:absolute before:bottom-[13px] before:left-[6px] before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
+              className={`relative before:absolute before:bottom-[15px] before:left-1 before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
             >
               {' '}
-              Love{`"`}
+              Love
             </span>
-            . <span className="text-sm">~Sophocles</span>
+            .{`"`} <span className="text-sm ml-[2px]">~Sophocles</span>
           </p>
         </div>
       </div>

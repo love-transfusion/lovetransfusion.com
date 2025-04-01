@@ -35,7 +35,7 @@ const ResetPasswordPage = () => {
         <div className={'md:max-w-[440px] mx-auto mb-[25px] px-5'}>
           <p
             className={
-              'text-2xl md:text-[35px] font-acuminCondensedBold text-primary leading-tight'
+              'text-2xl md:text-[35px] font-acumin-condensed text-primary leading-tight'
             }
           >
             Reset Password
@@ -77,7 +77,9 @@ const ResetPasswordPage = () => {
                     'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
                   }
                 >
-                  <p className={'mx-auto text-center font-acuminProLight'}>
+                  <p
+                    className={'mx-auto text-center font-acumin-semi-condensed'}
+                  >
                     Update Password
                   </p>
                   <div className={'pl-[19px]'}>
@@ -88,20 +90,16 @@ const ResetPasswordPage = () => {
             </div>
           </div>
         </form>
-        <p
-          className={
-            'italic text-primary text-[18px] text-center mt-9 md:mt-[49px] font-acuminProMedium'
-          }
-        >
+        <p className={'italic text-primary text-lg text-center mt-[48px]'}>
           {`"`}One word frees us of all the weight and pain in life. That word
           is
           <span
-            className={`relative before:absolute before:bottom-[13px] before:left-[6px] before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
+            className={`relative before:absolute before:bottom-[15px] before:left-1 before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
           >
             {' '}
-            Love{`"`}
+            Love
           </span>
-          . <span className="text-sm">~Sophocles</span>
+          .{`"`} <span className="text-sm ml-[2px]">~Sophocles</span>
         </p>
       </div>
     </div>

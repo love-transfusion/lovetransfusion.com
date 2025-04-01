@@ -29,14 +29,7 @@ module.exports = {
         customInner1: 'rgba(0, 0, 0, 0.22) 0px 1px 4px inset',
       },
       fontFamily: {
-        acuminCondensedRegular: ['var(--acuminCondensedRegular)'],
-        acuminCondensedBold: ['var(--acuminCondensedBold)'],
-        acuminProRegular: ['var(--acuminProRegular)'],
-        acuminProThin: ['var(--acuminProThin)'],
-        acuminProExtraLight: ['var(--acuminProExtraLight)'],
-        acuminProLight: ['var(--acuminProLight)'],
-        acuminProMedium: ['var(--acuminProMedium)'],
-        acuminProSemibold: ['var(--acuminProSemibold)'],
+        'acumin-variable': '"acumin-variable", sans-serif',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
