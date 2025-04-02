@@ -19,7 +19,7 @@ const AboutUsPage = () => {
         </div>
         <p
           className={
-            'font-acumin-condensed text-[23px] text-primary text-center mt-[14px] mb-[22px]'
+            'font-acumin-condensed font-bold text-[23px] text-primary text-center mt-[14px] mb-[22px]'
           }
         >
           About Us
@@ -37,7 +37,7 @@ const AboutUsPage = () => {
             impact.
           </p>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-acuminProSemibold font-semibold'}>
               About This App
             </p>
             <p className={''}>
@@ -53,7 +53,7 @@ const AboutUsPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-acuminProSemibold font-semibold'}>
               Why It Matters
             </p>
             <p className={''}>
@@ -65,7 +65,9 @@ const AboutUsPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>Our Vision</p>
+            <p className={'text-primary font-acuminProSemibold font-semibold'}>
+              Our Vision
+            </p>
             <p className={''}>
               We envision a world where technology amplifies human empathy, and
               love becomes a force for healing and transformation. With every
@@ -74,7 +76,9 @@ const AboutUsPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>Join Us</p>
+            <p className={'text-primary font-acuminProSemibold font-semibold'}>
+              Join Us
+            </p>
             <p className={''}>
               Love Transfusion is more than an app; it’s a movement of love and
               hope. Whether you’re a supporter, recipient, or family member, we

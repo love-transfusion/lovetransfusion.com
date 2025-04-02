@@ -20,7 +20,7 @@ const PrivacyPage = () => {
         </div>
         <p
           className={
-            'font-acumin-condensed text-[23px] text-primary text-center mt-[14px] mb-[22px]'
+            'font-acumin-condensed font-bold text-[23px] text-primary text-center mt-[14px] mb-[22px]'
           }
         >
           Privacy Policy
@@ -30,7 +30,7 @@ const PrivacyPage = () => {
             className={''}
           >{`Love Transfusion Inc. ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your personal information when you use the Love Transfusion App ("the App"). By accessing or using the App, you agree to this Privacy Policy. If you do not agree, please do not use the App.`}</p>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               1. Information We Collect
             </p>
             <p className={''}>
@@ -39,7 +39,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               a. Personal Information
             </p>
             <p className={''}>
@@ -50,7 +50,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               b. Information About Recipients
             </p>
             <p className={''}>
@@ -62,9 +62,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
-              c. Usage Data
-            </p>
+            <p className={'text-primary font-semibold'}>c. Usage Data</p>
             <p className={''}>
               We automatically collect information about how you use the App,
               such as IP address, device type, browser type, operating system,
@@ -73,7 +71,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               2. How We Use Your Information
             </p>
             <p className={''}>
@@ -82,43 +80,41 @@ const PrivacyPage = () => {
           </div>
           <div className={'flex flex-col gap-1'}>
             <ul className="space-y-2 pl-2">
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Account Management:{' '}
                 </span>
                 To create and manage your account, verify your identity, and
                 provide you access to the App.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Service Provision:{' '}
                 </span>
                 To provide, maintain, and improve the functionality of the App,
                 including facilitating support messages to recipients.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Communication:{' '}
                 </span>
                 To send you notifications, updates, and other communications
                 regarding the App and your account.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Personalization:{' '}
                 </span>
                 To customize your experience and show you content tailored to
                 your interests.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
-                  Analytics:{' '}
-                </span>
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">Analytics: </span>
                 To analyze trends, usage, and activities in connection with the
                 App to improve the user experience.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Legal Compliance:{' '}
                 </span>
                 To comply with applicable laws, regulations, or legal
@@ -127,7 +123,7 @@ const PrivacyPage = () => {
             </ul>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               3. Sharing Your Information
             </p>
             <p className={''}>
@@ -138,8 +134,8 @@ const PrivacyPage = () => {
           </div>
           <div className={'flex flex-col gap-1'}>
             <ul className="space-y-2 pl-2">
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Service Providers:{' '}
                 </span>
                 We may share your information with trusted service providers who
@@ -148,8 +144,8 @@ const PrivacyPage = () => {
                 by confidentiality agreements and are only permitted to use your
                 information for specified purposes.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Legal Requirements:{' '}
                 </span>
                 We may disclose your information if required to do so by law or
@@ -159,9 +155,7 @@ const PrivacyPage = () => {
             </ul>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
-              4. Data Security
-            </p>
+            <p className={'text-primary font-semibold'}>4. Data Security</p>
             <p className={''}>
               We take the security of your personal information seriously and
               use industry-standard security measures to protect your data.
@@ -171,7 +165,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               {`5. Children's Privacy`}
             </p>
             <p className={''}>
@@ -184,17 +178,15 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
-              6. Your Choices
-            </p>
+            <p className={'text-primary font-semibold'}>6. Your Choices</p>
             <p className={''}>
               You have the following choices regarding your information:
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
             <ul className="space-y-2 pl-2">
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Service Providers:{' '}
                 </span>
                 We may share your information with trusted service providers who
@@ -203,16 +195,16 @@ const PrivacyPage = () => {
                 by confidentiality agreements and are only permitted to use your
                 information for specified purposes.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Access and Update:{' '}
                 </span>
                 You may access and update your account information by logging
                 into the App or contacting us at
                 lovesupport@lovetransfusion.org.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Delete Account:{' '}
                 </span>
                 You may request the deletion of your account and personal
@@ -220,8 +212,8 @@ const PrivacyPage = () => {
                 Please note that certain information may be retained for legal
                 or business purposes.
               </li>
-              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] relative">
-                <span className="font-acuminProSemibold text-primary">
+              <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
+                <span className="text-primary font-semibold">
                   Opt-Out of Communications:{' '}
                 </span>
                 You may opt out of receiving promotional emails from us by
@@ -231,9 +223,7 @@ const PrivacyPage = () => {
             </ul>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
-              7. Third-Party Links
-            </p>
+            <p className={'text-primary font-semibold'}>7. Third-Party Links</p>
             <p className={''}>
               The App may contain links to third-party websites or services that
               are not operated by us. This Privacy Policy does not apply to
@@ -242,7 +232,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               8. International Users
             </p>
             <p className={''}>
@@ -255,7 +245,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
+            <p className={'text-primary font-semibold'}>
               9. Changes to This Privacy Policy
             </p>
             <p className={''}>
@@ -268,9 +258,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-acuminProSemibold'}>
-              10. Contact Us
-            </p>
+            <p className={'text-primary font-semibold'}>10. Contact Us</p>
             <p className={''}>
               If you have any questions about this Privacy Policy, please
               contact us at{' '}

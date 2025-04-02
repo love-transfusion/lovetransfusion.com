@@ -28,7 +28,7 @@ const ContactInformation = ({
       {!clDisableHelpCenter && (
         <p
           className={
-            'font-acumin-condensed text-primary-200 text-[30px] mb-4 leading-tight -mt-[1px]'
+            'font-acumin-condensed font-bold text-[#b3d8f3] text-[30px] mb-4 leading-tight -mt-[1px]'
           }
         >
           HELP CENTER
@@ -37,7 +37,7 @@ const ContactInformation = ({
       <Image src={ltLogoColored} alt="Love Transfusion logo" quality={100} />
       <p
         className={
-          'font-acumin-condensed text-primary text-[22px] leading-tight mt-[15px]'
+          'font-acumin-condensed font-bold text-primary text-[22px] leading-tight mt-[15px]'
         }
       >
         Love Transfusion Inc.
