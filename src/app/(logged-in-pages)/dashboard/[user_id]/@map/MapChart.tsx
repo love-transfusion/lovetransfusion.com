@@ -85,7 +85,6 @@ const MapChart = ({ mappedData }: I_MapChart) => {
     (deviceSize === '3xl' && '500px') ||
     (deviceSize === 'sm' && '170px') ||
     '370px'
-  console.log({ deviceSize , mapHeight})
   return (
     <ReactECharts
       option={option}

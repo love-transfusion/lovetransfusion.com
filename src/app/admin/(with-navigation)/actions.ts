@@ -61,3 +61,19 @@ export const fetchDataFromLTOrg = async (body: I_getDataFromLTOrg | string) => {
     .then((data) => data) // Log the response
     .catch((error) => console.error('Error:', error))
 }
+export const supa_admin_search_recipient = async (clSearchKeyword: string) => {
+  const supabase = await createAdmin()
+  const { data, error } = await supabase
+    .from('users_data_website')
+    .select()
+    .or(
+      `recipient->>first_name.ilike.${
+        clSearchKeyword ?? ''
+      },recipient->>id.eq.${
+        clSearchKeyword ?? ''
+      },recipient->>parent_name.ilike.Doe,recipient->>email.ilike.${
+        clSearchKeyword ?? ''
+      }`
+    )
+  return { data, error: error?.message ?? null }
+}

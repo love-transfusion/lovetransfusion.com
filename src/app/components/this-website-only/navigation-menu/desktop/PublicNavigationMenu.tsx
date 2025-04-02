@@ -65,7 +65,7 @@ const PublicNavigationMenu = ({
                     clUser
                       ? clIsAdmin
                         ? 'Admin'
-                        : clUser.users_data_website[0].recipient?.first_name
+                        : clUser.users_data_website[0].recipient.first_name
                       : 'Login'
                   }`}
                 </p>

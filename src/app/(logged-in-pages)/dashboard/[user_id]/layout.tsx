@@ -39,7 +39,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   return (
     <div className="">
       <WelcomeMessage />
-      <SlidingSupportersName />
+      <SlidingSupportersName clRecipient={recipientObj} />
       {/* Profile and Map Section */}
       <div
         className={

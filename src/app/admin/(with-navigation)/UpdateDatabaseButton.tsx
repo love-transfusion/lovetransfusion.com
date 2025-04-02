@@ -38,13 +38,12 @@ const UpdateButton = () => {
   return (
     <Button
       clDisabled={isLoading}
-      className={`-mb-[6px] min-w-[154px] ${
-        isLoading &&
-        'bg-neutral-300 hover:bg-neutral-300 border-neutral-400'
+      className={`-mb-[6px] md:min-w-[154px] ${
+        isLoading && 'bg-neutral-300 hover:bg-neutral-300 border-neutral-400'
       }`}
       onClick={handleClick}
     >
-      {isLoading ? 'Syncing' : 'Sync Database'}
+      {isLoading ? 'Syncing' : 'Sync'}
     </Button>
   )
 }

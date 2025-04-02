@@ -2,9 +2,7 @@ import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import Icon_left from '@/app/components/icons/Icon_left'
 import Icon_refresh from '@/app/components/icons/Icon_refresh'
 import Icon_right from '@/app/components/icons/Icon_right'
-import Icon_search from '@/app/components/icons/Icon_search'
 import Icon_trash from '@/app/components/icons/Icon_trash'
-import Input from '@/app/components/inputs/basic-input/Input'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
 import Engagements from './Engagements'
@@ -13,6 +11,7 @@ import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
 import { supa_admin_select_paginated_recipients } from './[recipient]/actions'
 import Icon_edit from '@/app/components/icons/Icon_edit'
+import SearchInput from './SearchInput'
 
 const AdminDashboard = async () => {
   const user = await getCurrentUser()
@@ -30,13 +29,7 @@ const AdminDashboard = async () => {
         >
           <p className={'text-2xl md:text-[32px] font-bold'}>User Management</p>
           <div className={'flex gap-2 items-center'}>
-            <Input
-              clPlaceholder="Search..."
-              clVariant="input2"
-              clLeftIcon={<Icon_search />}
-              clIconClassName="text-neutral-400"
-              className="shadow-inner"
-            />
+            <SearchInput />
             <UpdateButton />
           </div>
         </div>
