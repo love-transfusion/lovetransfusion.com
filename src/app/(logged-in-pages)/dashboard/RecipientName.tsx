@@ -13,8 +13,8 @@ const RecipientName = () => {
             '2xl:text-xl text-[#ffffffad] flex gap-[10px] 2xl:pl-[110px]'
           }
         >
-          <p className={''}>RECIPIENT:</p>
-          <p className="font-acuminProMedium tracking-[0.5px]">
+          <p className={'font-light'}>RECIPIENT:</p>
+          <p className="font-medium tracking-[0.5px]">
             {userInStore.first_name}
           </p>
         </div>

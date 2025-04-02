@@ -46,18 +46,17 @@ const MessagesSection = ({ clRecipientObj, clUser_id }: I_Messages) => {
                 'bg-gradient-to-r p-3 rounded-[4px] from-[#2F8EDD] to-[#2FA2DD]'
               }
             >
-              <p className={'font-acuminProSemibold'}>PARENTS:</p>
+              <p className={'font-semibold'}>PARENTS:</p>
               <div className={'flex flex-col gap-2'}>
                 <p className={''}>
-                  You have full{' '}
-                  <span className="font-acuminProSemibold">control</span> over
+                  You have <span className="font-bold">full control</span> over
                   messages.
                 </p>
                 <p className={''}>
                   They are all displayed by default, however, you may hide them{' '}
-                  <span className="font-acuminProSemibold">individually</span>{' '}
-                  or hide <span className="font-acuminProSemibold">all</span>{' '}
-                  messages using the toggle switch above.
+                  <span className="font-bold">individually</span> or hide{' '}
+                  <span className="font-bold">all</span> messages using the
+                  toggle switch above.
                 </p>
               </div>
             </div>

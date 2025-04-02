@@ -10,12 +10,16 @@ import register from '@/app/images/homepage/Register.svg'
 import PublicNavigationMenu from './components/this-website-only/navigation-menu/desktop/PublicNavigationMenu'
 import PublicFooter from './components/this-website-only/footer/PublicFooter'
 import Link from 'next/link'
+import { getCurrentUser } from './config/supabase/getCurrentUser'
+import { isAdmin } from './lib/adminCheck'
 
-const Homepage = () => {
+const Homepage = async () => {
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role })
   return (
     <>
       {/* Navigation Menu 2 */}
-      <PublicNavigationMenu />
+      <PublicNavigationMenu clUser={user} clIsAdmin={isadmin} />
       {/* Section 2 */}
       <div
         className={
@@ -52,7 +56,9 @@ const Homepage = () => {
                 containerStyle="shadow-lg bg-[#3082C4]"
               />
             </div>
-            <div className={'flex flex-col max-w-[235px]'}>
+            <div
+              className={'flex flex-col max-w-[235px] mx-auto md:mx-[unset]'}
+            >
               <div className={'relative mt-[1px] w-fit mx-auto'}>
                 <Image
                   src={child}

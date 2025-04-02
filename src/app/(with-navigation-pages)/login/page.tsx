@@ -8,12 +8,12 @@ const LoginPage = () => {
         <div className={'md:max-w-[440px] mx-auto mb-[25px] px-5'}>
           <p
             className={
-              'text-2xl md:text-[35px] font-acumin-condensed text-primary leading-tight'
+              'text-2xl md:text-[35px] font-acumin-condensed font-bold text-primary leading-tight'
             }
           >
             Welcome To Love Transfusion!
           </p>
-          <p className={'text-lg md:text-xl text-[#999] mt-[3px]'}>
+          <p className={'text-lg md:text-xl font-acumin-semi-condensed font-semibold text-[#999] mt-[3px]'}>
             Log into your account...
           </p>
         </div>
@@ -25,16 +25,16 @@ const LoginPage = () => {
           <LoginForm />
         </div>
         <p className={'italic text-primary text-lg text-center mt-[48px]'}>
-            {`"`}One word frees us of all the weight and pain in life. That word
-            is
-            <span
-              className={`relative before:absolute before:bottom-[15px] before:left-1 before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
-            >
-              {' '}
-              Love
-            </span>
-            .{`"`} <span className="text-sm ml-[2px]">~Sophocles</span>
-          </p>
+          {`"`}One word frees us of all the weight and pain in life. That word
+          is
+          <span
+            className={`relative before:absolute before:bottom-[15px] before:left-1 before:w-9 before:h-[3px] before:content-[url('/images/underline.svg')]`}
+          >
+            {' '}
+            Love
+          </span>
+          .{`"`} <span className="text-sm ml-[2px]">~Sophocles</span>
+        </p>
       </div>
     </div>
   )

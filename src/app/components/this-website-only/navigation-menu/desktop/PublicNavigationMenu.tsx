@@ -5,7 +5,15 @@ import Link from 'next/link'
 import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 
-const PublicNavigationMenu = () => {
+interface I_PublicNavigationMenu {
+  clUser: I_User | null | undefined
+  clIsAdmin: boolean
+}
+
+const PublicNavigationMenu = ({
+  clUser,
+  clIsAdmin,
+}: I_PublicNavigationMenu) => {
   return (
     <div
       className={
@@ -53,7 +61,13 @@ const PublicNavigationMenu = () => {
             >
               <div className={'flex items-center divide-opacity-50'}>
                 <p className={'pl-6 pr-[17px] text-sm font-acumin-variable'}>
-                  Login
+                  {`${
+                    clUser
+                      ? clIsAdmin
+                        ? 'Admin'
+                        : clUser.users_data_website[0].recipient?.first_name
+                      : 'Login'
+                  }`}
                 </p>
                 <span className={'text-[#DFEEFA8F]'}>|</span>
                 <div className={'pl-[15px]'}>

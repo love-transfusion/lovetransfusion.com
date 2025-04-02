@@ -2,7 +2,8 @@
 
 import { createServer } from './supabaseServer'
 
-export const getCurrentUser = async () => {
+
+export const getCurrentUser = async (): Promise<I_User | null | undefined> => {
   // { users_stripe_subscriptions: true }
   const supabase = await createServer()
   const {
@@ -14,7 +15,7 @@ export const getCurrentUser = async () => {
     // Return default
     const { data, error: userError } = await supabase
       .from('users')
-      .select('*')
+      .select('*, users_data_website(*)')
       .eq('id', user.id)
     return { data, error: userError?.message ?? null }
   }

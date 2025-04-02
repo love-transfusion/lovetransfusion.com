@@ -6,6 +6,8 @@ import Image from 'next/image'
 import Icon_menu from '../components/icons/Icon_menu'
 import PublicFooter from '../components/this-website-only/footer/PublicFooter'
 import RecipientName from './dashboard/RecipientName'
+import { getCurrentUser } from '../config/supabase/getCurrentUser'
+import { isAdmin } from '../lib/adminCheck'
 
 // interface I_MembersLayout
 
@@ -15,6 +17,8 @@ const UserIDLayout = async ({
   children: React.ReactNode
   params: Promise<{ user_id: string }>
 }) => {
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role })
   return (
     <>
       <div
@@ -22,7 +26,7 @@ const UserIDLayout = async ({
           'grid grid-cols-1 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
         }
       >
-        <NavigationMenu />
+        <NavigationMenu clIsAdmin={isadmin} />
         <div className="h-full flex flex-col w-full">
           <div
             className={

@@ -2,6 +2,7 @@ import { analyticsdata_v1beta } from 'googleapis'
 import { Database as DB } from './database.types'
 import { Database as orgDB } from './ltorgDatabase.types'
 import { UUID } from './utils.types'
+import { User } from '@supabase/supabase-js'
 
 interface extended_supaorg_recipient extends I_supaorg_recipient {
   profile_picture: {
@@ -16,12 +17,17 @@ interface extended_supaorg_recipient extends I_supaorg_recipient {
 
 declare global {
   // users_data_website table
+
   type I_supa_users_data_website_insert =
     DB['public']['Tables']['users_data_website']['Insert']
   type I_supa_users_data_website_update =
     DB['public']['Tables']['users_data_website']['Update']
-  type I_supa_users_data_website_row =
+  type I_supa_unextended_users_data_website_row =
     DB['public']['Tables']['users_data_website']['Row']
+  interface I_supa_users_data_website_row
+    extends Omit<I_supa_unextended_users_data_website_row, 'recipient'> {
+    recipient: jsonb
+  }
 
   // receipients_deleted_messages table
   type I_supa_receipients_deleted_messages_insert =
@@ -41,6 +47,11 @@ declare global {
 
   // Utilities
   type UUID = `${string}-${string}-${string}-${string}-${string}`
+
+  interface I_User extends User {
+    role: I_supa_enumTypes_role
+    users_data_website: I_supa_users_data_website_row[]
+  }
 
   type I_AnalyticsData = analyticsdata_v1beta.Schema$RunReportResponse
 

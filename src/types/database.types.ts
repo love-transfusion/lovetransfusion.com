@@ -50,34 +50,34 @@ export type Database = {
           avatar: string | null
           created_at: string
           display_name: string | null
-          email: string | null
+          email: string
           first_name: string | null
           id: string
           last_name: string | null
           parent_name: string | null
-          role: Database["public"]["Enums"]["role"] | null
+          role: Database["public"]["Enums"]["role"]
         }
         Insert: {
           avatar?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
+          email: string
           first_name?: string | null
           id: string
           last_name?: string | null
           parent_name?: string | null
-          role?: Database["public"]["Enums"]["role"] | null
+          role?: Database["public"]["Enums"]["role"]
         }
         Update: {
           avatar?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
+          email?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
           parent_name?: string | null
-          role?: Database["public"]["Enums"]["role"] | null
+          role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
       }

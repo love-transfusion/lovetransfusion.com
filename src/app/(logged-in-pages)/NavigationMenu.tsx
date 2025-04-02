@@ -10,11 +10,11 @@ import Link from 'next/link'
 import SignoutContainerComponent from '../(auth)/signout/SignoutContainerComponent'
 import SubMenu from './SubMenu'
 
-// interface I_NavigationMenu {
-//   clRecipientRow: I_supa_users_data_website_row
-// }
+interface I_NavigationMenu {
+  clIsAdmin: boolean
+}
 
-const NavigationMenu = () => {
+const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
   const getFormattedDate = (): string => {
     const today: Date = new Date()
     const options: Intl.DateTimeFormatOptions = {
@@ -33,7 +33,7 @@ const NavigationMenu = () => {
         <div className={'bg-[#2F8EDD] h-[84px]'} />
         <div
           className={
-            'bg-gradient-to-b from-[#2F8EDD] to-[#2FBADD] px-5 h-[calc(100%-20px)] text-[#DFEEFA] font-acumin-semi-condensed pb-10'
+            'bg-[linear-gradient(rgb(47,142,221)_0%,rgb(47,157,221)_33%,rgb(47,171,221)_69%,rgb(47,186,221)_97%)] px-5 h-[calc(100%-20px)] text-[#DFEEFA] font-acumin-semi-condensed pb-10'
           }
         >
           <div className={'text-[#E9F5FE] text-center -mt-[64px]'}>
@@ -43,18 +43,14 @@ const NavigationMenu = () => {
               quality={100}
               className="mx-auto"
             />
-            <p
-              className={'text-2xl font-acuminProMedium mt-[14px] text-nowrap'}
-            >
-              LOVE TRANSFUSION
-            </p>
+            <p className={'text-2xl mt-[14px] text-nowrap'}>LOVE TRANSFUSION</p>
             <p className={'mt-[2px] mb-[19px]'}>Support Platform</p>
             <p className={'border-y border-[#92CCED] py-1 text-lg'}>
               {/* March 13, 2025 */}
               {getFormattedDate()}
             </p>
           </div>
-          <SubMenu />
+          <SubMenu clIsAdmin={clIsAdmin} />
           <div className={'mt-[60px] flex flex-col gap-[5px]'}>
             <p className={'text-[#DFEEFA8F] mb-[13px]'}>HELP & SUPPORT</p>
             <Link href={'/help-center'}>

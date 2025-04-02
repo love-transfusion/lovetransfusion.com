@@ -8,7 +8,7 @@ export const isAdmin = ({
   clThrowIfUnauthorized?: boolean
 }) => {
   // user object: containing "role" example ("super_admin")
-  if (!clRole) return
+  if (!clRole) return false
   const admin = ['admin']
   const isAdmin = admin.includes(clRole)
   if (clThrowIfUnauthorized && !isAdmin) notFound()
