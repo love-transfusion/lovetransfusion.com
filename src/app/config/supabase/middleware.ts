@@ -1,8 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
+import { AuthError } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServer } from './supabaseServer'
+
+async function handleAuthError(error: AuthError, request: NextRequest) {
+  if (error.message === 'Invalid Refresh Token: Refresh Token Not Found') {
+    // Sign out the user
+    const supabase = await createServer()
+    await supabase.auth.signOut()
+
+    // Redirect to login page
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+  return null // No action needed for other errors
+}
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -22,11 +36,6 @@ export async function updateSession(request: NextRequest) {
             value,
             ...options,
           })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({
             name,
             value,
@@ -38,11 +47,6 @@ export async function updateSession(request: NextRequest) {
             name,
             value: '',
             ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
           })
           response.cookies.set({
             name,
@@ -57,7 +61,17 @@ export async function updateSession(request: NextRequest) {
   // refreshing the auth token
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
+
+  // Handle authentication errors
+  if (error) {
+    const redirectResponse = await handleAuthError(error, request)
+    if (redirectResponse) {
+      return redirectResponse // Return the redirect response if an error was handled
+    }
+  }
+
   const url = new URL(request.url)
 
   if (user) {

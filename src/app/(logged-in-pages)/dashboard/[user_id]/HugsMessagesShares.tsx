@@ -8,7 +8,7 @@ import ripple from './images/ripple.png'
 import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
 
 interface I_HugsMessagesShares {
-  clRecipientObj: I_supaorg_recipient
+  clRecipientObj: I_supaorg_recipient_hugs_counters_comments
 }
 
 const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {

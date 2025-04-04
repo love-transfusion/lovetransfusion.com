@@ -2,27 +2,43 @@
 import { useEffect, useState } from 'react'
 
 interface I_DeviceSize {
-  deviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
+  clDeviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
+  clWindowWidth: number
+  clWindowHeight: number
 }
 
-const useDeviceSize = (): I_DeviceSize['deviceSize'] => {
-  const [deviceSize, setdeviceSize] = useState<
-    I_DeviceSize['deviceSize'] | null
-  >(null)
+const useDeviceSize = (): {
+  clDeviceSize: I_DeviceSize['clDeviceSize']
+  clWindowWidth: number
+  clWindowHeight: number
+} => {
+  const [clDeviceSize, setdeviceSize] = useState<I_DeviceSize>({
+    clDeviceSize: null,
+    clWindowWidth: 0,
+    clWindowHeight: 0,
+  })
+
+  const setValues = (size: I_DeviceSize['clDeviceSize']) => {
+    setdeviceSize({
+      clDeviceSize: size,
+      clWindowHeight: window.innerHeight,
+      clWindowWidth: window.innerWidth,
+    })
+  }
 
   const updateDeviceSize = () => {
     if (window.innerWidth <= 767) {
-      setdeviceSize('sm')
+      setValues('sm')
     } else if (window.innerWidth >= 768 && window.innerWidth <= 1023) {
-      setdeviceSize('md')
+      setValues('md')
     } else if (window.innerWidth >= 1024 && window.innerWidth <= 1279) {
-      setdeviceSize('lg')
+      setValues('lg')
     } else if (window.innerWidth >= 1280 && window.innerWidth <= 1535) {
-      setdeviceSize('xl')
+      setValues('xl')
     } else if (window.innerWidth >= 1536 && window.innerWidth <= 1920) {
-      setdeviceSize('2xl')
+      setValues('2xl')
     } else if (window.innerWidth >= 1930) {
-      setdeviceSize('3xl')
+      setValues('3xl')
     }
   }
 
@@ -33,8 +49,9 @@ const useDeviceSize = (): I_DeviceSize['deviceSize'] => {
     return () => {
       window.removeEventListener('resize', updateDeviceSize)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  return deviceSize
+  return clDeviceSize
 }
 
 export default useDeviceSize

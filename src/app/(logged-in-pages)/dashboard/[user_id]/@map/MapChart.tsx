@@ -12,8 +12,7 @@ type I_Parameters = [number, number, number, number, number] // [lon, lat, views
 
 const MapChart = ({ mappedData }: I_MapChart) => {
   const [option, setOption] = useState({})
-  const deviceSize = useDeviceSize()
-
+  const { clDeviceSize, clWindowWidth } = useDeviceSize()
   useEffect(() => {
     fetch('/maps/world.json')
       .then((res) => res.json())
@@ -81,9 +80,9 @@ const MapChart = ({ mappedData }: I_MapChart) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const mapHeight =
-    (deviceSize === '3xl' && '500px') ||
-    (deviceSize === 'sm' && '170px') ||
+  const mapHeight = (clWindowWidth >= 2400 && '650px') ||
+    (clWindowWidth >= 2000 && '600px') || (clWindowWidth >= 1800 && '480px') ||
+    (clDeviceSize === 'sm' && '170px') ||
     '370px'
   return (
     <ReactECharts
