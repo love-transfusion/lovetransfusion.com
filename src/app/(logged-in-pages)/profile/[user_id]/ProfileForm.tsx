@@ -14,7 +14,7 @@ export interface I_ProfileForm {
   recipientName: string
   fullName: string
   email: string
-  birthday?: Date
+  birthday?: string
 }
 
 const ProfileForm = ({ user }: { user: I_supa_users_row }) => {
@@ -29,6 +29,7 @@ const ProfileForm = ({ user }: { user: I_supa_users_row }) => {
         recipientName: util_capitalize(user.recipient_name ?? ''),
         fullName: util_capitalize(user.parent_name ?? ''),
         email: user.email ?? '',
+        birthday: user.birthday ? user.birthday.slice(0, 10) : '',
       }
     },
   })
@@ -41,7 +42,7 @@ const ProfileForm = ({ user }: { user: I_supa_users_row }) => {
       recipient_name: rawData.recipientName,
       parent_name: rawData.fullName,
       birthday: rawData.birthday
-        ? util_formatDateToUTCString(rawData.birthday)
+        ? util_formatDateToUTCString(new Date(rawData.birthday))
         : null,
     })
     if (error) {

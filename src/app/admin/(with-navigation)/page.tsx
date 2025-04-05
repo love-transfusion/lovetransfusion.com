@@ -12,6 +12,7 @@ import Icon_edit from '@/app/components/icons/Icon_edit'
 import SearchInput from './SearchInput'
 import { supa_select_paginated_recipients } from '@/app/_actions/users_data_website/actions'
 import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
+import ResetUserInStore from './ResetUserInStore'
 
 interface I_combineddata extends I_supa_users_data_website_row {
   user: I_supa_users_row | null
@@ -164,6 +165,7 @@ const AdminDashboard = async () => {
           </div>
         </div>
       </div>
+      <ResetUserInStore />
     </>
   )
 }
