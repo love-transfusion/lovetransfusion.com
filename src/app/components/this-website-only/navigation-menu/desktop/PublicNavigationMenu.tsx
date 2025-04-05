@@ -14,6 +14,7 @@ const PublicNavigationMenu = ({
   clUser,
   clIsAdmin,
 }: I_PublicNavigationMenu) => {
+  console.log({ clUser, clIsAdmin })
   return (
     <div
       className={
@@ -65,7 +66,8 @@ const PublicNavigationMenu = ({
                     clUser
                       ? clIsAdmin
                         ? 'Admin'
-                        : clUser.users_data_website[0].recipient.first_name
+                        : clUser.users_data_website.length > 0 &&
+                          clUser.users_data_website[0].recipient.first_name
                       : 'Login'
                   }`}
                 </p>
