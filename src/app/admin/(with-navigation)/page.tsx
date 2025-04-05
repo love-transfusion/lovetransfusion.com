@@ -6,18 +6,34 @@ import Icon_trash from '@/app/components/icons/Icon_trash'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
 import Engagements from './Engagements'
-// import { fetchDataFromLTOrg } from './actions'
 import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
-import { supa_admin_select_paginated_recipients } from './[recipient]/actions'
 import Icon_edit from '@/app/components/icons/Icon_edit'
 import SearchInput from './SearchInput'
+import { supa_select_paginated_recipients } from '@/app/_actions/users_data_website/actions'
+import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
+
+interface I_combineddata extends I_supa_users_data_website_row {
+  user: I_supa_users_row | null
+}
 
 const AdminDashboard = async () => {
   const user = await getCurrentUser()
   isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
+  const { data: comRecipients } = await supa_select_paginated_recipients()
 
-  const { data: comRecipients } = await supa_admin_select_paginated_recipients()
+  const IDs = comRecipients
+    .map((item) => item.user_id)
+    .filter((item): item is string => Boolean(item))
+
+  const { data: listOfusers } = await supa_admin_search_multiple_users(IDs)
+
+  const combinedData: I_combineddata[] = comRecipients.map((item) => {
+    return {
+      ...item,
+      user: listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
+    }
+  })
 
   return (
     <>
@@ -43,12 +59,13 @@ const AdminDashboard = async () => {
                   <td className="px-3 min-w-[140px] py-2">Recipient Name </td>
                   <td className="px-3 min-w-[140px] py-2">Relationship</td>
                   <td className="px-3 min-w-[140px] py-2">Date Submitted</td>
+                  <td className="px-3 min-w-[140px] py-2">Birthday</td>
                   <td className="px-3 min-w-[140px] py-2">Engagements</td>
                   <td className="px-3 min-w-[140px] py-2">Actions</td>
                 </tr>
               </thead>
               <tbody>
-                {comRecipients
+                {combinedData
                   .sort((a, b) => {
                     const recA = a.recipient as unknown
                     const recB = b.recipient as unknown
@@ -76,7 +93,10 @@ const AdminDashboard = async () => {
                           <p className={''}>{recipient.email}</p>
                         </td>
                         <td className="py-[6px] px-3">
-                          <p className={''}>{recipient.first_name}</p>
+                          <p className={'capitalize'}>
+                            {comRecipient.user?.recipient_name ??
+                              recipient.first_name}
+                          </p>
                         </td>
                         <td className="py-[6px] px-3">
                           <p className={''}>{recipient.relationship}</p>
@@ -86,6 +106,15 @@ const AdminDashboard = async () => {
                             {new Date(
                               recipient.created_at
                             ).toLocaleDateString()}
+                          </p>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <p className={''}>
+                            {comRecipient.user?.birthday
+                              ? new Date(
+                                  comRecipient.user?.birthday
+                                ).toLocaleDateString()
+                              : '-'}
                           </p>
                         </td>
                         <td className="py-[6px] px-3">
@@ -107,7 +136,9 @@ const AdminDashboard = async () => {
                                 <Icon_eyes className="size-5 text-primary" />
                               )}
                             </Link>
-                            <Icon_trash className="size-5 text-red-500" />
+                            {comRecipient.user_id && (
+                              <Icon_trash className="size-5 text-red-500" />
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -1,9 +1,9 @@
 import React from 'react'
-import { supa_select_recipient } from '../actions'
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import { mapAnalyticsToGeoPoints } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
 import MapChart from './MapChart'
+import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 
 type Params = Promise<{ user_id: string }>
 

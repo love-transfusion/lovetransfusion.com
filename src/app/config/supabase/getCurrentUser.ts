@@ -2,12 +2,11 @@
 
 import { createServer } from './supabaseServer'
 
-
 export const getCurrentUser = async (): Promise<I_User | null | undefined> => {
   // { users_stripe_subscriptions: true }
   const supabase = await createServer()
   const {
-    data: { user },
+    data: { user }
   } = await supabase.auth.getUser()
 
   if (!user) return null

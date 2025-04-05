@@ -2,10 +2,10 @@
 import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import React, { useState } from 'react'
-import { supa_admin_create_account } from '../actions'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import { supa_admin_update_recipient_website } from './actions'
+import { supa_admin_create_account } from '@/app/_actions/admin/actions'
 
 const CreateAccountButton = ({
   uuid,
@@ -23,6 +23,8 @@ const CreateAccountButton = ({
     const { data, error } = await supa_admin_create_account({
       email: orgRecipient.email,
       parent_name: orgRecipient.parent_name!,
+      recipient_name: orgRecipient.first_name!,
+      recipient_id: orgRecipient.id,
     })
     if (!error && data) {
       // update users_data_website table

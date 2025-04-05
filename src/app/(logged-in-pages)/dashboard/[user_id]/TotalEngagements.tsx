@@ -3,8 +3,8 @@ import Image from 'next/image'
 import React, { useEffect } from 'react'
 import ripple from './images/ripple.png'
 import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
-import { useStore } from 'zustand'
-import utilityStore from '@/app/utilities/store/utilityStore'
+// import { useStore } from 'zustand'
+// import utilityStore from '@/app/utilities/store/utilityStore'
 
 interface I_TotalEngagements {
   clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
@@ -15,16 +15,16 @@ const TotalEngagements = ({
   clRecipientOBj,
   clUserAccount,
 }: I_TotalEngagements) => {
-  const { setuserInStore } = useStore(utilityStore)
+  // const { setuserInStore } = useStore(utilityStore)
   const { total } = useEngagementsFromWeb(clRecipientOBj)
   useEffect(() => {
     if (clRecipientOBj && clUserAccount) {
-      setuserInStore({
-        id: clUserAccount.user_id ?? '',
-        first_name: clRecipientOBj.first_name ?? '',
-        parent_name: clRecipientOBj.parent_name ?? '',
-        recipient_id: clRecipientOBj.id,
-      })
+      // setuserInStore({
+      //   id: clUserAccount.user_id ?? '',
+      //   first_name: clRecipientOBj.first_name ?? '',
+      //   parent_name: clRecipientOBj.parent_name ?? '',
+      //   recipient_id: clRecipientOBj.id,
+      // })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -14,7 +14,6 @@ const PublicNavigationMenu = ({
   clUser,
   clIsAdmin,
 }: I_PublicNavigationMenu) => {
-  console.log({ clUser, clIsAdmin })
   return (
     <div
       className={

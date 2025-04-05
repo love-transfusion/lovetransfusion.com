@@ -1,12 +1,10 @@
 'use client'
 import Button from '@/app/components/Button/Button'
 import React, { useState } from 'react'
-import {
-  fetchDataFromLTOrg,
-  supa_admin_upsert_list_of_recipients,
-} from './actions'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
+import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import { supa_admin_upsert_list_of_recipients } from '@/app/_actions/admin/actions'
 
 type I_data =
   | {

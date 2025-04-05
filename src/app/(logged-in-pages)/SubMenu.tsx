@@ -30,7 +30,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
           </div>
         </Link>
       )}
-      <Link href={`/dashboard/${userInStore?.id}`}>
+      <Link href={`/dashboard/${userInStore?.id}`} scroll={true}>
         <div
           className={
             'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'
@@ -45,7 +45,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
           <p className={''}>Dashboard</p>
         </div>
       </Link>
-      <Link href={'/#'}>
+      <Link href={userInStore?.id ? `/profile/${userInStore?.id}` : ''}>
         <div
           className={
             'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'

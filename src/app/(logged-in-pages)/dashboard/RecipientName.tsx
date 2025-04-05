@@ -19,11 +19,13 @@ const RecipientName = () => {
           </p>
         </div>
       ) : (
-        <div
-          className={
-            'w-[100px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
-          }
-        />
+        <div className={'flex w-full justify-end'}>
+          <div
+            className={
+              'w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
+            }
+          />
+        </div>
       )}
     </>
   )

@@ -7,8 +7,10 @@ import MostRecentEngagements from './MostRecentEngagements'
 import HugsMessagesShares from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
-import { filter_comments, supa_select_recipient } from './actions'
+import { filter_comments } from './actions'
 import MessagesSection from './MessagesSection'
+import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
+import { supa_select_user } from '@/app/_actions/users/actions'
 // import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 // import { redirect } from 'next/navigation'
 
@@ -28,6 +30,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   //   redirect('/admin')
   // }
   const { data: recipientRow } = await supa_select_recipient(user_id)
+  const { data: selectedUser } = await supa_select_user(user_id)
   if (!recipientRow) return
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
@@ -58,7 +61,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
                 'font-acuminProSemibold text-[22px] md:text-[26px] text-primary'
               }
             >
-              {recipientObj.first_name}
+              {selectedUser?.recipient_name}
             </p>
             <p className={'text-primary-200 md:text-xl'}>RECIPIENT</p>
           </div>

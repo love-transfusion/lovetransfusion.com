@@ -3,10 +3,10 @@ import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { supa_update_password_action } from './actions'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import PasswordField from '../login/PasswordField'
+import { supa_update_password_action } from '@/app/_actions/authentication/actions'
 
 interface I_password {
   password: string

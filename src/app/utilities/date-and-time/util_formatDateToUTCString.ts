@@ -1,4 +1,4 @@
-export const formatDateToUTCString = (paramDate: Date) => {
+export const util_formatDateToUTCString = (paramDate: Date) => {
   const date = new Date(paramDate)
   const year = date.getUTCFullYear()
   const month = String(date.getUTCMonth() + 1).padStart(2, '0') // Pad month for single digit

@@ -1,7 +1,7 @@
-import { fetchDataFromLTOrg } from '@/app/admin/(with-navigation)/actions'
 import React from 'react'
-import { supa_select_recipient } from '../actions'
 import ClientUpdate from './ClientUpdate'
+import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 
 type Params = Promise<{ user_id: string }>
 

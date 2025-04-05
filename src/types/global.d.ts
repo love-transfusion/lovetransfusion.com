@@ -48,7 +48,7 @@ declare global {
   // Utilities
   type UUID = `${string}-${string}-${string}-${string}-${string}`
 
-  interface I_User extends User {
+  interface I_User extends User, I_supa_users_row {
     role: I_supa_enumTypes_role
     users_data_website: I_supa_users_data_website_row[]
   }

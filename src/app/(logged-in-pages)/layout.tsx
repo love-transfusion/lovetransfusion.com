@@ -8,6 +8,7 @@ import PublicFooter from '../components/this-website-only/footer/PublicFooter'
 import RecipientName from './dashboard/RecipientName'
 import { getCurrentUser } from '../config/supabase/getCurrentUser'
 import { isAdmin } from '../lib/adminCheck'
+import SetStore from './SetStore'
 
 // interface I_MembersLayout
 
@@ -77,6 +78,7 @@ const UserIDLayout = async ({
           </div>
         </div>
       </div>
+      <SetStore />
       <PublicFooter />
     </>
   )

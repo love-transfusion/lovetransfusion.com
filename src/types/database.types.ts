@@ -48,6 +48,7 @@ export type Database = {
       users: {
         Row: {
           avatar: string | null
+          birthday: string | null
           created_at: string
           display_name: string | null
           email: string
@@ -55,10 +56,13 @@ export type Database = {
           id: string
           last_name: string | null
           parent_name: string | null
+          recipient_id: string | null
+          recipient_name: string | null
           role: Database["public"]["Enums"]["role"]
         }
         Insert: {
           avatar?: string | null
+          birthday?: string | null
           created_at?: string
           display_name?: string | null
           email: string
@@ -66,10 +70,13 @@ export type Database = {
           id: string
           last_name?: string | null
           parent_name?: string | null
+          recipient_id?: string | null
+          recipient_name?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Update: {
           avatar?: string | null
+          birthday?: string | null
           created_at?: string
           display_name?: string | null
           email?: string
@@ -77,6 +84,8 @@ export type Database = {
           id?: string
           last_name?: string | null
           parent_name?: string | null
+          recipient_id?: string | null
+          recipient_name?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
@@ -121,7 +130,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       role: "admin" | "basic" | "manager"

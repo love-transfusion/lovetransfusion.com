@@ -2,8 +2,8 @@
 import Icon_search from '@/app/components/icons/Icon_search'
 import Input from '@/app/components/inputs/basic-input/Input'
 import React, { useState } from 'react'
-import { supa_admin_search_recipient } from './actions'
 import Icon_spinner from '@/app/components/icons/Icon_spinner'
+import { supa_admin_search_recipient } from '@/app/_actions/admin/actions'
 
 const SearchInput = () => {
   const [isSubmitting, setisSubmitting] = useState<boolean>(false)

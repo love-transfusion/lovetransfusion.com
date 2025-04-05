@@ -1,7 +1,7 @@
 import React from 'react'
 import { twMerge } from 'tailwind-merge'
 
-interface I_Input extends React.HTMLAttributes<HTMLInputElement> {
+interface I_Input extends React.InputHTMLAttributes<HTMLInputElement> {
   clLeftIcon?: React.ReactNode
   clRightIcon?: React.ReactNode
   clPlaceholder: string
@@ -9,7 +9,7 @@ interface I_Input extends React.HTMLAttributes<HTMLInputElement> {
   clIconClassName?: string
   clContainerClassName?: string
   clVariant?: 'default' | 'input2'
-  type?: string
+  // type?: string
   clErrorMessage?: string | undefined
   clValue?: string
   clDisabled?: boolean
@@ -41,7 +41,6 @@ const Input = ({
   className,
   clDisabled,
   clVariant,
-  type,
   clValue,
   ...props
 }: I_Input) => {
@@ -72,7 +71,6 @@ const Input = ({
         {...props}
         value={clValue}
         disabled={clDisabled}
-        type={type}
         placeholder={clPlaceholder}
         className={twMerge(``, variantStyles, className)}
       />

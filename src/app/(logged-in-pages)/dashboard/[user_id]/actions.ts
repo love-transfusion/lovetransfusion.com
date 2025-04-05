@@ -7,16 +7,6 @@ export interface I_Recipient_Data {
   recipient: I_supaorg_recipient
 }
 
-export const supa_select_recipient = async (user_id: string) => {
-  const supabase = await createServer()
-  const { data, error } = await supabase
-    .from('users_data_website')
-    .select('*, receipients_deleted_messages(*)')
-    .eq('user_id', user_id)
-    .single()
-  return { data, error: error?.message ?? null }
-}
-
 export const supa_insert_deleted_messages = async (
   data: I_supa_receipients_deleted_messages_insert
 ) => {

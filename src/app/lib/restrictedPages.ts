@@ -1,5 +1,1 @@
-export const restrictedPages = [
-  '/login',
-  '/signup',
-  '/dashboard',
-]
+export const restrictedPages = ['/login', '/signup', '/dashboard', '/profile']

@@ -9,9 +9,9 @@ import twitter from './images/twitter.webp'
 import Image from 'next/image'
 import Input from '@/app/components/inputs/basic-input/Input'
 import Link from 'next/link'
-import { fetchDataFromLTOrg } from '../actions'
 import { supa_admin_select_recipient_data } from './actions'
 import CreateAccountButton from './CreateAccountButton'
+import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
 
 type Params = Promise<{ recipient: UUID }>
 
