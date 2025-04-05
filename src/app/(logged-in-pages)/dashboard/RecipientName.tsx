@@ -14,7 +14,7 @@ const RecipientName = () => {
           }
         >
           <p className={'font-light'}>RECIPIENT:</p>
-          <p className="font-medium tracking-[0.5px]">
+          <p className="font-medium tracking-[0.5px] capitalize">
             {userInStore.first_name}
           </p>
         </div>
