@@ -15,7 +15,10 @@ const MapChart = ({ mappedData }: I_MapChart) => {
   const { clDeviceSize, clWindowWidth } = useDeviceSize()
   useEffect(() => {
     fetch('/maps/world.json')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load map JSON')
+        return res.json()
+      })
       .then((worldJson) => {
         registerMap('world', worldJson) // Register map
 
@@ -80,8 +83,10 @@ const MapChart = ({ mappedData }: I_MapChart) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const mapHeight = (clWindowWidth >= 2400 && '650px') ||
-    (clWindowWidth >= 2000 && '600px') || (clWindowWidth >= 1800 && '480px') ||
+  const mapHeight =
+    (clWindowWidth >= 2400 && '650px') ||
+    (clWindowWidth >= 2000 && '600px') ||
+    (clWindowWidth >= 1800 && '480px') ||
     (clDeviceSize === 'sm' && '170px') ||
     '370px'
   return (
