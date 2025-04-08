@@ -25,12 +25,10 @@ interface I_userDashboardLayout extends Params {
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
   const { map, updateSlot } = props
-  // const user = await getCurrentUser()
-  // if (user?.id === user_id) {
-  //   redirect('/admin')
-  // }
+
   const { data: recipientRow } = await supa_select_recipient(user_id)
   const { data: selectedUser } = await supa_select_user(user_id)
+
   if (!recipientRow) return
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
@@ -54,7 +52,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-5 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4'
           }
         >
-          <RecipientProfilePicture recipientObj={recipientObj} />
+          <RecipientProfilePicture
+            recipientObj={recipientObj}
+            selectedUser={selectedUser}
+          />
           <div className={'mt-2 text-left md:text-center'}>
             <p
               className={

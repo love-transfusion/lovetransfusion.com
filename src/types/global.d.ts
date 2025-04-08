@@ -37,6 +37,14 @@ declare global {
   type I_supa_receipients_deleted_messages_row =
     DB['public']['Tables']['receipients_deleted_messages']['Row']
 
+  // profile_pictures table
+  type I_supa_profile_pictures_insert =
+    DB['public']['Tables']['profile_pictures']['Insert']
+  type I_supa_profile_pictures_update =
+    DB['public']['Tables']['profile_pictures']['Update']
+  type I_supa_profile_pictures_row_unextended =
+    DB['public']['Tables']['profile_pictures']['Row']
+
   // users table
   type I_supa_users_insert = DB['public']['Tables']['users']['Insert']
   type I_supa_users_update = DB['public']['Tables']['users']['Update']
@@ -51,6 +59,7 @@ declare global {
   interface I_User extends User, I_supa_users_row {
     role: I_supa_enumTypes_role
     users_data_website: I_supa_users_data_website_row[]
+    profile_pictures: I_supa_profile_pictures_row_unextended | null
   }
 
   type I_AnalyticsData = analyticsdata_v1beta.Schema$RunReportResponse

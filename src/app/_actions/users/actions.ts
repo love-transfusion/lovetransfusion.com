@@ -19,7 +19,7 @@ export const supa_select_user = async (user_id: string) => {
   const supabase = isadmin ? await createAdmin() : await createServer()
   const { data, error } = await supabase
     .from('users')
-    .select('*')
+    .select('*, profile_pictures(*), users_data_website(*)')
     .eq('id', user_id)
     .single()
   return { data, error: error?.message ?? null }

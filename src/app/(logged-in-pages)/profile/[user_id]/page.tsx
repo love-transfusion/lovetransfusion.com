@@ -22,6 +22,7 @@ const ProfilePage = async (props: I_ProfilePage) => {
     (user_id !== user.id && !isAdmin({ clRole: user.role }))
   )
     notFound()
+  const users_data_website = userObj.users_data_website
   return (
     <div className={'pb-10 pt-10 md:pb-[70px] md:pt-[64px]'}>
       <div className={'container md:px-6 lg:px-10 xl:px-0 '}>
@@ -43,10 +44,10 @@ const ProfilePage = async (props: I_ProfilePage) => {
         </div>
         <div
           className={
-            'md:max-w-[440px] mx-auto rounded-lg shadow-custom2 px-6 py-10 md:py-[70px] md:px-[80px]'
+            'md:max-w-[440px] mx-auto rounded-lg shadow-custom2 px-6 py-10 md:py-[40px] md:px-[60px]'
           }
         >
-          <ProfileForm user={userObj} />
+          <ProfileForm user={userObj} users_data_website={users_data_website} />
         </div>
         <p className={'italic text-primary text-lg text-center mt-[48px]'}>
           {`"`}One word frees us of all the weight and pain in life. That word

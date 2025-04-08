@@ -1,12 +1,17 @@
 import Image from 'next/image'
 import React from 'react'
 import brandLogo from '@/app/images/homepage/brand-logo.svg'
+import { I_UserWithProfilePicture } from '../../profile/[user_id]/ProfileForm'
 
 const RecipientProfilePicture = ({
   recipientObj,
+  selectedUser,
 }: {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
+  selectedUser: I_UserWithProfilePicture | null
 }) => {
+  const profile_pictures = selectedUser?.profile_pictures
+  const blurDataURL = selectedUser?.profile_pictures?.blur_data_url || undefined
   return (
     <div
       className={
@@ -19,7 +24,13 @@ const RecipientProfilePicture = ({
         }
       >
         <Image
-          src={`${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObj.profile_picture.fullPath}`}
+          src={
+            selectedUser?.profile_pictures?.storage_path
+              ? `${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL}${profile_pictures?.bucket_name}/${profile_pictures?.storage_path}`
+              : `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObj.profile_picture.fullPath}`
+          }
+          blurDataURL={blurDataURL}
+          placeholder={blurDataURL ? 'blur' : undefined}
           alt="Profile picture of adley"
           quality={100}
           fill

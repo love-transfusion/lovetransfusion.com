@@ -53,7 +53,7 @@ const Homepage = async () => {
             >
               <WistiaPlayer
                 videoId={'ow4kttqlhy'}
-                containerStyle="shadow-lg bg-[#3082C4]"
+                containerStyle="shadow-lg"
               />
             </div>
             <div

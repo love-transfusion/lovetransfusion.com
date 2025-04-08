@@ -6,7 +6,7 @@ export const getCurrentUser = async (): Promise<I_User | null | undefined> => {
   // { users_stripe_subscriptions: true }
   const supabase = await createServer()
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) return null
@@ -14,7 +14,7 @@ export const getCurrentUser = async (): Promise<I_User | null | undefined> => {
     // Return default
     const { data, error: userError } = await supabase
       .from('users')
-      .select('*, users_data_website(*)')
+      .select('*, users_data_website(*), profile_pictures(*)')
       .eq('id', user.id)
     return { data, error: userError?.message ?? null }
   }

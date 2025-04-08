@@ -50,7 +50,6 @@ export const util_facebookInsights = async (data: I_data) => {
     return response.data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
-    console.error('Facebook API error:', err.response?.data || err.message)
     throw err
   }
 }
