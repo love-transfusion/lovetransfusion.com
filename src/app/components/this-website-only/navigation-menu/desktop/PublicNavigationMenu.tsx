@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
+import MobilePublicNavigation from '../MobilePublicNavigation'
 
 interface I_PublicNavigationMenu {
   clUser: I_User | null | undefined
@@ -17,29 +18,35 @@ const PublicNavigationMenu = ({
   return (
     <div
       className={
-        'pb-10 pt-10 md:pb-[38px] md:pt-[38px] bg-[linear-gradient(90deg,#2f8edd,#2f9ddd_33%,#2fabdd_69%,#2fbadd_97%)]'
+        'pb-5 pt-5 md:pb-[38px] md:pt-[38px] bg-[linear-gradient(90deg,#2f8edd,#2f9ddd_33%,#2fabdd_69%,#2fbadd_97%)]'
       }
     >
       <div
         className={
-          'max-w-[1304px] mx-auto md:px-6 lg:px-10 xl:px-0 flex justify-between items-center text-white relative'
+          'max-w-[1304px] mx-auto gap-2 md:gap-0 px-2 md:px-6 lg:px-10 xl:px-0 flex justify-between items-center text-white relative'
         }
       >
-        <div className={'w-fit'}>
+        <div className={'w-fit flex flex-nowrap items-center gap-2'}>
+          <MobilePublicNavigation />
           <Link href={'/'}>
-            <Image src={ltLogo} alt="Love Transfusion logo" quality={100} />
+            <Image
+              src={ltLogo}
+              alt="Love Transfusion logo"
+              quality={100}
+              className="max-w-[158px] md:max-w-[unset]"
+            />
           </Link>
         </div>
         <Image
           src={heartbeat}
           alt="heartbeat"
           quality={100}
-          className="absolute top-0 bottom-0 right-0 left-[14px] m-auto w-[209px] h-[75.63px]"
+          className="hidden lg:block absolute top-0 bottom-0 right-0 left-[14px] m-auto w-[209px] h-[75.63px]"
         />
         <div className={'flex gap-[12.5px] items-center'}>
           <div
             className={
-              'flex items-center overflow-y-hidden font-acumin-variable font-extralight text-[15px] gap-2'
+              'hidden lg:flex items-center overflow-y-hidden font-acumin-variable font-extralight text-[15px] gap-2'
             }
           >
             <Link href={'/about-us'}>
@@ -60,7 +67,11 @@ const PublicNavigationMenu = ({
               className="border-2 border-[#e5e7eb] rounded-md flex py-[2px] shadow-[0_0_12px_0_#288ccc45] pl-[7px] pr-[10px]"
             >
               <div className={'flex items-center divide-opacity-50'}>
-                <p className={'pl-6 pr-[17px] text-sm font-acumin-variable'}>
+                <p
+                  className={
+                    'pl-2 pr-2 md:pl-6 md:pr-[17px] text-[13px] md:text-sm font-acumin-variable line-clamp-1 max-w-[130px]'
+                  }
+                >
                   {`${
                     clUser
                       ? clIsAdmin

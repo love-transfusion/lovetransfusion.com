@@ -14,17 +14,17 @@ interface I_NavigationMenu {
   clIsAdmin: boolean
 }
 
-const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
-  const getFormattedDate = (): string => {
-    const today: Date = new Date()
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }
-    return today.toLocaleDateString('en-US', options)
+export const getFormattedDate = (): string => {
+  const today: Date = new Date()
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   }
+  return today.toLocaleDateString('en-US', options)
+}
 
+const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
   return (
     <div
       className={'hidden 2xl:flex flex-col bg-black justify-start items-start'}
