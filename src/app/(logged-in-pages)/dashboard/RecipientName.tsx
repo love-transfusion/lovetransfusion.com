@@ -22,7 +22,7 @@ const RecipientName = () => {
         <div className={'flex w-full justify-end'}>
           <div
             className={
-              'w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
+              'w-[120px] md:w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
             }
           />
         </div>

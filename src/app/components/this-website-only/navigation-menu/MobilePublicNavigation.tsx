@@ -13,6 +13,24 @@ import dashboard from '@/app/(logged-in-pages)/images/dashboard-icon.svg'
 import privacy from '@/app/(logged-in-pages)/images/privacy.svg'
 import { usePathname } from 'next/navigation'
 
+export const MenuTopPart = () => {
+  return (
+    <div className="mt-4">
+      <Image
+        src={ltLogo}
+        alt="Love Transfusion Logo"
+        quality={100}
+        className="mx-auto"
+      />
+      <p className={'text-center mt-6 mb-3'}>LOVE TRANSFUSION</p>
+      <p className={'text-center mb-6'}>Support Platform</p>
+      <p className={'text-center py-3 border-y border-primary-300'}>
+        {getFormattedDate()}
+      </p>
+    </div>
+  )
+}
+
 const MobilePublicNavigation = () => {
   const path = usePathname()
   const { clIsOpen, clToggleDrawer, Drawer } = useDrawer()
@@ -37,19 +55,7 @@ const MobilePublicNavigation = () => {
             'linear-gradient(rgb(47, 142, 221) 0%, rgb(47, 157, 221) 33%, rgb(47, 171, 221) 69%, rgb(47, 186, 221) 97%)',
         }}
       >
-        <div className="mt-4">
-          <Image
-            src={ltLogo}
-            alt="Love Transfusion Logo"
-            quality={100}
-            className="mx-auto"
-          />
-          <p className={'text-center mt-6 mb-3'}>LOVE TRANSFUSION</p>
-          <p className={'text-center mb-6'}>Support Platform</p>
-          <p className={'text-center py-3 border-y border-primary-300'}>
-            {getFormattedDate()}
-          </p>
-        </div>
+        <MenuTopPart />
         <div>
           <div className={'mt-[77px]'}>
             <p className={'text-[#DFEEFA8F] mb-[13px] font-light uppercase'}>

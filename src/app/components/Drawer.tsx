@@ -45,7 +45,7 @@ const Drawer = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [minWidth, setminWidth] = useState<
     `${number}px` | `${number}%` | `${number}vw`
-  >('50%')
+  >('80%')
   const { clDeviceSize } = useDeviceSize()
 
   const animate = {
@@ -88,7 +88,9 @@ const Drawer = ({
       <AnimatePresence>
         {clIsOpen && (
           <div
-            className="fixed top-0 left-0 w-full h-screen bg-secondary-950 bg-opacity-70 z-[999] flex flex-row-reverse"
+            className={`fixed top-0 left-0 w-full h-screen bg-secondary-950 bg-opacity-70 z-[999] flex ${
+              clMoveLeftToRight && 'flex-row-reverse'
+            }`}
             ref={containerRef}
           >
             <div

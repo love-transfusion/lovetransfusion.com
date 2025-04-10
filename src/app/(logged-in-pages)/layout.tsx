@@ -3,12 +3,12 @@ import dots from './images/Dots.svg'
 import doubleHeart from './images/Double Heart.svg'
 import NavigationMenu from './NavigationMenu'
 import Image from 'next/image'
-import Icon_menu from '../components/icons/Icon_menu'
 import PublicFooter from '../components/this-website-only/footer/PublicFooter'
 import RecipientName from './dashboard/RecipientName'
 import { getCurrentUser } from '../config/supabase/getCurrentUser'
 import { isAdmin } from '../lib/adminCheck'
 import SetStore from './SetStore'
+import MobileDashboardMenu from './MobileDashboardMenu'
 
 // interface I_MembersLayout
 
@@ -40,7 +40,7 @@ const UserIDLayout = async ({
               }
             >
               <div className={'flex gap-[11px] items-center'}>
-                <Icon_menu className="size-6 text-white 2xl:hidden" />
+                <MobileDashboardMenu clIsAdmin={isadmin} />
                 <p className={'md:text-lg 2xl:text-2xl tracking-[3px]'}>
                   DASHBOARD
                 </p>
