@@ -26,7 +26,6 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   const clToggleMenu = (bool?: boolean) => {
-    console.log('toggling')
     if (bool === false) {
       setclIsOpen(bool)
     } else {
@@ -51,8 +50,8 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
       if (clRef.current) {
         const {
           top,
-          right,
-          bottom,
+          // right,
+          // bottom,
           left,
           height: buttonHeight,
           width: buttonWidth,
@@ -89,7 +88,7 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
         if (
           clDeviceSize === 'sm' ? isRightPositionedMobile : isRightPositioned
         ) {
-          console.log('entered right')
+          // console.log('entered right')
           if (clDeviceSize === 'sm') {
             posLeft = scrollableWidth - modalWidth - marginX
             arrowLeft = modalWidth + marginX - remaining - 10
@@ -98,46 +97,46 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
             arrowLeft = modalWidth + marginX - remaining - 10
           }
         } else if (left + buttonHalfWidth < modalHalfWidth + marginX) {
-          console.log('entered left')
+          // console.log('entered left')
           posLeft = marginX
           arrowLeft = left - marginX + (buttonHalfWidth - 10)
         } else {
-          console.log('entered center')
+          // console.log('entered center')
           posLeft = left + buttonHalfWidth - modalHalfWidth
           arrowLeft = modalHalfWidth - 10
         }
 
         // Adjust position to avoid overflow at the bottom
         if (isTopPositioned) {
-          console.log('entered top')
+          // console.log('entered top')
           posTop = top - modalHeight - marginY - 1
           arrowTop = modalHeight - 8
           isArrowOnTop = true
         } else {
-          console.log('entered bottom')
+          // console.log('entered bottom')
           posTop = top + buttonHeight + marginY + 1
           arrowTop = -8
         }
 
-        console.log({
-          top,
-          right,
-          bottom,
-          left,
-          buttonHeight,
-          buttonWidth,
-          modalHeight,
-          viewportWidth,
-          viewportHeight,
-          scrollableWidth,
-          scrollableHeight,
-          buttonHalfWidth,
-          modalHalfWidth,
-          isRightPositioned,
-          isRightPositionedMobile,
-          remaining,
-          isTopPositioned,
-        })
+        // console.log({
+        //   top,
+        //   right,
+        //   bottom,
+        //   left,
+        //   buttonHeight,
+        //   buttonWidth,
+        //   modalHeight,
+        //   viewportWidth,
+        //   viewportHeight,
+        //   scrollableWidth,
+        //   scrollableHeight,
+        //   buttonHalfWidth,
+        //   modalHalfWidth,
+        //   isRightPositioned,
+        //   isRightPositionedMobile,
+        //   remaining,
+        //   isTopPositioned,
+        // })
 
         setMenuPosition({
           posTop,

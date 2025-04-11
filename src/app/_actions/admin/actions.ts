@@ -45,7 +45,6 @@ export const supa_admin_create_account = async (rawData: I_signupData) => {
     email_confirm: true,
     user_metadata: { parent_name, recipient_name, recipient_id },
   })
-  console.log({ data, error })
   if (!error) {
     resendEmail_AccountCredentials({ email, password, parent_name })
   }

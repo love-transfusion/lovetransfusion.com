@@ -21,7 +21,6 @@ const Popup = ({
   className,
   clDisableOutsideClick,
 }: I_Popup) => {
-  console.log({ clTogglePopup })
   const handleOutsideClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!clDisableOutsideClick) {
