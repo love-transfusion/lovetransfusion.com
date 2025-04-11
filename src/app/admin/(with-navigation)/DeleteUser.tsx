@@ -17,7 +17,7 @@ const DeleteUser = ({ user_id }: { user_id: string }) => {
   return (
     <>
       <Icon_trash
-        className="size-5 text-red-500"
+        className="size-5 text-red-500 cursor-pointer"
         onClick={() => clTogglePopup()}
       />
       <Popup
