@@ -5,6 +5,7 @@ interface I_getDataFromLTOrg {
   fetch_date?: Date
   fetch_all?: boolean
   limit?: number
+  searchIds?: string[]
 }
 
 export const fetchDataFromLTOrg = async (body: I_getDataFromLTOrg | string) => {
@@ -15,6 +16,7 @@ export const fetchDataFromLTOrg = async (body: I_getDataFromLTOrg | string) => {
     headers: myHeaders,
     body: JSON.stringify(body),
   }
+
   return await fetch(
     'https://www.lovetransfusion.org/api/recipients2',
     requestOptions

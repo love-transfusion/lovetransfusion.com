@@ -4,18 +4,17 @@ import Popup from '../components/Popup'
 import { useState } from 'react'
 
 const usePopup = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clPopupData, setpopup] = useState<any | null>(null)
+  const [clIsOpen, setpopup] = useState<boolean>(false)
 
-  const clClosePopup = () => {
-    setpopup(null)
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clOpenPopup = (data: any) => {
-    setpopup(data)
+  const clTogglePopup = (bool?: boolean) => {
+    if (bool === false) {
+      setpopup(bool)
+    } else {
+      setpopup((prev) => !prev)
+    }
   }
 
-  return { clClosePopup, clOpenPopup, clPopupData, Popup }
+  return { clTogglePopup, clIsOpen, Popup }
 }
 
 export default usePopup

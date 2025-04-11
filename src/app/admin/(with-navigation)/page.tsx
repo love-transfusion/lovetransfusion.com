@@ -2,7 +2,6 @@ import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import Icon_left from '@/app/components/icons/Icon_left'
 import Icon_refresh from '@/app/components/icons/Icon_refresh'
 import Icon_right from '@/app/components/icons/Icon_right'
-import Icon_trash from '@/app/components/icons/Icon_trash'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
 import Engagements from './Engagements'
@@ -13,15 +12,37 @@ import SearchInput from './SearchInput'
 import { supa_select_paginated_recipients } from '@/app/_actions/users_data_website/actions'
 import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
 import ResetUserInStore from './ResetUserInStore'
+import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import DeleteUser from './DeleteUser'
 
-interface I_combineddata extends I_supa_users_data_website_row {
+interface I_recipient_data {
+  id: string
+  page_status: string
+}
+
+interface I_orgRecipients {
+  error: string | null
+  recipients: I_recipient_data[] | null
+}
+
+export interface I_combineddataOfRecipient extends I_supa_users_data_website_row {
   user: I_supa_users_row | null
 }
 
 const AdminDashboard = async () => {
   const user = await getCurrentUser()
   isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
+
   const { data: comRecipients } = await supa_select_paginated_recipients()
+
+  const { recipients: orgRecipients }: I_orgRecipients =
+    await fetchDataFromLTOrg({
+      searchIds: comRecipients.map((item) => item.id),
+    })
+  const draftRecipients =
+    orgRecipients
+      ?.filter((item) => item.page_status === 'draft')
+      .map((item) => item.id) ?? []
 
   const IDs = comRecipients
     .map((item) => item.user_id)
@@ -29,13 +50,12 @@ const AdminDashboard = async () => {
 
   const { data: listOfusers } = await supa_admin_search_multiple_users(IDs)
 
-  const combinedData: I_combineddata[] = comRecipients.map((item) => {
+  const combinedData: I_combineddataOfRecipient[] = comRecipients.map((item) => {
     return {
       ...item,
       user: listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
     }
   })
-
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
@@ -122,25 +142,46 @@ const AdminDashboard = async () => {
                           <Engagements recipient={recipient} />
                         </td>
                         <td className="py-[6px] px-3">
-                          <div className={'flex gap-2 justify-start'}>
-                            {comRecipient.user_id ? (
-                              <Link href={`/dashboard/${comRecipient.user_id}`}>
-                                <Icon_refresh className="size-5" />
-                              </Link>
-                            ) : (
-                              <div className={'flex size-5'} />
-                            )}
-                            <Link href={`/admin/${recipient.id}`}>
+                          {!draftRecipients.includes(recipient.id) ? (
+                            <div className={'flex gap-2 justify-start'}>
                               {comRecipient.user_id ? (
-                                <Icon_edit className="size-5 text-primary" />
+                                <Link
+                                  href={`/dashboard/${comRecipient.user_id}`}
+                                >
+                                  <Icon_refresh className="size-5" />
+                                </Link>
                               ) : (
-                                <Icon_eyes className="size-5 text-primary" />
+                                <div className={'flex size-5'} />
                               )}
-                            </Link>
-                            {comRecipient.user_id && (
-                              <Icon_trash className="size-5 text-red-500" />
-                            )}
-                          </div>
+                              <Link href={`/admin/${recipient.id}`}>
+                                {comRecipient.user_id ? (
+                                  <Icon_edit className="size-5 text-primary" />
+                                ) : (
+                                  <Icon_eyes className="size-5 text-primary" />
+                                )}
+                              </Link>
+                              {comRecipient.user_id && (
+                                <DeleteUser user_id={comRecipient.user_id} />
+                              )}
+                            </div>
+                          ) : (
+                            <div
+                              className={
+                                'flex gap-2 justify-start items-center'
+                              }
+                            >
+                              <p
+                                className={
+                                  'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
+                                }
+                              >
+                                draft
+                              </p>
+                              {comRecipient.user_id && (
+                                <DeleteUser user_id={comRecipient.user_id} />
+                              )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )

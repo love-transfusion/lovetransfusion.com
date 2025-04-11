@@ -12,7 +12,10 @@ const useUpdateRecipientDatabase = (userData: I_Recipient_Data) => {
     ])
   }
   useEffect(() => {
-    updateRecipient()
+    // This makes safe when the recipient is unpublished from .org
+    if (userData.recipient?.id) {
+      updateRecipient()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return

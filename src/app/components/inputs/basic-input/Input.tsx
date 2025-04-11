@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 interface I_Input extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -31,19 +31,22 @@ const getVariant = (
   return variant ? variants[variant] : variants['default']
 }
 
-const Input = ({
-  clPlaceholder = 'Text here...',
-  clContainerClassName,
-  clIconClassName,
-  clErrorMessage,
-  clRightIcon,
-  clLeftIcon,
-  className,
-  clDisabled,
-  clVariant,
-  clValue,
-  ...props
-}: I_Input) => {
+const Input = forwardRef<HTMLInputElement, I_Input>(function Input(
+  {
+    clPlaceholder = 'Text here...',
+    clContainerClassName,
+    clIconClassName,
+    clErrorMessage,
+    clRightIcon,
+    clLeftIcon,
+    className,
+    clDisabled,
+    clVariant,
+    clValue,
+    ...props
+  }: I_Input,
+  ref
+) {
   const variantStyles = getVariant(clVariant, clLeftIcon, clRightIcon)
   return (
     <div className={twMerge('relative', clContainerClassName)}>
@@ -68,6 +71,7 @@ const Input = ({
         </div>
       )}
       <input
+        ref={ref}
         {...props}
         value={clValue}
         disabled={clDisabled}
@@ -79,6 +83,6 @@ const Input = ({
       )}
     </div>
   )
-}
+})
 
 export default Input

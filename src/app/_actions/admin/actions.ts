@@ -15,9 +15,9 @@ export const supa_admin_search_recipient = async (clSearchKeyword: string) => {
         clSearchKeyword ?? ''
       },recipient->>id.eq.${
         clSearchKeyword ?? ''
-      },recipient->>parent_name.ilike.Doe,recipient->>email.ilike.${
+      },recipient->>parent_name.ilike.${
         clSearchKeyword ?? ''
-      }`
+      },recipient->>email.ilike.${clSearchKeyword ?? ''}`
     )
   return { data, error: error?.message ?? null }
 }
@@ -30,18 +30,43 @@ interface I_signupData {
 }
 
 export const supa_admin_create_account = async (rawData: I_signupData) => {
-  const { email, parent_name, recipient_name, recipient_id } = rawData
+  const {
+    email,
+    parent_name,
+    recipient_name,
+    recipient_id: stringRecipientId,
+  } = rawData
   const supabase = await createAdmin()
   const password = uuid().slice(0, 6)
+  const recipient_id = stringRecipientId as UUID
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     user_metadata: { parent_name, recipient_name, recipient_id },
   })
+  console.log({ data, error })
   if (!error) {
     resendEmail_AccountCredentials({ email, password, parent_name })
   }
+  revalidatePath('/admin')
+  return { data, error: error?.message ?? null }
+}
+
+export const supa_admin_select_recipient_data = async (uuid: UUID) => {
+  const supabase = await createAdmin()
+
+  const { data, error } = await supabase
+    .from('users_data_website')
+    .select('*')
+    .eq('id', uuid)
+    .single()
+  return { data, error: error?.message ?? null }
+}
+
+export const supa_admin_delete_auth_user = async (user_id: string) => {
+  const supabase = await createAdmin()
+  const { data, error } = await supabase.auth.admin.deleteUser(user_id)
   revalidatePath('/admin')
   return { data, error: error?.message ?? null }
 }

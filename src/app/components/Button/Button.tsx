@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
@@ -44,20 +44,24 @@ const getTheme = (properties: Pick<ButtonProps, 'clTheme' | 'clVariant'>) => {
   }
 }
 
-const Button = ({
-  children,
-  className,
-  clDisabled,
-  clType,
-  clTheme,
-  clVariant,
-  clSize,
-  ...props
-}: ButtonProps) => {
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    children,
+    className,
+    clDisabled,
+    clType,
+    clTheme,
+    clVariant,
+    clSize,
+    ...props
+  }: ButtonProps,
+  ref
+) {
   const cssSize = getSize(clSize)
   const cssTheme = getTheme({ clTheme, clVariant })
   return (
     <button
+      ref={ref}
       type={clType}
       {...props}
       disabled={clDisabled}
@@ -71,6 +75,6 @@ const Button = ({
       <div className={twMerge(`relative w-full`)}>{children}</div>
     </button>
   )
-}
+})
 
 export default Button

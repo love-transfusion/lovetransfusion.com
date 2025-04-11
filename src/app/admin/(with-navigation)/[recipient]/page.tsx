@@ -9,9 +9,10 @@ import twitter from './images/twitter.webp'
 import Image from 'next/image'
 import Input from '@/app/components/inputs/basic-input/Input'
 import Link from 'next/link'
-import { supa_admin_select_recipient_data } from './actions'
 import CreateAccountButton from './CreateAccountButton'
 import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import { supa_select_user } from '@/app/_actions/users/actions'
+import { supa_admin_select_recipient_data } from '@/app/_actions/admin/actions'
 
 type Params = Promise<{ recipient: UUID }>
 
@@ -20,6 +21,12 @@ const RecipientPage = async (props: { params: Params }) => {
   const { data: foundRecipient } = await supa_admin_select_recipient_data(
     recipient
   )
+
+  let user
+  if (foundRecipient?.user_id) {
+    const { data } = await supa_select_user(foundRecipient?.user_id)
+    user = data
+  }
 
   const recipientData: {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
@@ -65,25 +72,33 @@ const RecipientPage = async (props: { params: Params }) => {
         >
           <div className={'flex-col w-fit'}>
             <p className={''}>Recipient</p>
-            <p className={'md:text-xl font-bold'}>Claire</p>
+            <p className={'md:text-xl font-bold capitalize'}>
+              {recipientObject.first_name}
+            </p>
           </div>
           <div className={'flex-col w-fit'}>
             <p className={''}>Applied By</p>
-            <p className={'md:text-xl font-bold'}>Keving Lengkeek</p>
+            <p className={'md:text-xl font-bold capitalize'}>
+              {recipientObject.parent_name}
+            </p>
           </div>
           <div className={'flex-col w-fit'}>
             <p className={''}>Date Of Birth</p>
-            <p className={'md:text-xl font-bold'}>-</p>
+            <p className={'md:text-xl font-bold'}>
+              {user?.birthday
+                ? new Date(user?.birthday).toLocaleDateString()
+                : '-'}
+            </p>
           </div>
           <div className={'flex-col w-fit'}>
             <p className={''}>Relationship</p>
-            <p className={'md:text-xl font-bold'}>Friend</p>
+            <p className={'md:text-xl font-bold capitalize'}>
+              {recipientObject.relationship}
+            </p>
           </div>
           <div className={'flex-col w-fit'}>
             <p className={''}>Email</p>
-            <p className={'md:text-xl font-bold'}>
-              kevinlengkeek+benny@gmail.com
-            </p>
+            <p className={'md:text-xl font-bold'}>{recipientObject.email}</p>
           </div>
         </div>
       </div>

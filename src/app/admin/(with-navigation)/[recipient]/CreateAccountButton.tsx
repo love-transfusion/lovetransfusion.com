@@ -33,7 +33,6 @@ const CreateAccountButton = ({
         id: uuid,
       })
 
-      setisLoading(false)
       settoast({
         clDescription: 'Account successfully created.',
         clStatus: 'success',
@@ -41,6 +40,7 @@ const CreateAccountButton = ({
     } else if (error) {
       settoast({ clDescription: error, clStatus: 'error' })
     }
+    setisLoading(false)
   }
   return (
     <Button

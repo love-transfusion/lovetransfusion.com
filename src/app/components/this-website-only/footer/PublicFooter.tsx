@@ -29,7 +29,8 @@ const PublicFooter = () => {
           </Link>
         </div>
         <p className={'text-center mt-[7px] text-lg'}>
-          1201 N. Orange Street, Suite 799, Wilmington DE 19801
+          1201 N. Orange Street, Suite 799, <br className="block md:hidden" />
+          Wilmington DE 19801
         </p>
         <p className={'text-center mt-[2px]'}>
           501(c)3 Nonprofit Organization | Tax ID #27-2829895
