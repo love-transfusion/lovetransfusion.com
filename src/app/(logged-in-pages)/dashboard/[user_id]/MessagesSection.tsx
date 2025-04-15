@@ -3,17 +3,27 @@ import DividerText from '@/app/components/DividerText'
 import ShowOrHide from './ShowOrHide'
 import Messages, { I_Messages } from './Messages'
 import useToggle from '@/app/hooks/useToggle'
+import { useEffect, useState } from 'react'
 
-const MessagesSection = ({ clRecipientObj, clUser_id }: I_Messages) => {
+const MessagesSection = ({
+  clRecipientObj,
+  clUser_id,
+}: Omit<I_Messages, 'setcomments' | 'comments'>) => {
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
+  const [comments, setcomments] = useState<I_supaorg_comments[]>(
+    clRecipientObj.comments
+  )
+  useEffect(() => {
+    setcomments(clRecipientObj.comments)
+  }, [clRecipientObj.comments])
   return (
     <div
       className={
         'flex flex-col-reverse md:flex-row items-center md:items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px]'
       }
     >
-      {clRecipientObj.comments.length > 0 && (
+      {comments.length > 0 && (
         <div className={'md:min-w-full xl:min-w-[900px] w-full'}>
           <div className={'flex gap-9'}>
             <DividerText
@@ -31,11 +41,16 @@ const MessagesSection = ({ clRecipientObj, clUser_id }: I_Messages) => {
             />
           </div>
           {showMessages && (
-            <Messages clRecipientObj={clRecipientObj} clUser_id={clUser_id} />
+            <Messages
+              clRecipientObj={clRecipientObj}
+              clUser_id={clUser_id}
+              setcomments={setcomments}
+              comments={comments}
+            />
           )}
         </div>
       )}
-      {clRecipientObj.comments.length > 0 && (
+      {comments.length > 0 && (
         <div className={'block md:hidden xl:block'}>
           <ShowOrHide clToggle={setshowMessages} clisToggled={showMessages} />
           {showMessages && (

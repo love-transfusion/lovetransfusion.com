@@ -42,13 +42,8 @@ const ProfilePage = async (props: I_ProfilePage) => {
             Update your name and profile image
           </p>
         </div>
-        <div
-          className={
-            'md:max-w-[440px] mx-auto rounded-lg shadow-custom2 px-6 py-10 md:py-[40px] md:px-[60px]'
-          }
-        >
-          <ProfileForm user={userObj} users_data_website={users_data_website} />
-        </div>
+
+        <ProfileForm user={userObj} users_data_website={users_data_website} />
         <p className={'italic text-primary text-lg text-center mt-[48px]'}>
           {`"`}One word frees us of all the weight and pain in life. That word
           is

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import Image from 'next/image'
 import anonymousImg from './images/user.webp'
 import { supa_insert_deleted_messages } from './actions'
@@ -7,16 +7,18 @@ import { supa_insert_deleted_messages } from './actions'
 export interface I_Messages {
   clRecipientObj: I_supaorg_recipient_hugs_counters_comments
   clUser_id: string
+  setcomments: Dispatch<SetStateAction<I_supaorg_comments[]>>
+  comments: I_supaorg_comments[]
 }
 
-const Messages = ({ clRecipientObj, clUser_id }: I_Messages) => {
+const Messages = ({
+  clRecipientObj,
+  clUser_id,
+  comments,
+  setcomments,
+}: I_Messages) => {
   const [lastVisible, setlastVisible] = useState<number>(6)
 
-  // const filterComments = () => {}
-
-  const [comments, setcomments] = useState<I_supaorg_comments[]>(
-    clRecipientObj.comments
-  )
   comments
     .map((recipient: I_supaorg_comments) => {
       const { id, public_profiles, created_at, name, comment } = recipient

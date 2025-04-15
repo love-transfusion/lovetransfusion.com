@@ -52,31 +52,37 @@ const SearchInput = () => {
       />
       <Menu className="max-w-[360px] min-w-[340px] max-h-[460px] overflow-auto px-5 shadow-md">
         <div>
-          {searchResults?.map((item) => {
-            return (
-              <div
-                key={item.id}
-                className={'grid grid-cols-[1fr_1fr_60px] gap-5 items-center'}
-              >
-                <p className={'line-clamp-1'}>{item.recipient?.parent_name}</p>
-                <p className={'line-clamp-1'}>{item.recipient?.first_name}</p>
-                <div className={'w-fit flex gap-1'}>
-                  {item.user_id && (
-                    <Link href={`/dashboard/${item.user_id}`}>
-                      <Icon_refresh className="size-5" />
-                    </Link>
-                  )}
-                  <Link href={`/admin/${item.id}`}>
-                    {item.user_id ? (
-                      <Icon_edit className="size-5 text-primary" />
-                    ) : (
-                      <Icon_eyes className="size-5 text-primary" />
+          {searchResults && searchResults?.length > 0 ? (
+            searchResults?.map((item) => {
+              return (
+                <div
+                  key={item.id}
+                  className={'grid grid-cols-[1fr_1fr_60px] gap-5 items-center'}
+                >
+                  <p className={'line-clamp-1'}>
+                    {item.recipient?.parent_name}
+                  </p>
+                  <p className={'line-clamp-1'}>{item.recipient?.first_name}</p>
+                  <div className={'w-fit flex gap-1'}>
+                    {item.user_id && (
+                      <Link href={`/dashboard/${item.user_id}`}>
+                        <Icon_refresh className="size-5" />
+                      </Link>
                     )}
-                  </Link>
+                    <Link href={`/admin/${item.id}`}>
+                      {item.user_id ? (
+                        <Icon_edit className="size-5 text-primary" />
+                      ) : (
+                        <Icon_eyes className="size-5 text-primary" />
+                      )}
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })
+          ) : (
+            <p className={''}>No search results.</p>
+          )}
         </div>
       </Menu>
     </div>

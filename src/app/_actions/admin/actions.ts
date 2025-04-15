@@ -85,3 +85,15 @@ export const supa_admin_search_multiple_users = async (IDs: string[]) => {
   const { data, error } = await supabase.from('users').select('*').in('id', IDs)
   return { data, error: error?.message ?? null }
 }
+
+export const supa_admin_reset_user_password = async (
+  newPassword: string,
+  userId: string
+) => {
+  const supabase = await createAdmin()
+
+  const { data, error } = await supabase.auth.admin.updateUserById(userId, {
+    password: newPassword,
+  })
+  return { data, error: error?.message ?? null }
+}

@@ -21,13 +21,21 @@ const ResetPasswordPage = () => {
     formState: { isSubmitting },
   } = useForm<I_password>()
   const onSubmit = async (rawData: I_password) => {
-    if (rawData.password !== rawData.confirmPassword) return
-    localStorage.setItem('dashboard-modal', 'true')
-    const { error } = await supa_update_password_action(rawData.password)
-    if (error) {
-      localStorage.removeItem('dashboard-modal')
-      settoast({ clDescription: error, clStatus: 'error' })
+    if (rawData.password !== rawData.confirmPassword) {
+      settoast({ clDescription: 'Passwords did not match.', clStatus: 'error' })
+      return
     }
+    localStorage.setItem('dashboard-modal', 'true')
+    const { data, error } = await supa_update_password_action(rawData.password)
+    if (error) {
+      settoast({ clDescription: error, clStatus: 'error' })
+    } else if (data) {
+      settoast({
+        clDescription: 'Your update is successfully updated.',
+        clStatus: 'success',
+      })
+    }
+    localStorage.removeItem('dashboard-modal')
   }
   return (
     <div className={'pb-10 pt-10 md:pb-[70px] md:pt-[64px]'}>
