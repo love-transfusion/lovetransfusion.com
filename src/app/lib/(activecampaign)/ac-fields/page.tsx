@@ -1,14 +1,14 @@
 import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import React from 'react'
 import { isAdmin } from '../../adminCheck'
-import { ac_retrieveAllLists } from '@/app/utilities/activeCampaignFunctions'
+import { ac_retrieveAllFields } from '@/app/utilities/activeCampaignFunctions'
 
-const TestPages = async () => {
+const FieldsPage = async () => {
   const user = await getCurrentUser()
   isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
-  const { data } = await ac_retrieveAllLists()
-  const filteredList = data?.lists.map((list) => {
-    return { name: list.name, id: list.id }
+  const { data } = await ac_retrieveAllFields()
+  const filteredList = data?.fields.map((list) => {
+    return { name: list.title, id: list.id }
   })
   return (
     <div>
@@ -17,4 +17,4 @@ const TestPages = async () => {
   )
 }
 
-export default TestPages
+export default FieldsPage

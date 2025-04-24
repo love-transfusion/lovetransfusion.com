@@ -1,5 +1,27 @@
-netstat -ano | findstr :3000
---> To check what's using port 3000
+Topic & SEO Foundation
+Analyze topic for SEO optimization and search intent
+@Workflow Planner
 
-taskkill /PID 17252 /F
--- > TCP    127.0.0.1:3000     0.0.0.0:0     LISTENING     1234
+Contextual Framework
+Define audience, angle, tone and content length
+@Workflow Planner
+
+Structural Outline
+Create the article structure with headers and key points
+@Workflow Planner
+
+Research Phase
+Gather current data, expert quotes, and credible sources
+@Perplexity Researcher
+
+Content Creation
+Expand the research into a full blog post draft
+@ChatGPT Writer
+
+Editorial Perfection
+Enhance readability, visualizations and actionable content
+@Claude Editor
+
+Final Output
+Export in multiple formats with version control
+@Workflow Planner

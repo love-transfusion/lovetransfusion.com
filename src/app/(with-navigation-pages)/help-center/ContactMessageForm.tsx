@@ -3,7 +3,11 @@ import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import Input from '@/app/components/inputs/basic-input/Input'
 import TextArea from '@/app/components/inputs/textarea/TextArea'
-import { ac_create_contact } from '@/app/utilities/activeCampaignFunctions'
+import { ac_lists } from '@/app/lib/(activecampaign)/library/ac_lists'
+import { resendEmail_MessageConfirmation } from '@/app/lib/resend_email_templates/resendEmail_MessageConfirmation'
+import {
+  ac_custom_create_contact,
+} from '@/app/utilities/activeCampaignFunctions'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import { util_getFirstAndLastName } from '@/app/utilities/util_getFirstNameAndLastName'
 import React from 'react'
@@ -32,22 +36,31 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
 
   const onSubmit = async (rawData: I_contactForm) => {
     const { firstName, lastName } = util_getFirstAndLastName(rawData.name)
-    const data = await ac_create_contact({
-      email: rawData.email,
-      firstName: firstName,
-      lastName: lastName,
-      fieldValues: [{ field: '8', value: rawData.message }],
+    const { error } = await ac_custom_create_contact({
+      clListName: ac_lists.getList('COM Website Contacts').name,
+      data: {
+        email: rawData.email,
+        firstName: firstName,
+        lastName: lastName,
+        fieldValues: [{ field: '8', value: rawData.message }],
+      },
     })
     reset()
-    if (data?.errors || data?.message) {
+
+    if (error) {
+      console.log({ error })
       settoast({
-        clDescription:
-          (data.errors && data.errors[0].title) ??
-          data.message ??
-          'Form Submission Error',
+        clDescription: error,
         clStatus: 'error',
       })
     } else {
+      resendEmail_MessageConfirmation({
+        clEmail: rawData.email,
+        clFirstName: firstName,
+        clLastName: lastName,
+        clMessage: rawData.message,
+      })
+      console.log('setting toast')
       settoast({
         clDescription: 'Message successfully submitted',
         clStatus: 'success',
@@ -93,7 +106,9 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
             }
           >
             <p
-              className={'mx-auto text-[17px] text-center font-acumin-semi-condensed'}
+              className={
+                'mx-auto text-[17px] text-center font-acumin-semi-condensed'
+              }
             >
               Submit
             </p>
