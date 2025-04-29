@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
-import useDeviceSize from '@/app/hooks/useDeviceSize'
 import { registerMap } from 'echarts/core'
 import { GeoPoint } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
 
@@ -12,7 +11,7 @@ type I_Parameters = [number, number, number, number, number] // [lon, lat, views
 
 const MapChart = ({ mappedData }: I_MapChart) => {
   const [option, setOption] = useState({})
-  const { clDeviceSize, clWindowWidth } = useDeviceSize()
+
   useEffect(() => {
     fetch('/maps/world.json')
       .then((res) => {
@@ -48,14 +47,15 @@ const MapChart = ({ mappedData }: I_MapChart) => {
           geo: {
             map: 'world',
             roam: true, // Enable zoom and pan
-
             zoom: 1.2, // Adjust zoom level to fit screen
             layoutSize: '100%',
-
             label: {
               show: false,
             },
-
+            scaleLimit: {
+              min: 1,
+              max: 2.5,
+            },
             itemStyle: {
               areaColor: '#E2F2FA',
               borderColor: '#DAEBFA',
@@ -76,6 +76,13 @@ const MapChart = ({ mappedData }: I_MapChart) => {
               itemStyle: {
                 color: '#63B6AC',
               },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              symbolSize: (val: any[]) => {
+                const total = val[2] + val[3] + val[4] // [lng, lat, views, hugs, messages]
+                const safeTotal = Math.max(total, 1) // avoid log(0)
+                const size = Math.log10(safeTotal) * 10 // Log scaling
+                return Math.max(5, Math.min(size, 100)) // clamp between 5 and 100
+              },
             },
           ],
         })
@@ -83,17 +90,10 @@ const MapChart = ({ mappedData }: I_MapChart) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const mapHeight =
-    (clWindowWidth >= 2400 && '650px') ||
-    (clWindowWidth >= 2000 && '600px') ||
-    (clWindowWidth >= 1800 && '480px') ||
-    (clDeviceSize === 'sm' && '170px') ||
-    '370px'
   return (
     <ReactECharts
       option={option}
       style={{
-        height: mapHeight,
         width: '100%',
       }}
     />

@@ -1,17 +1,22 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-interface I_DeviceSize {
+/**
+ * ```
+ * interface I_DeviceSize {
+ * clDeviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
+ * clWindowWidth: number
+ *  clWindowHeight: number
+ }
+ * ```
+ */
+export interface I_DeviceSize {
   clDeviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
   clWindowWidth: number
   clWindowHeight: number
 }
 
-const useDeviceSize = (): {
-  clDeviceSize: I_DeviceSize['clDeviceSize']
-  clWindowWidth: number
-  clWindowHeight: number
-} => {
+const useDeviceSize = (): I_DeviceSize => {
   const [clDeviceSize, setdeviceSize] = useState<I_DeviceSize>({
     clDeviceSize: null,
     clWindowWidth: 0,

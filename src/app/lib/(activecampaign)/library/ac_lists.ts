@@ -1,7 +1,7 @@
 export type ac_list_types =
   | 'Master Contact List'
   | 'Love Transfusion'
-  | 'Website Contacts'
+  | 'ORG Website Contacts'
   | 'Commenting Audience'
   | 'New Member'
   | 'New Recipient Notifications'
@@ -28,7 +28,7 @@ export const ac_lists = {
         id: '3',
       },
       {
-        name: 'Website Contacts',
+        name: 'ORG Website Contacts',
         id: '4',
       },
       {
