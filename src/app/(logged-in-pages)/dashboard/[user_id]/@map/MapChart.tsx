@@ -1,102 +1,157 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useEffect, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { registerMap } from 'echarts/core'
-import { GeoPoint } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
+import {
+  GeoPoint,
+  mapAnalyticsToGeoPoints,
+} from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
+import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
+import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
+import LoadingComponent from '@/app/components/Loading'
 
-interface I_MapChart {
-  mappedData: GeoPoint[] | undefined
+interface Props {
+  recipientObj: I_supaorg_recipient_hugs_counters_comments
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
-const MapChart = ({ mappedData }: I_MapChart) => {
-  const [option, setOption] = useState({})
+const MapChart = ({ recipientObj }: Props) => {
+  const [option, setOption] = useState<any>({
+    series: [],
+  })
+  const [mappedData, setMappedData] = useState<GeoPoint[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+
+  console.log({ mappedData, loading })
+  useEffect(() => {
+    const loadMap = async () => {
+      if (mappedData.length < 1) {
+        setLoading(true)
+      }
+      const res = await fetch('/maps/world.json')
+      const worldJson = await res.json()
+      registerMap('world', worldJson)
+
+      // Initial map render (no data yet)
+      setOption({
+        tooltip: {
+          trigger: 'item',
+          borderColor: '#5470C6',
+          formatter: (params: {
+            name: string
+            value?: I_Parameters
+            seriesName: string
+          }) => {
+            if (Array.isArray(params.value)) {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const [lon, lat, views, hugs, messages] = params.value
+              return `
+                <strong>${params.name}</strong><br/>
+                views: ${views}<br/>
+                hugs: ${hugs}<br/>
+                messages: ${messages}
+              `
+            } else {
+              return `<strong>${params.name}</strong><br/>No data`
+            }
+          },
+        },
+        geo: {
+          map: 'world',
+          roam: true, // Enable zoom and pan
+          zoom: 1.2, // Adjust zoom level to fit screen
+          layoutSize: '100%',
+          label: {
+            show: false,
+          },
+          scaleLimit: {
+            min: 1,
+            max: 2.5,
+          },
+          itemStyle: {
+            areaColor: '#E2F2FA',
+            borderColor: '#DAEBFA',
+          },
+          emphasis: {
+            label: { show: false },
+            itemStyle: {
+              areaColor: '#A5D8FF',
+            },
+          },
+        },
+        series: [
+          {
+            name: 'Effect Points',
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            data: mappedData,
+            itemStyle: {
+              color: '#63B6AC',
+            },
+            symbolSize: (val: any[]) => {
+              const total = val[2] + val[3] + val[4] // [lng, lat, views, hugs, messages]
+              const safeTotal = Math.max(total, 1) // avoid log(0)
+              const size = Math.log10(safeTotal) * 10 // Log scaling
+              return Math.max(5, Math.min(size, 100)) // clamp between 5 and 100
+            },
+          },
+        ],
+      })
+
+      // Fetch and map data
+      const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
+        clSpecificPath: `/${recipientObj.path_url}`,
+      })
+
+      const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
+        clGoogleAnalytics,
+        clRecipient: recipientObj,
+      })
+
+      const mapped = await mapAnalyticsToGeoPoints(
+        analyticsWithCountryPathTotal || []
+      )
+      setMappedData(mapped)
+      setLoading(false)
+    }
+
+    loadMap()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipientObj])
 
   useEffect(() => {
-    fetch('/maps/world.json')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load map JSON')
-        return res.json()
-      })
-      .then((worldJson) => {
-        registerMap('world', worldJson) // Register map
+    // Update just the series data without resetting the entire option
 
-        setOption({
-          tooltip: {
-            trigger: 'item',
-            borderColor: '#5470C6',
-            formatter: (params: {
-              name: string
-              value?: I_Parameters
-              seriesName: string
-            }) => {
-              if (Array.isArray(params.value)) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const [lon, lat, views, hugs, messages] = params.value
-                return `
-                  <strong>${params.name}</strong><br/>
-                  views: ${views}<br/>
-                  hugs: ${hugs}<br/>
-                  messages: ${messages}
-                `
-              } else {
-                return `<strong>${params.name}</strong><br/>No data`
-              }
-            },
+    setOption((prev: any) => ({
+      ...prev,
+      series: [
+        {
+          ...prev.series?.[0],
+          data: mappedData,
+          symbolSize: (val: any[]) => {
+            const total = val[2] + val[3] + val[4]
+            return Math.max(
+              5,
+              Math.min(Math.log10(Math.max(total, 1)) * 10, 100)
+            )
           },
-          geo: {
-            map: 'world',
-            roam: true, // Enable zoom and pan
-            zoom: 1.2, // Adjust zoom level to fit screen
-            layoutSize: '100%',
-            label: {
-              show: false,
-            },
-            scaleLimit: {
-              min: 1,
-              max: 2.5,
-            },
-            itemStyle: {
-              areaColor: '#E2F2FA',
-              borderColor: '#DAEBFA',
-            },
-            emphasis: {
-              label: { show: false },
-              itemStyle: {
-                areaColor: '#A5D8FF',
-              },
-            },
-          },
-          series: [
-            {
-              name: 'Effect Points',
-              type: 'effectScatter',
-              coordinateSystem: 'geo',
-              data: mappedData,
-              itemStyle: {
-                color: '#63B6AC',
-              },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              symbolSize: (val: any[]) => {
-                const total = val[2] + val[3] + val[4] // [lng, lat, views, hugs, messages]
-                const safeTotal = Math.max(total, 1) // avoid log(0)
-                const size = Math.log10(safeTotal) * 10 // Log scaling
-                return Math.max(5, Math.min(size, 100)) // clamp between 5 and 100
-              },
-            },
-          ],
-        })
-      })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+        },
+      ],
+    }))
+  }, [mappedData])
 
+  // return <ReactECharts option={option} style={{ width: '100%' }} />
   return (
-    <ReactECharts
-      option={option}
-      style={{
-        width: '100%',
-      }}
-    />
+    <>
+      {loading ? (
+        <div className="echarts-for-react text-center text-gray-500 py-10">
+          <LoadingComponent />
+        </div>
+      ) : (
+        <ReactECharts option={option} style={{ width: '100%' }} />
+      )}
+    </>
   )
 }
 

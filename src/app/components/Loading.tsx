@@ -11,7 +11,7 @@ const LoadingComponent = ({ clContainerClassName }: I_LoadingComponent) => {
   return (
     <div
       className={twMerge(
-        'w-full h-full flex items-center justify-center bg-white bg-opacity-15',
+        'w-full h-full flex items-center justify-center bg-red-100 bg-opacity-15',
         clContainerClassName
       )}
     >
