@@ -29,6 +29,8 @@ export interface I_combineddataOfRecipient extends I_supa_users_data_website_row
   user: I_supa_users_row | null
 }
 
+export const maxDuration = 60
+
 const AdminDashboard = async () => {
   const user = await getCurrentUser()
   isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
