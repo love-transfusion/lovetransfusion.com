@@ -22,6 +22,8 @@ interface I_userDashboardLayout extends Params {
   params: Params
 }
 
+export const maxDuration = 60
+
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
   const { map, updateSlot } = props

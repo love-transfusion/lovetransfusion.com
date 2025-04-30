@@ -12,6 +12,8 @@ import MobileDashboardMenu from './MobileDashboardMenu'
 
 // interface I_MembersLayout
 
+export const maxDuration = 60
+
 const UserIDLayout = async ({
   children,
 }: {
