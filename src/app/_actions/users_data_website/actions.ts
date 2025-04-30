@@ -2,7 +2,6 @@
 
 import { createServer } from '@/app/config/supabase/supabaseServer'
 import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
-import { util_delay } from '@/app/utilities/util_delay'
 import { PostgrestError } from '@supabase/supabase-js'
 
 interface I_custom_selected_recipient
@@ -38,7 +37,6 @@ export const supa_select_paginated_recipients = async (optionsObject?: {
 }) => {
   const { clFetchDateFrom, clLimit } = optionsObject ?? {}
   const supabase = await createServer()
-  await util_delay(20)
   const { data, error } = await supabase
     .from('users_data_website')
     .select('*')

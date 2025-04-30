@@ -21,7 +21,7 @@ const MapChart = ({ recipientObj }: Props) => {
     series: [],
   })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
 
   console.log({ mappedData, loading })
   useEffect(() => {
