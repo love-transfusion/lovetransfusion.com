@@ -75,7 +75,7 @@ const LoginForm = () => {
             'flex items-center justify-between my-auto divide-x divide-white divide-opacity-50'
           }
         >
-          <p className={'mx-auto text-center font-acumin-semi-condensed'}>
+          <p className={'mx-auto text-center font-acumin-variable-90'}>
             {isSubmitting ? 'Logging in...' : 'Login'}
           </p>
           <div className={'pl-[19px]'}>

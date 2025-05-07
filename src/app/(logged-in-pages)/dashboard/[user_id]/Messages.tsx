@@ -46,7 +46,7 @@ const Messages = ({
   return (
     <div
       className={
-        'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] overflow-hidden mt-4 md:mt-8'
+        'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] overflow-hidden mt-4 md:mt-[29px]'
       }
     >
       <div
@@ -54,7 +54,7 @@ const Messages = ({
           'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] h-4 w-full rounded-t-md'
         }
       />
-      <div className={'divide-y divide-primary'}>
+      <div className={'divide-y divide-[#B0E0F1]'}>
         {comments.map((item, index) => {
           if (index > lastVisible) return
           const isLastItem = index === lastVisible
@@ -91,7 +91,7 @@ const Messages = ({
                       <div className={'text-center md:text-left'}>
                         <p
                           className={
-                            'text-lg font-acuminProSemibold text-[#009933]'
+                            'text-xl font-acuminProSemibold text-[#009933] font-semibold'
                           }
                         >
                           {item.name}

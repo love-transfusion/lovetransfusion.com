@@ -8,21 +8,19 @@ const RecipientName = () => {
   return (
     <>
       {userInStore?.first_name ? (
-        <div
-          className={
-            '2xl:text-xl text-[#ffffffad] flex gap-[10px] 2xl:pl-[110px]'
-          }
-        >
-          <p className={'font-light'}>RECIPIENT:</p>
-          <p className="font-medium tracking-[0.5px] capitalize">
+        <div className={'2xl:text-xl text-[#ffffffad] flex gap-[11px]'}>
+          <p className={'font-thin font-acumin-variable-92'}>RECIPIENT:</p>
+          <p className="font-acumin-variable-96 -mt-[1px] font-extralight capitalize opacity-80">
             {userInStore.first_name}
           </p>
         </div>
       ) : (
-        <div className={'flex w-full justify-end'}>
+        <div
+          className={'flex w-full justify-end xl:justify-start max-w-[200px]'}
+        >
           <div
             className={
-              'w-[120px] md:w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
+              'w-[120px] md:w-[200px] lg:w-[138px] xl:w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-50 animate-pulse h-6 rounded-md'
             }
           />
         </div>

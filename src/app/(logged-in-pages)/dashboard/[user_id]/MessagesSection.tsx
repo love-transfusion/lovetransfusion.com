@@ -20,17 +20,21 @@ const MessagesSection = ({
   return (
     <div
       className={
-        'flex flex-col-reverse md:flex-row items-center md:items-start gap-4 md:gap-[50px]  pt-5 pb-5 md:pt-7 md:pb-7 px-5 md:px-10 bg-[#EFF7FC] min-h-[130px]'
+        'flex flex-col-reverse md:flex-row items-center md:items-start justify-center gap-4 md:gap-[65px] pl-5 pr-5 md:pl-[60px] md:pr-[60px] 2xl:pl-[86px] 2xl:pr-0 pt-5 pb-5 md:pt-7 md:pb-7 bg-[#EFF7FC] min-h-[130px]'
       }
     >
       {comments.length > 0 && (
-        <div className={'md:min-w-full xl:min-w-[900px] w-full'}>
+        <div className={'md:min-w-full xl:min-w-[900px] w-full max-w-[959px]'}>
           <div className={'flex gap-9'}>
             <DividerText
               clContainerClassName="hidden md:block"
-              clBorderTopClassName="border-[#92CCED]"
+              clBorderTopClassName="border-[#92CCED] border-[1.7px]"
             >
-              <p className={'text-nowrap md:text-2xl uppercase text-[#B3D8F3]'}>
+              <p
+                className={
+                  'text-nowrap md:text-2xl uppercase text-[#B3D8F3] font-acumin-variable-103 tracking-[1px]'
+                }
+              >
                 messages
               </p>
             </DividerText>
@@ -56,7 +60,7 @@ const MessagesSection = ({
           {showMessages && (
             <div
               className={
-                'hidden xl:block p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative w-full 2xl:min-w-[406px] max-w-[406px]'
+                'hidden xl:block p-3 bg-[#2F8EDD] rounded-[4px] mt-8 text-white relative w-full 2xl:min-w-[330px] max-w-[330px]'
               }
             >
               <div

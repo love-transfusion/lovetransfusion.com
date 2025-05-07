@@ -35,7 +35,7 @@ const SlidingSupportersName = ({ clRecipient }: I_SlidingSupportersName) => {
     return dateB - dateA
   })
   return (
-    <div className={'flex items-center min-h-9 bg-[#E5F4FA]'}>
+    <div className={'flex items-center min-h-8 bg-[#E5F4FA]'}>
       <Marquee speed={50} autoFill={true}>
         {combinedEngagements.map((item) => {
           return (

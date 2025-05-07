@@ -2,7 +2,7 @@
 import React from 'react'
 import utilityStore from '../utilities/store/utilityStore'
 import { useStore } from 'zustand'
-import dashboard from './images/dashboard-icon.svg'
+import dashboard from './images/dashboard-new.svg'
 import profile from './images/profile.svg'
 import privacy from './images/privacy.svg'
 import Image from 'next/image'
@@ -16,17 +16,19 @@ interface I_SubMenu {
 const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
   const { userInStore } = useStore(utilityStore)
   return (
-    <div className={'mt-[60px] flex flex-col gap-[5px]'}>
-      <p className={'text-[#DFEEFA8F] mb-[13px]'}>MAIN MENU</p>
+    <div className={'mt-[49px] flex flex-col gap-[15px]'}>
+      <p className={'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light'}>
+        MAIN MENU
+      </p>
       {clIsAdmin && (
         <Link href={`/admin`}>
           <div
             className={
-              'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'
+              'flex gap-[13px] items-center text-xl font-acumin-variable-95 font-light'
             }
           >
-            <Icon_cog className="size-[34px] ml-1" />
-            <p className={'ml-1'}>Manage Recipients</p>
+            <Icon_cog className="size-[34px] -ml-1" strokeWidth={0.8} />
+            <p className={'ml-1 -mt-[1px]'}>Manage Recipients</p>
           </div>
         </Link>
       )}
@@ -37,16 +39,16 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
       >
         <div
           className={
-            'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'
+            'flex gap-5 items-center text-xl font-acumin-variable-95 font-light'
           }
         >
           <Image
             src={dashboard}
             alt="heart"
             quality={100}
-            className="size-[43px]"
+            className="size-[26px]"
           />
-          <p className={''}>Dashboard</p>
+          <p className={'-mt-[1px]'}>Dashboard</p>
         </div>
       </Link>
       <Link
@@ -55,31 +57,31 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
       >
         <div
           className={
-            'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'
+            'flex gap-5 items-center text-xl font-acumin-variable-95 font-light'
           }
         >
           <Image
             src={profile}
             alt="heart"
             quality={100}
-            className="size-[43px]"
+            className="size-[26px]"
           />
-          <p className={''}>Profile</p>
+          <p className={'-mt-[1px]'}>Profile</p>
         </div>
       </Link>
       <Link href={'/privacy-policy'}>
         <div
           className={
-            'flex gap-[7px] items-center text-xl font-acumin-semi-condensed font-light'
+            'flex gap-[18px] items-center text-xl font-acumin-variable-95 font-light -mt-[2px]'
           }
         >
           <Image
             src={privacy}
             alt="heart"
             quality={100}
-            className="size-[43px]"
+            className="size-[32px] -ml-[3px]"
           />
-          <p className={''}>Privacy</p>
+          <p className={'-mt-[1px]'}>Privacy</p>
         </div>
       </Link>
     </div>

@@ -11,7 +11,7 @@ const HelpCenterPage = () => {
       <div className={'max-w-[950px] mx-auto md:px-6 lg:px-10 xl:px-4'}>
         <p
           className={
-            'font-acumin-condensed font-bold text-[#b3d8f3] text-center text-[35px]'
+            'font-acumin-variable-68 font-bold text-[#b3d8f3] text-center text-[35px]'
           }
         >
           HELP CENTER
@@ -23,7 +23,7 @@ const HelpCenterPage = () => {
         >
           <p
             className={
-              'font-acumin-condensed font-semibold text-primary text-center text-2xl md:text-[28px]'
+              'font-acumin-variable-68 font-semibold text-primary text-center text-2xl md:text-[28px]'
             }
           >
             Frequently Asked Questions...
@@ -36,7 +36,7 @@ const HelpCenterPage = () => {
         <div className={'px-4 md:px-8 mt-8'}>
           <p
             className={
-              'font-acumin-condensed text-primary text-[28px] mb-[13px] pl-[26px]'
+              'font-acumin-variable-68 text-primary text-[28px] mb-[13px] pl-[26px]'
             }
           >
             Message Us

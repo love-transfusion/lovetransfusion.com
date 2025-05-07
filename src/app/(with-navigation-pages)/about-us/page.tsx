@@ -19,7 +19,7 @@ const AboutUsPage = () => {
         </div>
         <p
           className={
-            'font-acumin-condensed font-bold text-[23px] text-primary text-center mt-[14px] mb-[22px]'
+            'font-acumin-variable-68 font-bold text-[23px] text-primary text-center mt-[14px] mb-[22px]'
           }
         >
           About Us

@@ -6,10 +6,10 @@ import ltLogo from '@/app/(logged-in-pages)/images/Logo Icon.svg'
 import Image from 'next/image'
 import { getFormattedDate } from '@/app/(logged-in-pages)/NavigationMenu'
 import Link from 'next/link'
-import aboutUsIcon from '@/app/(logged-in-pages)/images/about-us-icon.svg'
-import messageIcon from '@/app/(logged-in-pages)/images/messageIcon.svg'
-import helpCenter from '@/app/(logged-in-pages)/images/help-center-icon.svg'
-import dashboard from '@/app/(logged-in-pages)/images/dashboard-icon.svg'
+import aboutUsIcon from '@/app/(logged-in-pages)/images/About.svg'
+import messageIcon from '@/app/(logged-in-pages)/images/Contact.svg'
+import helpCenter from '@/app/(logged-in-pages)/images/Help.svg'
+import dashboard from '@/app/(logged-in-pages)/images/dashboard-new.svg'
 import privacy from '@/app/(logged-in-pages)/images/privacy.svg'
 import { usePathname } from 'next/navigation'
 
@@ -64,7 +64,7 @@ const MobilePublicNavigation = () => {
             <Link href={'/'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
                 }
               >
                 <Image
@@ -79,7 +79,7 @@ const MobilePublicNavigation = () => {
             <Link href={'/privacy-policy'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
                 }
               >
                 <Image
@@ -99,7 +99,7 @@ const MobilePublicNavigation = () => {
             <Link href={'/help-center'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
                 }
               >
                 <Image
@@ -119,7 +119,7 @@ const MobilePublicNavigation = () => {
             <Link href={'/about-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
                 }
               >
                 <Image
@@ -134,7 +134,7 @@ const MobilePublicNavigation = () => {
             <Link href={'/contact-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-semi-condensed'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
                 }
               >
                 <Image

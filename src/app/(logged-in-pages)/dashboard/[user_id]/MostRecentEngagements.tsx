@@ -40,7 +40,7 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
   return (
     <div
       className={
-        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-[18px] -mt-[6px] max-h-[586px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[337px] overflow-hidden relative mx-auto'
+        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-[18px] pt-[3px] -mt-[6px] max-h-[586px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[337px] overflow-hidden relative mx-auto'
       }
     >
       <div
@@ -50,7 +50,7 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
       />
       <p
         className={
-          'mx-5 bg-gradient-to-b from-[#2F8FDD] to-[#2EB4DB] pt-2 pb-[6px] text-center text-white uppercase rounded-t-lg mt-[46px] xl:mt-10 2xl:mt-[unset]'
+          'mx-5 bg-gradient-to-b from-[#2F8FDD] to-[#2EB4DB] pt-2 pb-[3px] text-[17.69px] text-center text-white uppercase rounded-t-lg mt-[46px] xl:mt-0 2xl:mt-[unset]'
         }
       >
         Most Recent
@@ -65,8 +65,8 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
             'flex justify-between text-[12px] text-primary pl-16 px-6 leading-tight py-[7px]'
           }
         >
-          <p className={''}>NAME</p>
-          <p className={''}>SOURCE</p>
+          <p className={'text-[10.11px] tracking-[1px]'}>NAME</p>
+          <p className={'text-[10.11px] tracking-[1px]'}>SOURCE</p>
         </div>
         <div className={'divide-y divide-primary-200'}>
           {combinedEngagements.map((item, index) => {
@@ -74,7 +74,7 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
               <div
                 key={index}
                 className={
-                  'flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] first:bg-white first:scale-105 first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px]'
+                  'flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] first:bg-white first:scale-105 first:px-[23] first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px] first:font-semibold text-base'
                 }
               >
                 <div className={'flex items-center gap-3'}>
@@ -91,7 +91,10 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
                     className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
                   />
                   <p className={'text-[#009933]'}>
-                    {item.name ?? 'Someone Who Cares'}
+                    {item.public_profiles
+                      ? item.public_profiles?.full_name ||
+                        `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
+                      : 'Someone Who Cares'}
                   </p>
                 </div>
                 <Image

@@ -29,14 +29,14 @@ const ProfilePage = async (props: I_ProfilePage) => {
         <div className={'md:max-w-[440px] mx-auto mb-[25px] px-5'}>
           <p
             className={
-              'text-2xl md:text-[35px] font-acumin-condensed font-bold text-primary leading-tight'
+              'text-2xl md:text-[35px] font-acumin-variable-68 font-bold text-primary leading-tight'
             }
           >
             Profile Settings
           </p>
           <p
             className={
-              'text-lg md:text-xl font-acumin-semi-condensed text-[#999] mt-[3px]'
+              'text-lg md:text-xl font-acumin-variable-90 text-[#999] mt-[3px]'
             }
           >
             Update your name and profile image

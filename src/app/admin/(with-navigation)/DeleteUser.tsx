@@ -35,7 +35,7 @@ const DeleteUser = ({ user_id }: { user_id: string }) => {
           <div className={'px-3 md:px-14 w-fit'}>
             <p
               className={
-                'font-acumin-condensed text-3xl font-bold mx-auto w-[290px] text-left'
+                'font-acumin-variable-68 text-3xl font-bold mx-auto w-[290px] text-left'
               }
             >
               Are you sure you want to delete this user?

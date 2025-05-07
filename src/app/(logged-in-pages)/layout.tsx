@@ -33,41 +33,47 @@ const UserIDLayout = async ({
         <div className="h-full flex flex-col w-full">
           <div
             className={
-              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] min-h-[84px] pl-3 pr-3 2xl:pl-7 2xl:pr-11 flex items-center'
+              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex items-center'
             }
           >
             <div
               className={
-                'flex 2xl:gap-[98px] items-center justify-between w-full'
+                'flex 2xl:gap-[183px] items-center w-full justify-between 2xl:justify-normal'
               }
             >
               <div className={'flex gap-[11px] items-center'}>
                 <MobileDashboardMenu clIsAdmin={isadmin} />
-                <p className={'md:text-lg 2xl:text-2xl tracking-[3px]'}>
-                  DASHBOARD
-                </p>
-              </div>
-              <Image
-                src={dots}
-                alt="dots"
-                quality={100}
-                className="hidden lg:block"
-              />
-              <div className={'hidden md:flex gap-[15px]'}>
-                <Image
-                  src={doubleHeart}
-                  alt="dots"
-                  quality={100}
-                  className="hidden lg:block"
-                />
-                <p
-                  className={
-                    'text-xl 2xl:text-[26px] italic text-nowrap hidden lg:block -tracking-[0.3px] mt-[2px]'
-                  }
-                >
-                  Love Transfusion In Progress
-                </p>
-                <Image src={doubleHeart} alt="dots" quality={100} />
+                <div className="flex gap-[40px] xl:gap-[90px]">
+                  <p
+                    className={
+                      'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
+                    }
+                  >
+                    DASHBOARD
+                  </p>
+                  <Image
+                    src={dots}
+                    alt="dots"
+                    quality={100}
+                    className="hidden xl:block"
+                  />
+                  <div className={'hidden md:flex gap-[17px] ml-[5px]'}>
+                    <Image
+                      src={doubleHeart}
+                      alt="dots"
+                      quality={100}
+                      className="hidden lg:block"
+                    />
+                    <p
+                      className={
+                        'font-acumin-variable-102 text-xl 2xl:text-[26px] text-nowrap hidden lg:block mt-[1px] font-light'
+                      }
+                    >
+                      Love Transfusion In Progress
+                    </p>
+                    <Image src={doubleHeart} className="hidden lg:block" alt="dots" quality={100} />
+                  </div>
+                </div>
               </div>
               <RecipientName />
             </div>

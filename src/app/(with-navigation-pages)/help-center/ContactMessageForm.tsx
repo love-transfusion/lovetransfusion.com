@@ -107,7 +107,7 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
           >
             <p
               className={
-                'mx-auto text-[17px] text-center font-acumin-semi-condensed'
+                'mx-auto text-[17px] text-center font-acumin-variable-90'
               }
             >
               Submit

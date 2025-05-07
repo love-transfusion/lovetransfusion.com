@@ -43,7 +43,7 @@ const ResetPasswordPage = () => {
         <div className={'md:max-w-[440px] mx-auto mb-[25px] px-5'}>
           <p
             className={
-              'text-2xl md:text-[35px] font-acumin-condensed font-bold text-primary leading-tight'
+              'text-2xl md:text-[35px] font-acumin-variable-68 font-bold text-primary leading-tight'
             }
           >
             Reset Password
@@ -86,7 +86,7 @@ const ResetPasswordPage = () => {
                   }
                 >
                   <p
-                    className={'mx-auto text-center font-acumin-semi-condensed'}
+                    className={'mx-auto text-center font-acumin-variable-90'}
                   >
                     Update Password
                   </p>

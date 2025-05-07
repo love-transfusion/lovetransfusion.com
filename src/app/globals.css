@@ -13,26 +13,37 @@
     --foreground: #ededed;
   }
 }
-
-.font-acumin-condensed {
+.font-acumin-variable-68 {
   font-family: 'acumin-variable', sans-serif;
   font-variation-settings: 'wdth' 68;
 }
-.font-acumin-semi-condensed {
+/* .font-acumin-variable-80 {
+  font-family: 'acumin-variable', sans-serif;
+  font-variation-settings: 'wdth' 80;
+} */
+.font-acumin-variable-90 {
   font-family: 'acumin-variable', sans-serif;
   font-variation-settings: 'wdth' 90;
 }
-.font-acumin-semi-condensed-92 {
+.font-acumin-variable-92 {
   font-family: 'acumin-variable', sans-serif;
-  font-variation-settings: 'wdth' 92, 'slnt' 0;
+  font-variation-settings: 'wdth' 92;
 }
-.font-acumin-semi-condensed-92 {
+.font-acumin-variable-95 {
   font-family: 'acumin-variable', sans-serif;
-  font-variation-settings: 'wdth' 92, 'slnt' 0;
+  font-variation-settings: 'wdth' 95;
 }
-.font-acumin-semi-condensed-95 {
+.font-acumin-variable-96 {
   font-family: 'acumin-variable', sans-serif;
-  font-variation-settings: 'wdth' 95, 'slnt' 0;
+  font-variation-settings: 'wdth' 98;
+}
+.font-acumin-variable-102 {
+  font-family: 'acumin-variable', sans-serif;
+  font-variation-settings: 'wdth' 102.5, 'slnt' -12;
+}
+.font-acumin-variable-103 {
+  font-family: 'acumin-variable', sans-serif;
+  font-variation-settings: 'wdth' 103;
 }
 
 @media (min-width: 1921px) {
@@ -42,11 +53,18 @@
 }
 @media (min-width: 1620px) and (max-width: 1920px) {
   .echarts-for-react {
-    height: 480px !important;
+    height: 25.93vw !important;
   }
 }
-.echarts-for-react {
-  height: 370px !important;
+@media (min-width: 1440px) and (max-width: 1619px) {
+  .echarts-for-react {
+    height: 26.5vw !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1439px) {
+  .echarts-for-react {
+    height: 370px !important;
+  }
 }
 @media (max-width: 767px) {
   .echarts-for-react {

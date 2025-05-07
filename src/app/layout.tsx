@@ -1,15 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-// import {
-//   acuminProThin,
-//   acuminCondensedBold,
-//   acuminProMedium,
-//   acuminProSemibold,
-//   acuminProLight,
-//   acuminProExtraLight,
-//   acuminProRegular,
-//   acuminCondensedRegular,
-// } from './utilities/fonts/fonts'
 import GlobalToast from './GlobalToast'
 
 export const revalidate = 30
@@ -29,10 +19,7 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://use.typekit.net/hox1ite.css" />
       </head>
-      <body
-        // className={`${acuminCondensedBold.variable} ${acuminProThin.variable} ${acuminProRegular.className} ${acuminProMedium.variable} ${acuminProSemibold.variable} ${acuminProLight.variable} ${acuminProExtraLight.variable} ${acuminCondensedRegular.variable}`}
-        className="font-acumin-variable"
-      >
+      <body className="font-acumin-variable">
         <GlobalToast />
         <div>{children}</div>
       </body>

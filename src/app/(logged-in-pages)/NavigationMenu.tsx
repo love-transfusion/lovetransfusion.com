@@ -27,20 +27,35 @@ const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
         <div className={'bg-[#2F8EDD] h-[84px]'} />
         <div
           className={
-            'bg-[linear-gradient(rgb(47,142,221)_0%,rgb(47,157,221)_33%,rgb(47,171,221)_69%,rgb(47,186,221)_97%)] px-5 h-[calc(100%-20px)] text-[#DFEEFA] font-acumin-semi-condensed pb-10'
+            'bg-[linear-gradient(rgb(47,142,221)_0%,rgb(47,157,221)_33%,rgb(47,171,221)_69%,rgb(47,186,221)_97%)] px-6 h-[calc(100%-24px)] text-[#DFEEFA] font-acumin-variable-90 pb-10'
           }
         >
-          <div className={'text-[#E9F5FE] text-center -mt-[64px]'}>
+          <div className={'text-[#E9F5FE] text-center -mt-[60px]'}>
             <Image
               src={ltLogo}
               alt="Love Transfusion Logo"
               quality={100}
               className="mx-auto"
             />
-            <p className={'text-2xl mt-[14px] text-nowrap'}>LOVE TRANSFUSION</p>
-            <p className={'mt-[2px] mb-[19px]'}>Support Platform</p>
-            <p className={'border-y border-[#92CCED] py-1 text-lg'}>
-              {/* March 13, 2025 */}
+            <p
+              className={
+                'font-acumin-concept-90 text-2xl mt-4 text-nowrap font-medium'
+              }
+            >
+              LOVE TRANSFUSION
+            </p>
+            <p
+              className={
+                'font-acumin-variable-103 -mt-[2px] mb-[22px] tracking-[0.48px] font-light'
+              }
+            >
+              Support Platform
+            </p>
+            <p
+              className={
+                'font-acumin-variable-92 border-y text-[#E9F5FE] border-[#92CCED] pt-[2px] pb-[3.5px] tracking-[0.48px] text-lg font-light'
+              }
+            >
               {getFormattedDate()}
             </p>
           </div>

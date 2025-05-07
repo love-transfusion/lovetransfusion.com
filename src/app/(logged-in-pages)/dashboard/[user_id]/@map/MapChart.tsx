@@ -146,7 +146,7 @@ const MapChart = ({ recipientObj }: Props) => {
     <>
       {loading ? (
         <div className="echarts-for-react text-center text-gray-500 py-10">
-          <LoadingComponent />
+          <LoadingComponent clLoadingText='Loading map...' />
         </div>
       ) : (
         <ReactECharts option={option} style={{ width: '100%' }} />

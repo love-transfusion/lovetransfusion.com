@@ -29,14 +29,14 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-condensed font-bold text-2xl md:text-[35px] text-primary text-center'
+              'font-acumin-variable-68 font-bold text-2xl md:text-[35px] text-primary text-center'
             }
           >
             Connecting People Who Hurt With Those Who Care
           </p>
           <p
             className={
-              'font-acumin-semi-condensed font-medium text-[17px] md:text-xl text-[#999] text-center mt-2'
+              'font-acumin-variable-90 font-medium text-[17px] md:text-xl text-[#999] text-center mt-2'
             }
           >
             A Conduit for Expressions of Love and Support
@@ -79,14 +79,14 @@ const Homepage = async () => {
               </div>
               <p
                 className={
-                  'font-acumin-condensed font-bold text-primary text-[23px] mt-[22px] mb-1 pl-[1px]'
+                  'font-acumin-variable-68 font-bold text-primary text-[23px] mt-[22px] mb-1 pl-[1px]'
                 }
               >
                 Emotional Support Network
               </p>
               <p
                 className={
-                  'font-acumin-semi-condensed-92 leading-[22px] text-[#999] text-center lg:text-left'
+                  'font-acumin-variable-92 leading-[22px] text-[#999] text-center lg:text-left'
                 }
               >
                 Provided free of charge for families battling serious illness,
@@ -109,7 +109,7 @@ const Homepage = async () => {
             >
               <p
                 className={
-                  'text-xl md:text-[24px] text-primary font-acumin-condensed text-center mb-2 md:mb-4'
+                  'text-xl md:text-[24px] text-primary font-acumin-variable-68 text-center mb-2 md:mb-4'
                 }
               >
                 NEW RECIPIENTS
@@ -122,14 +122,14 @@ const Homepage = async () => {
                   <div className={'flex items-center justify-between my-auto'}>
                     <p
                       className={
-                        'text-[22px] mx-auto text-center font-acumin-semi-condensed-95 font-extralight pr-[4px]'
+                        'text-[22px] mx-auto text-center font-acumin-variable-95 font-extralight pr-[4px]'
                       }
                     >
                       Register
                     </p>
                     <p
                       className={
-                        'font-acumin-condensed color-[#dfeefa8f] opacity-60 font-extralight'
+                        'font-acumin-variable-68 color-[#dfeefa8f] opacity-60 font-extralight'
                       }
                     >
                       |
@@ -146,7 +146,7 @@ const Homepage = async () => {
             >
               <p
                 className={
-                  'text-xl md:text-[24px] text-primary font-acumin-condensed text-center mb-2 md:mb-4'
+                  'text-xl md:text-[24px] text-primary font-acumin-variable-68 text-center mb-2 md:mb-4'
                 }
               >
                 RETURNING RECIPIENTS
@@ -159,14 +159,14 @@ const Homepage = async () => {
                   <div className={'flex items-center justify-between my-auto'}>
                     <p
                       className={
-                        'text-[22px] mx-auto text-center font-acumin-semi-condensed-95 font-extralight pr-4'
+                        'text-[22px] mx-auto text-center font-acumin-variable-95 font-extralight pr-4'
                       }
                     >
                       Login
                     </p>
                     <p
                       className={
-                        'font-acumin-condensed color-[#dfeefa8f] opacity-60 font-extralight'
+                        'font-acumin-variable-68 color-[#dfeefa8f] opacity-60 font-extralight'
                       }
                     >
                       |
@@ -187,7 +187,7 @@ const Homepage = async () => {
                   >
                     <p
                       className={
-                        'text-[22px] mx-auto text-center font-acumin-semi-condensed-95 font-extralight'
+                        'text-[22px] mx-auto text-center font-acumin-variable-95 font-extralight'
                       }
                     >
                       Login
@@ -209,7 +209,7 @@ const Homepage = async () => {
             <div className={'flex border-t w-full h-[1px] mt-[3px]'} />
             <p
               className={
-                'text-nowrap font-acumin-condensed font-semibold text-[#E6E6E6] text-[23px] md:text-[32px] tracking-[0.1em]'
+                'text-nowrap font-acumin-variable-68 font-semibold text-[#E6E6E6] text-[23px] md:text-[32px] tracking-[0.1em]'
               }
             >
               HOW IT WORKS
@@ -224,7 +224,7 @@ const Homepage = async () => {
             <div className={'flex flex-col items-center mt-[5px]'}>
               <p
                 className={
-                  'font-acumin-condensed text-3xl font-medium text-primary'
+                  'font-acumin-variable-68 text-3xl font-medium text-primary'
                 }
               >
                 Register
@@ -241,7 +241,7 @@ const Homepage = async () => {
             <div className={'flex flex-col items-center mt-3'}>
               <p
                 className={
-                  'font-acumin-condensed text-3xl font-medium text-primary'
+                  'font-acumin-variable-68 text-3xl font-medium text-primary'
                 }
               >
                 Log In
@@ -263,7 +263,7 @@ const Homepage = async () => {
             <div className={'flex flex-col items-center'}>
               <p
                 className={
-                  'font-acumin-condensed text-3xl font-medium text-primary'
+                  'font-acumin-variable-68 text-3xl font-medium text-primary'
                 }
               >
                 Receive

@@ -26,7 +26,7 @@ export const maxDuration = 60
 
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
-  const { map, updateSlot } = props
+  const { updateSlot, map } = props
 
   const { data: recipientRow } = await supa_select_recipient(user_id)
   const { data: selectedUser } = await supa_select_user(user_id)
@@ -46,7 +46,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       {/* Profile and Map Section */}
       <div
         className={
-          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[46px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[45px] pr-0 md:pr-[34px] 2xl:pr-[30px] border-b-4 border-[#B0E0F1]'
+          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[53px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[59px] pr-0 md:pr-[34px] 2xl:pr-[49px] border-b-4 border-[#B0E0F1]'
         }
       >
         <div
@@ -58,15 +58,22 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             recipientObj={recipientObj}
             selectedUser={selectedUser}
           />
-          <div className={'mt-2 text-left md:text-center'}>
+          <div className={'mt-2 text-left md:text-center -ml-[9px]'}>
             <p
               className={
-                'font-acuminProSemibold text-[22px] md:text-[26px] text-primary'
+                'font-acumin-variable-90 text-[22px] md:text-[26px] text-primary capitalize font-semibold pt-1'
               }
             >
-              {selectedUser?.recipient_name}
+              {/* {selectedUser?.recipient_name} */}
+              bobby white
             </p>
-            <p className={'text-primary-200 md:text-xl'}>RECIPIENT</p>
+            <p
+              className={
+                'text-primary-200 md:text-xl font font-acumin-variable-90'
+              }
+            >
+              RECIPIENT
+            </p>
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
@@ -77,13 +84,13 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               src={arrow}
               alt="arrow"
               quality={100}
-              className=" max-sm:hidden absolute top-4 left-[79px] my-auto"
+              className=" max-sm:hidden absolute top-[9px] left-[64px] my-auto min-w-[260px]"
             />
           </div>
         </div>
         <div
           className={
-            'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] 2xl:pt-[26px]'
+            'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] xl:pt-[26px]'
           }
         >
           {map}
@@ -91,7 +98,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <HugsMessagesShares clRecipientObj={recipientObj} />
           </div>
         </div>
-        <div className={'mx-auto max-sm:w-full'}>
+        <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
             <HugsMessagesShares clRecipientObj={recipientObj} />
           </div>

@@ -5,9 +5,13 @@ import { twMerge } from 'tailwind-merge'
 
 interface I_LoadingComponent {
   clContainerClassName?: string
+  clLoadingText?: string
 }
 
-const LoadingComponent = ({ clContainerClassName }: I_LoadingComponent) => {
+const LoadingComponent = ({
+  clContainerClassName,
+  clLoadingText,
+}: I_LoadingComponent) => {
   return (
     <div
       className={twMerge(
@@ -30,7 +34,7 @@ const LoadingComponent = ({ clContainerClassName }: I_LoadingComponent) => {
             className="absolute inset-[6px] bg-white rounded-full"
           />
         </div>
-        <p className={'text-center'}>Loading...</p>
+        <p className={'text-center'}>{clLoadingText ?? 'Loading...'}</p>
       </div>
     </div>
   )

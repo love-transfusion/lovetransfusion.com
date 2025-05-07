@@ -8,12 +8,12 @@ const LoginPage = () => {
         <div className={'md:max-w-[440px] mx-auto mb-[25px] px-5'}>
           <p
             className={
-              'text-2xl md:text-[35px] font-acumin-condensed font-bold text-primary leading-tight'
+              'text-2xl md:text-[35px] font-acumin-variable-68 font-bold text-primary leading-tight'
             }
           >
             Welcome To Love Transfusion!
           </p>
-          <p className={'text-lg md:text-xl font-acumin-semi-condensed font-semibold text-[#999] mt-[3px]'}>
+          <p className={'text-lg md:text-xl font-acumin-variable-90 font-semibold text-[#999] mt-[3px]'}>
             Log into your account...
           </p>
         </div>
