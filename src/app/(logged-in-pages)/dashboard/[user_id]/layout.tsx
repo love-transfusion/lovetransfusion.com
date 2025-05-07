@@ -64,8 +64,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
                 'font-acumin-variable-90 text-[22px] md:text-[26px] text-primary capitalize font-semibold pt-1'
               }
             >
-              {/* {selectedUser?.recipient_name} */}
-              bobby white
+              {selectedUser?.recipient_name}
             </p>
             <p
               className={

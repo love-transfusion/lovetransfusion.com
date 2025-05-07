@@ -102,12 +102,12 @@ export interface AdInsight {
 
 // Interface for AdWise insights
 export interface AdWiseInsight {
-  adId: string
-  adName: string
-  adsetId?: string
-  adsetName?: string
-  campaignId?: string
-  campaignName?: string
+  // adId: string
+  // adName: string
+  // adsetId?: string
+  // adsetName?: string
+  // campaignId?: string
+  // campaignName?: string
   clCountry: string
   clRegion: string
   clCity: string
@@ -310,11 +310,19 @@ const formatAccountId = (accountId: string): string => {
     clCountry: string
     clRegion: string
     clCity: string
-    clCountryCode: string
-    clTotalReactions: number
+    // clTotalReactions: number
     clLikeReactions?: number
     clHeartReactions?: number
     clHugReactions?: number
+    adId: string
+    adName: string
+    adsetId: string
+    adsetName: string
+    campaignId: string
+    campaignName: string
+    impressions: number
+    clImpressions: number
+    clReach: number
 }
  * ```
  */
@@ -322,20 +330,19 @@ interface AdWiseLocation {
   clCountry: string
   clRegion: string
   clCity: string
-  clCountryCode: string
-  clTotalReactions: number
+  // clTotalReactions: number
   clLikeReactions?: number
   clHeartReactions?: number
   clHugReactions?: number
-  // adId: string
-  // adName: string
-  // adsetId: string
-  // adsetName: string
-  // campaignId: string
-  // campaignName: string
-  // impressions: number
-  // clImpressions: number
-  // clReach: number
+  adId: string
+  adName: string
+  adsetId: string
+  adsetName: string
+  campaignId: string
+  campaignName: string
+  impressions: number
+  clImpressions: number
+  clReach: number
 }
 
 // Helper to get city name (DMA or region)
@@ -544,16 +551,16 @@ export const fetchAdWiseInsights = async (
           //   }[]
           // )
           return {
-            // adId: insight.ad_id!,
-            // adName: insight.ad_name || '',
-            // adsetId: insight.adset_id || '',
-            // adsetName: insight.adset_name || '',
-            // campaignId: insight.campaign_id || '',
-            // campaignName: insight.campaign_name || '',
+            adId: insight.ad_id!,
+            adName: insight.ad_name || '',
+            adsetId: insight.adset_id || '',
+            adsetName: insight.adset_name || '',
+            campaignId: insight.campaign_id || '',
+            campaignName: insight.campaign_name || '',
             clCountry: getCountryFullName(insight.country || 'Unknown'),
             clRegion: insight.region || 'Unknown',
             clCity: '(not set)',
-            // impressions: parseInt(insight.impressions || '0', 10),
+            impressions: parseInt(insight.impressions || '0', 10),
             clImpressions: parseInt(insight.impressions || '0', 10),
             clReach: parseInt(insight.reach || '0', 10),
           }
@@ -575,12 +582,6 @@ export const fetchAdWiseInsights = async (
       )
       withHug.forEach((l) => {
         results.push({
-          adId: l.adId,
-          adName: l.adName,
-          adsetId: l.adsetId,
-          adsetName: l.adsetName,
-          campaignId: l.campaignId,
-          campaignName: l.campaignName,
           clCountry: l.clCountry,
           clRegion: l.clRegion,
           clCity: l.clCity,

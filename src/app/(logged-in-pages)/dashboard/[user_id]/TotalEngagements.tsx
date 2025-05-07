@@ -49,8 +49,7 @@ const TotalEngagements = ({
             'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
           }
         >
-          {/* {total} */}
-          627
+          {total}
         </p>
       </div>
     </div>
