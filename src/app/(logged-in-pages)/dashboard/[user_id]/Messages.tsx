@@ -3,6 +3,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react'
 import Image from 'next/image'
 import anonymousImg from './images/user.webp'
 import { supa_insert_deleted_messages } from './actions'
+import { utils_dateAndTime_getPastTime } from '@/app/utilities/date-and-time/getPastTime'
 
 export interface I_Messages {
   clRecipientObj: I_supaorg_recipient_hugs_counters_comments
@@ -99,20 +100,31 @@ const Messages = ({
                         <p className={'text-primary'}>{item.comment}</p>
                       </div>
                     </div>
-                    <p
-                      onClick={() =>
-                        handleDelete({
-                          id: item.id,
-                          recipient_id: clRecipientObj.id,
-                          user_id: clUser_id,
-                        })
-                      }
-                      className={
-                        'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
-                      }
-                    >
-                      hide message
-                    </p>
+                    <div className={''}>
+                      <p
+                        onClick={() =>
+                          handleDelete({
+                            id: item.id,
+                            recipient_id: clRecipientObj.id,
+                            user_id: clUser_id,
+                          })
+                        }
+                        className={
+                          'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
+                        }
+                      >
+                        hide message
+                      </p>
+                      <p
+                        className={
+                          'text-center text-sm text-[#B3B3B3] mt-[3px]'
+                        }
+                      >
+                        {utils_dateAndTime_getPastTime(
+                          new Date(item.created_at)
+                        )}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : (
