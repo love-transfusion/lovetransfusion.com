@@ -2,7 +2,6 @@
 /**
  *
  * @param created_at `Date`
- * @returns
  */
 
 import { utils_dateAndTime_subtractDateTime } from "./subtractDateTime"

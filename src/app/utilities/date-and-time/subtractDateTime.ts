@@ -1,5 +1,11 @@
 import { utils_dateAndTime_convertToZeroFirst } from './convertToZero'
 
+/**
+ * 
+ * @param date1 Date
+ * @param date2 Date
+ * @returns 
+ */
 export const utils_dateAndTime_subtractDateTime = (
   date1: Date,
   date2: Date
