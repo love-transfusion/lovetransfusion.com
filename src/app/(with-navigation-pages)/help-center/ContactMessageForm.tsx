@@ -48,7 +48,6 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
     reset()
 
     if (error) {
-      console.log({ error })
       settoast({
         clDescription: error,
         clStatus: 'error',
@@ -60,7 +59,6 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
         clLastName: lastName,
         clMessage: rawData.message,
       })
-      console.log('setting toast')
       settoast({
         clDescription: 'Message successfully submitted',
         clStatus: 'success',

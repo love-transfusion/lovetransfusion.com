@@ -51,7 +51,7 @@ const WelcomeMessage = () => {
               >
                 <p
                   className={
-                    'font-acuminProSemibold text-2xl text-[#2f8edd] text-center pt-[86px]'
+                    'font-acuminProSemibold text-2xl text-[#2f8edd] text-center pt-[86px] font-bold'
                   }
                 >
                   Welcome to Your Love Transfusion Dashboard!
@@ -60,9 +60,12 @@ const WelcomeMessage = () => {
                   We have begun raising awareness about your story, and, as you
                   are about to see, many people have already expressed their
                   love and support for you through social media and our sister
-                  site, LoveTransfusion.org. In some cases, you may see
-                  placeholder names and pictures instead of real ones due to
-                  privacy limitations of the various platforms, but please know{' '}
+                  site, LoveTransfusion.org.{' '}
+                  <span className="font-bold">
+                    In some cases, you may see placeholder names and pictures
+                  </span>{' '}
+                  instead of real ones due to privacy limitations of the various
+                  platforms, but please know{' '}
                   <span className="font-acuminProSemibold">
                     that every expression of support is genuine and comes from a
                     real person.

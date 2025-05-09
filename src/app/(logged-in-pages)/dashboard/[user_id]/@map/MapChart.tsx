@@ -23,7 +23,6 @@ const MapChart = ({ recipientObj }: Props) => {
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
-  console.log({ mappedData, loading })
   useEffect(() => {
     const loadMap = async () => {
       if (mappedData.length < 1) {

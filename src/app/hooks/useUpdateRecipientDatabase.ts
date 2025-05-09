@@ -1,22 +1,18 @@
 'use client'
 import { useEffect } from 'react'
-import { I_Recipient_Data } from '../(logged-in-pages)/dashboard/[user_id]/actions'
-import { supa_admin_upsert_list_of_recipients } from '../_actions/admin/actions'
+import { fetchDataFromLTOrg_and_upsertto_users_data_website } from '../_actions/orgRecipients/actions'
 
-const useUpdateRecipientDatabase = (userData: I_Recipient_Data) => {
-  const updateRecipient = async () => {
-    await supa_admin_upsert_list_of_recipients([
-      {
-        id: userData.recipient.id,
-        recipient: userData.recipient,
-      },
-    ])
-  }
-  useEffect(() => {
-    // This makes safe when the recipient is unpublished from .org
-    if (userData.recipient?.id) {
-      updateRecipient()
+const useUpdateRecipientDatabase = (recipientId: string) => {
+  const updateRecipient = () => {
+    if (recipientId) {
+      fetchDataFromLTOrg_and_upsertto_users_data_website(recipientId)
     }
+  }
+
+  useEffect(() => {
+    updateRecipient()
+    const interval = setInterval(() => updateRecipient(), 0.5 * 60 * 1000)
+    return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return

@@ -812,7 +812,7 @@ export const fetchAdInsights = async (
       `${geoUrl}?${geoQueryString}`
     )
 
-    console.log('Ad geo insights fetched:', geoInsights.length)
+    // console.log('Ad geo insights fetched:', geoInsights.length)
 
     // Second: Fetch ad insights with reaction data (without conflicting breakdowns)
     const reactionsUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
@@ -830,7 +830,7 @@ export const fetchAdInsights = async (
       `${reactionsUrl}?${reactionsQueryString}`
     )
 
-    console.log('Ad reaction data fetched:', reactionsInsights.length)
+    // console.log('Ad reaction data fetched:', reactionsInsights.length)
 
     // Fetch DMA data separately (still needed for US locations)
     const dmaUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
@@ -919,9 +919,9 @@ export const fetchAdInsights = async (
         hugs: 0,
       }
 
-      console.log(
-        `Ad ${adId} reactions - Likes: ${reactions.likes}, Hearts: ${reactions.hearts}, Hugs: ${reactions.hugs}`
-      )
+      // console.log(
+      //   `Ad ${adId} reactions - Likes: ${reactions.likes}, Hearts: ${reactions.hearts}, Hugs: ${reactions.hugs}`
+      // )
 
       // Calculate total impressions for this ad across all regions
       const totalImpressions = fbInsights.reduce((sum, insight) => {

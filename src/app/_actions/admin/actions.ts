@@ -70,6 +70,18 @@ export const supa_admin_delete_auth_user = async (user_id: string) => {
   return { data, error: error?.message ?? null }
 }
 
+/**
+ * 
+ * users_data: I_Recipient_Data[]
+ * @example
+ * ```
+ *  await supa_admin_upsert_list_of_recipients({
+      id: string, // recipient's id
+      recipient: I_supaorg_recipient // recipient object
+    })
+ * ```
+ * @returns 
+ */
 export const supa_admin_upsert_list_of_recipients = async (
   users_data: I_Recipient_Data[]
 ) => {

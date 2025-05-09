@@ -28,7 +28,6 @@ const TestPage = async () => {
     }
   }
   const data = await fetchAdWiseOnlyInsights()
-  console.log({ data })
   return <pre>{data}</pre>
 }
 
