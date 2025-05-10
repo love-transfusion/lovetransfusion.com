@@ -56,92 +56,100 @@ const Messages = ({
         }
       />
       <div className={'divide-y divide-[#B0E0F1]'}>
-        {comments.map((item, index) => {
-          if (index > lastVisible) return
-          const isLastItem = index === lastVisible
-          return (
-            <div key={item.id} className="even:bg-white odd:bg-[#F7FCFF]">
-              {!isLastItem ? (
-                <div className={'px-9 pt-6 pb-7 md:pt-[23px] md:pb-[23px]'}>
-                  <div
-                    className={
-                      'flex flex-col md:flex-row md:justify-between items-center gap-[21px] md:gap-6'
-                    }
-                  >
+        {comments
+          .sort((a, b) => {
+            const dateA = new Date(a.created_at).getTime()
+            const dateB = new Date(b.created_at).getTime()
+            return dateB - dateA
+          })
+          .map((item, index) => {
+            if (index > lastVisible) return
+            const isLastItem = index === lastVisible
+            return (
+              <div key={item.id} className="even:bg-white odd:bg-[#F7FCFF]">
+                {!isLastItem ? (
+                  <div className={'px-9 pt-6 pb-7 md:pt-[23px] md:pb-[23px]'}>
                     <div
-                      className={'flex flex-col md:flex-row gap-6 items-center'}
+                      className={
+                        'flex flex-col md:flex-row md:justify-between items-center gap-[21px] md:gap-6'
+                      }
                     >
                       <div
                         className={
-                          'min-w-[64px] min-h-[64px] md:min-w-[60px] md:min-h-[60px] border-[3px] border-[#288CCC] rounded-full overflow-hidden relative'
+                          'flex flex-col md:flex-row gap-6 items-center'
                         }
                       >
-                        <Image
-                          src={
-                            item.public_profiles &&
-                            item.public_profiles.profile_picture?.fullPath
-                              ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.public_profiles.profile_picture?.fullPath}`
-                              : anonymousImg
-                          }
-                          alt="Profile picture of adley"
-                          quality={100}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className={'text-center md:text-left'}>
-                        <p
+                        <div
                           className={
-                            'text-xl font-acuminProSemibold text-[#009933] font-semibold'
+                            'min-w-[64px] min-h-[64px] md:min-w-[60px] md:min-h-[60px] border-[3px] border-[#288CCC] rounded-full overflow-hidden relative'
                           }
                         >
-                          {item.name}
+                          <Image
+                            src={
+                              item.public_profiles &&
+                              item.public_profiles.profile_picture?.fullPath
+                                ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.public_profiles.profile_picture?.fullPath}`
+                                : anonymousImg
+                            }
+                            alt="Profile picture of adley"
+                            quality={100}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className={'text-center md:text-left'}>
+                          <p
+                            className={
+                              'text-xl font-acuminProSemibold text-[#009933] font-semibold'
+                            }
+                          >
+                            {item.name}
+                          </p>
+                          <p className={'text-primary'}>{item.comment}</p>
+                        </div>
+                      </div>
+                      <div className={''}>
+                        <p
+                          onClick={() =>
+                            handleDelete({
+                              id: item.id,
+                              recipient_id: clRecipientObj.id,
+                              user_id: clUser_id,
+                            })
+                          }
+                          className={
+                            'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
+                          }
+                        >
+                          hide message
                         </p>
-                        <p className={'text-primary'}>{item.comment}</p>
+                        <p
+                          className={
+                            'text-center text-sm text-[#B3B3B3] mt-[3px]'
+                          }
+                        >
+                          {utils_dateAndTime_getPastTime(
+                            new Date(item.created_at)
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <div className={''}>
-                      <p
-                        onClick={() =>
-                          handleDelete({
-                            id: item.id,
-                            recipient_id: clRecipientObj.id,
-                            user_id: clUser_id,
-                          })
-                        }
-                        className={
-                          'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
-                        }
-                      >
-                        hide message
-                      </p>
-                      <p
-                        className={
-                          'text-center text-sm text-[#B3B3B3] mt-[3px]'
-                        }
-                      >
-                        {utils_dateAndTime_getPastTime(
-                          new Date(item.created_at)
-                        )}
-                      </p>
-                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className={'even:bg-white odd:bg-[#F7FCFF]'}>
-                  <p
-                    className={
-                      'text-primary underline text-center py-4 w-fit cursor-pointer mx-auto'
-                    }
-                    onClick={handleLoadMore}
-                  >
-                    Load more messages...
-                  </p>
-                </div>
-              )}
-            </div>
-          )
-        })}
+                ) : (
+                  <div className={'even:bg-white odd:bg-[#F7FCFF]'}>
+                    <p
+                      className={
+                        'text-primary underline text-center py-4 w-fit cursor-pointer mx-auto'
+                      }
+                      onClick={handleLoadMore}
+                    >
+                      Load more messages...
+                    </p>
+                  </div>
+                )}
+              </div>
+            )
+          })}
       </div>
     </div>
   )

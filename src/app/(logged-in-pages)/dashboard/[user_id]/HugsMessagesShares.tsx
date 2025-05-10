@@ -21,7 +21,7 @@ const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {
   return (
     <div
       className={
-        'flex flex-col md:flex-row gap-3 2xl:gap-6 pl-3 pr-3 md:pl-[15px] mt-[22px] md:mt-12 xl:mt-4 justify-center'
+        'flex flex-col md:flex-row gap-3 2xl:gap-6 pl-3 pr-3 md:pl-[15px] justify-center'
       }
     >
       <div className={'block md:hidden text-center '}>

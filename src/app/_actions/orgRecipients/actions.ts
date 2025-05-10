@@ -64,11 +64,6 @@ export const fetchDataFromLTOrg_and_upsertto_users_data_website = async (
   const newOrgRecipientData: {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
   } = await fetchDataFromLTOrg(recipientId)
-  console.log({
-    newOrgRecipientData,
-    recipients: newOrgRecipientData.recipients,
-    hugs: newOrgRecipientData.recipients[0].hugs.length,
-  })
 
   await supa_admin_upsert_list_of_recipients([
     {
