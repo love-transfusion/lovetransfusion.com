@@ -46,12 +46,12 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       {/* Profile and Map Section */}
       <div
         className={
-          'flex flex-wrap xl:flex-nowrap gap-5 xl:gap-0 pt-[30px] xl:pt-[53px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[59px] pr-0 md:pr-[34px] 2xl:pr-[49px] border-b-4 border-[#B0E0F1]'
+          'flex flex-wrap xl:flex-nowrap gap-2 md:gap-5 xl:gap-0 pt-[30px] xl:pt-[53px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[59px] pr-0 md:pr-[34px] 2xl:pr-[49px] border-b-4 border-[#B0E0F1]'
         }
       >
         <div
           className={
-            'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-5 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4'
+            'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-7 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4'
           }
         >
           <RecipientProfilePicture
@@ -61,14 +61,14 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'mt-2 text-left md:text-center -ml-[9px]'}>
             <p
               className={
-                'font-acumin-variable-90 text-[22px] md:text-[26px] text-primary capitalize font-semibold pt-1'
+                'font-acumin-variable-90 text-[28px] md:text-[26px] text-primary capitalize font-semibold pt-1'
               }
             >
               {selectedUser?.recipient_name}
             </p>
             <p
               className={
-                'text-primary-200 md:text-xl font font-acumin-variable-90'
+                'text-primary-200 text-xl md:text-xl font font-acumin-variable-90'
               }
             >
               RECIPIENT

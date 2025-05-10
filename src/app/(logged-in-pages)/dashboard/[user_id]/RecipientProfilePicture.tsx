@@ -20,7 +20,7 @@ const RecipientProfilePicture = ({
     >
       <div
         className={
-          'w-[100px] h-[100px] md:w-[128px] 2xl:w-[196px] md:h-[128px] 2xl:h-[196px] border-[3px] md:border-4 border-white ring-4 md:ring-[5px] ring-[#288CCC] rounded-full overflow-hidden relative'
+          'w-[140px] h-[140px] md:w-[128px] 2xl:w-[196px] md:h-[128px] 2xl:h-[196px] border-[3px] md:border-4 border-white ring-4 md:ring-[5px] ring-[#288CCC] rounded-full overflow-hidden relative'
         }
       >
         <Image
