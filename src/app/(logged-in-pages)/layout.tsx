@@ -9,6 +9,7 @@ import { getCurrentUser } from '../config/supabase/getCurrentUser'
 import { isAdmin } from '../lib/adminCheck'
 import SetStore from './SetStore'
 import MobileDashboardMenu from './MobileDashboardMenu'
+import ltLogo from '@/app/images/recipient-page-logo.png'
 
 // interface I_MembersLayout
 
@@ -33,9 +34,17 @@ const UserIDLayout = async ({
         <div className="h-full flex flex-col w-full">
           <div
             className={
-              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex items-center'
+              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex items-center flex-wrap'
             }
           >
+            <div className={'block lg:hidden w-full -mb-2 mt-0 md:mt-[2px]'}>
+              <Image
+                src={ltLogo}
+                alt="Love Transfusion Logo"
+                quality={100}
+                className="max-w-[240px] md:max-w-[300px] mx-auto w-full"
+              />
+            </div>
             <div
               className={
                 'flex 2xl:gap-[183px] items-center w-full justify-between 2xl:justify-normal'
@@ -71,7 +80,12 @@ const UserIDLayout = async ({
                     >
                       Love Transfusion In Progress
                     </p>
-                    <Image src={doubleHeart} className="hidden lg:block" alt="dots" quality={100} />
+                    <Image
+                      src={doubleHeart}
+                      className="hidden lg:block"
+                      alt="dots"
+                      quality={100}
+                    />
                   </div>
                 </div>
               </div>
