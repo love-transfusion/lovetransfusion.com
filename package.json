@@ -10,7 +10,7 @@
     "update-types": "npx supabase gen types typescript --project-id xbjzdshnnddfeqyninmm > src/types/database.types.ts",
     "update-orgtypes": "supabase gen types typescript --project-id bnsyauupzwhhsloomymu > src/types/ltorgDatabase.types.ts",
     "tunnel": "cloudflared tunnel run preview-tunnel",
-    "preview": "concurrently \"npm run dev\" \"npm run tunnel\" --names \"NEXTJS,TUNNEL\" --prefix-colors \"cyan,green\" && echo '🌍 Live at https://preview.lovetransfusion.org'"
+    "preview": "concurrently \"npm run dev\" \"npm run tunnel\" --names \"NEXTJS,TUNNEL\" --prefix-colors \"cyan,green\" && echo '🌍 Live at https://preview.lovetransfusion.com'"
   },
   "dependencies": {
     "@google-analytics/data": "^5.1.0",
