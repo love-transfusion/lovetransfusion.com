@@ -6,42 +6,46 @@ import Icon_instagram from '../../icons/Icon_instagram'
 import Icon_twitterX from '../../icons/Icon_twitterX'
 import Icon_pinterest from '../../icons/Icon_pinterest'
 import webIcon from '@/app/images/footer-images/Website.svg'
-import footerLogo from '@/app/images/footer-logo.svg'
+import footerLogo from '@/app/images/main-logo.png'
 
 const PublicFooter = () => {
   return (
-    <div
-      className={
-        'pb-10 pt-10 md:pb-[21px] md:pt-10 bg-primary text-white font-extralight text-sm md:text-base px-4 lg:px-0'
-      }
-    >
-      <div className={'max-w-[1104px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
-        <div className={'w-fit mx-auto'}>
-          <Link href={'/'} className="">
-            <Image
-              src={footerLogo}
-              alt="Love Transfusion Logo"
-              quality={100}
-              width={353}
-              height={43}
-              className="w-[353px] h-[65px]"
-            />
-          </Link>
+    <div className="bg-primary text-white text-sm md:text-base font-extralight">
+      <div
+        className={
+          'pt-10 md:pt-10 px-4 lg:px-0'
+        }
+      >
+        <div className={'max-w-[1104px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
+          <div className={'w-fit mx-auto'}>
+            <Link href={'/'} className="">
+              <Image
+                src={footerLogo}
+                alt="Love Transfusion Logo"
+                quality={100}
+                // width={353}
+                // height={43}
+                className="w-[353px]"
+              />
+            </Link>
+          </div>
+          <p className={'text-center mt-[7px]'}>
+            1201 N. Orange Street, Suite 799, <br className="block md:hidden" />
+            Wilmington DE 19801
+          </p>
+          <p className={'text-center mt-[2px]'}>
+            501(c)3 Nonprofit Organization | Tax ID #27-2829895
+          </p>
+          <p className={'mt-2 md:mt-[28px] text-center'}>
+            <Link href={'/about-us'}>About Us</Link> |{' '}
+            <Link href={'/help-center'}>FAQ</Link> |{' '}
+            <Link href={'/contact-us'}>Contact Us</Link> |{' '}
+            <Link href={'/terms-of-use'}>Terms of Use</Link> |{' '}
+            <Link href={'/privacy-policy'}>Privacy Policy</Link>
+          </p>
         </div>
-        <p className={'text-center mt-[7px] text-lg'}>
-          1201 N. Orange Street, Suite 799, <br className="block md:hidden" />
-          Wilmington DE 19801
-        </p>
-        <p className={'text-center mt-[2px]'}>
-          501(c)3 Nonprofit Organization | Tax ID #27-2829895
-        </p>
-        <p className={'mt-2 md:mt-[28px] text-center'}>
-          <Link href={'/about-us'}>About Us</Link> |{' '}
-          <Link href={'/help-center'}>FAQ</Link> |{' '}
-          <Link href={'/contact-us'}>Contact Us</Link> |{' '}
-          <Link href={'/terms-of-use'}>Terms of Use</Link> |{' '}
-          <Link href={'/privacy-policy'}>Privacy Policy</Link>
-        </p>
+      </div>
+      <div className={'pb-10 md:pb-[21px] px-4 md:px-[50px]'}>
         <div
           className={
             'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-10 gap-4'

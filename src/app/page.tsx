@@ -29,7 +29,7 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-variable-68 font-bold text-2xl md:text-[35px] text-primary text-center'
+              'font-acumin-variable-68 font-bold text-2xl md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto'
             }
           >
             Connecting People Who Hurt With Those Who Care
@@ -51,10 +51,7 @@ const Homepage = async () => {
                 'shadow-custom1 rounded-lg flex gap-2 w-full lg:w-[633px]'
               }
             >
-              <WistiaPlayer
-                videoId={'ow4kttqlhy'}
-                containerStyle="shadow-lg"
-              />
+              <WistiaPlayer videoId={'ow4kttqlhy'} containerStyle="shadow-lg" />
             </div>
             <div
               className={'flex flex-col max-w-[235px] mx-auto md:mx-[unset]'}

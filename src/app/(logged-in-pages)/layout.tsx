@@ -9,7 +9,7 @@ import { getCurrentUser } from '../config/supabase/getCurrentUser'
 import { isAdmin } from '../lib/adminCheck'
 import SetStore from './SetStore'
 import MobileDashboardMenu from './MobileDashboardMenu'
-import ltLogo from '@/app/images/recipient-page-logo.png'
+import ltLogo from '@/app/images/main-logo.png'
 
 // interface I_MembersLayout
 

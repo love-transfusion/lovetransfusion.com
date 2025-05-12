@@ -11,7 +11,7 @@ const useUpdateRecipientDatabase = (recipientId: string) => {
 
   useEffect(() => {
     updateRecipient()
-    const interval = setInterval(() => updateRecipient(), 0.5 * 60 * 1000)
+    const interval = setInterval(() => updateRecipient(), 15 * 60 * 1000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
