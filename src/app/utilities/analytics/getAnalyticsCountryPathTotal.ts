@@ -1,10 +1,10 @@
 'use server'
 
 export interface I_CountryPathTotalFormat {
-  clRegion: string
-  clCountry: string
-  clCountryCode: string
-  clCity: string
+  cl_region: string
+  cl_country: string
+  cl_country_code: string
+  cl_city: string
   clViews: number
   clMessages: number
   clHugs: number
@@ -22,21 +22,21 @@ const getAnalyticsCountryPathTotal = async ({
   const analytics: I_CountryPathTotalFormat[] =
     (clGoogleAnalytics.rows &&
       clGoogleAnalytics.rows.map((row) => {
-        const clCity =
+        const cl_city =
           (row.dimensionValues && row.dimensionValues[1].value) ?? ''
-        const clCountryCode =
+        const cl_country_code =
           (row.dimensionValues && row.dimensionValues[4].value) ?? ''
-        const clCountry =
+        const cl_country =
           (row.dimensionValues && row.dimensionValues[3].value) ?? ''
-        const clRegion =
+        const cl_region =
           (row.dimensionValues && row.dimensionValues[2].value) ?? ''
         const clViews =
           (row.metricValues && parseInt(row.metricValues[0].value!)) ?? 0
         return {
-          clCity,
-          clRegion,
-          clCountry,
-          clCountryCode,
+          cl_city,
+          cl_region,
+          cl_country,
+          cl_country_code,
           clViews,
           clHugs: 0,
           clMessages: 0,
@@ -66,10 +66,10 @@ const getAnalyticsCountryPathTotal = async ({
     })
     const formattedArray = Object.entries(grouped).map((item) => {
       return {
-        clCity: item[0],
-        clCountry: item[1][0]?.country ?? '(not set)',
-        clCountryCode: item[1][0]?.country_code ?? '(not set)',
-        clRegion: item[1][0]?.region ?? '(not set)',
+        cl_city: item[0],
+        cl_country: item[1][0]?.country ?? '(not set)',
+        cl_country_code: item[1][0]?.country_code ?? '(not set)',
+        cl_region: item[1][0]?.region ?? '(not set)',
         clViews: 0,
         clMessages: isComments ? item[1].length : 0,
         clHugs: isHug ? item[1].length : 0,

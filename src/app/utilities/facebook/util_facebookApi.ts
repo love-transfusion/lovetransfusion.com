@@ -1,5 +1,7 @@
+'use server'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios'
+import fuzzysort from 'fuzzysort'
 
 // Types for handling Facebook API responses
 export interface FacebookAdAccount {
@@ -30,30 +32,30 @@ export interface GeoLocation {
 
 // Data structures for formatted insights
 export interface AccountInsight {
-  clCountry: string
-  clCountryCode: string
-  clRegion: string
-  clCity: string
-  clImpressions: number
-  clReach: number
-  clLikeReactions: number
-  clHeartReactions: number
-  clHugReactions: number
-  clTotalReactions: number
+  cl_country: string
+  cl_country_code: string // Add country code for consistency
+  cl_region: string
+  cl_city: string
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions: number
+  cl_heart_reactions: number
+  cl_hug_reactions: number
+  cl_total_reactions: number
 }
 
 export interface CampaignInsight {
-  campaignId: string
-  campaignName: string
-  clCountry: string
-  clRegion: string
-  clCity: string
-  clImpressions: number
-  clReach: number
-  clLikeReactions: number
-  clHeartReactions: number
-  clHugReactions: number
-  clTotalReactions: number
+  campaign_id: string
+  campaign_name: string
+  cl_country: string
+  cl_region: string
+  cl_city: string
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions: number
+  cl_heart_reactions: number
+  cl_hug_reactions: number
+  cl_total_reactions: number
   objective?: string
   status?: string
   spendAmount?: number
@@ -62,19 +64,19 @@ export interface CampaignInsight {
 
 // Add AdSetInsight interface definition after the existing CampaignInsight interface
 export interface AdSetInsight {
-  adsetId: string
-  adsetName: string
-  campaignId?: string
-  campaignName?: string
-  clCountry: string
-  clRegion: string
-  clCity: string
-  clImpressions: number
-  clReach: number
-  clLikeReactions: number
-  clHeartReactions: number
-  clHugReactions: number
-  clTotalReactions: number
+  adset_id: string
+  adset_name: string
+  campaign_id?: string
+  campaign_name?: string
+  cl_country: string
+  cl_region: string
+  cl_city: string
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions: number
+  cl_heart_reactions: number
+  cl_hug_reactions: number
+  cl_total_reactions: number
   objective?: string
   status?: string
   spendAmount?: number
@@ -83,40 +85,42 @@ export interface AdSetInsight {
 
 // Update the AdInsight interface to use properties that align with FacebookInsight
 export interface AdInsight {
-  adId: string
-  adName: string
-  adsetId?: string
-  adsetName?: string
-  campaignId?: string
-  campaignName?: string
-  clCountry: string
-  clRegion: string
-  clCity: string
-  clImpressions: number
-  clReach: number
-  clLikeReactions: number
-  clHeartReactions: number
-  clHugReactions: number
-  clTotalReactions: number
+  ad_id: string
+  ad_name: string
+  adset_id?: string
+  adset_name?: string
+  campaign_id?: string
+  campaign_name?: string
+  cl_country: string
+  cl_country_code: string // Added country code
+  cl_region: string
+  cl_city: string
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions: number
+  cl_heart_reactions: number
+  cl_hug_reactions: number
+  cl_total_reactions: number
 }
 
 // Interface for AdWise insights
 export interface AdWiseInsight {
-  // adId: string
-  // adName: string
-  // adsetId?: string
-  // adsetName?: string
-  // campaignId?: string
-  // campaignName?: string
-  clCountry: string
-  clRegion: string
-  clCity: string
-  clImpressions: number
-  clReach: number
-  clLikeReactions: number
-  clHeartReactions: number
-  clHugReactions: number
-  clTotalReactions: number
+  ad_id: string
+  ad_name: string
+  adset_id?: string
+  adset_name?: string
+  campaign_id?: string
+  campaign_name?: string
+  cl_country: string
+  cl_country_code: string // Added country code
+  cl_region: string
+  cl_city: string
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions: number
+  cl_heart_reactions: number
+  cl_hug_reactions: number
+  cl_total_reactions: number
   objective?: string
   status?: string
   spendAmount?: number
@@ -274,81 +278,64 @@ const formatAccountId = (accountId: string): string => {
 }
 
 // Helper: Distribute reactions to locations by impressions share (Hamilton/Largest Remainder)
-// function distributeReactionsByImpressions(
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     locations: { [key: string]: any }[],
-//     total: number,
-//     key: string
-// ) {
-//     const totalImpressions = locations.reduce((sum, l) => sum + l.impressions, 0);
-//     if (totalImpressions === 0) return locations.map(l => ({ ...l, [key]: 0 }));
-//     // Step 1: Raw quotas
-//     const withRaw = locations.map(l => ({ ...l, raw: (l.impressions / totalImpressions) * total, base: 0, rem: 0 }));
-//     // Step 2: Floor allocation
-//     withRaw.forEach(l => {
-//         l.base = Math.floor(l.raw);
-//         l.rem = l.raw - l.base;
-//     });
-//     // Step 3: Distribute leftovers
-//     const allocated = withRaw.reduce((sum, l) => sum + l.base, 0);
-//     let leftover = total - allocated;
-//     const sorted = [...withRaw].sort((a, b) => b.rem - a.rem);
-//     for (let i = 0; i < leftover; i++) {
-//         sorted[i % sorted.length].base++;
-//     }
-//     // Step 4: Set final value, preserve all original properties
-//     return withRaw.map(l => {
-//         const { raw, base, rem, ...rest } = l;
-//         return { ...rest, [key]: l.base };
-//     });
-// }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function distributeReactionsByImpressions(
+  locations: { [key: string]: any }[],
+  total: number,
+  key: string
+) {
+  const totalImpressions = locations.reduce((sum, l) => sum + l.impressions, 0)
+  if (totalImpressions === 0) return locations.map((l) => ({ ...l, [key]: 0 }))
+  // Step 1: Raw quotas
+  const withRaw = locations.map((l) => ({
+    ...l,
+    raw: (l.impressions / totalImpressions) * total,
+    base: 0,
+    rem: 0,
+  }))
+  // Step 2: Floor allocation
+  withRaw.forEach((l) => {
+    l.base = Math.floor(l.raw)
+    l.rem = l.raw - l.base
+  })
+  // Step 3: Distribute leftovers
+  const allocated = withRaw.reduce((sum, l) => sum + l.base, 0)
+  const leftover = total - allocated
+  const sorted = [...withRaw].sort((a, b) => b.rem - a.rem)
+  for (let i = 0; i < leftover; i++) {
+    sorted[i % sorted.length].base++
+  }
+  // Step 4: Set final value, preserve all original properties
+  return withRaw.map((l) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { raw, base, rem, ...rest } = l
+    return { ...rest, [key]: l.base }
+  })
+}
 
 // --- Ad Wise Insights ---
-/**
- * ```
- * interface AdWiseLocation {
-    clCountry: string
-    clRegion: string
-    clCity: string
-    // clTotalReactions: number
-    clLikeReactions?: number
-    clHeartReactions?: number
-    clHugReactions?: number
-    adId: string
-    adName: string
-    adsetId: string
-    adsetName: string
-    campaignId: string
-    campaignName: string
-    impressions: number
-    clImpressions: number
-    clReach: number
-}
- * ```
- */
 interface AdWiseLocation {
-  clCountry: string
-  clRegion: string
-  clCity: string
-  // clTotalReactions: number
-  clLikeReactions?: number
-  clHeartReactions?: number
-  clHugReactions?: number
-  adId: string
-  adName: string
-  adsetId: string
-  adsetName: string
-  campaignId: string
-  campaignName: string
+  ad_id: string
+  ad_name: string
+  adset_id: string
+  adset_name: string
+  campaign_id: string
+  campaign_name: string
+  cl_country: string
+  cl_region: string
+  cl_city: string
   impressions: number
-  clImpressions: number
-  clReach: number
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions?: number
+  cl_heart_reactions?: number
+  cl_hug_reactions?: number
 }
 
 // Helper to get city name (DMA or region)
 function getCityName(
   region: string,
-  adId: string,
+  ad_id: string,
   country: string,
   dmaInsights: Array<{
     ad_id: string
@@ -367,7 +354,7 @@ function getCityName(
   ) {
     const matchingDma = filteredDmaInsights.find(
       (dma) =>
-        dma.ad_id === adId &&
+        dma.ad_id === ad_id &&
         dma.region === region &&
         dma.country === country &&
         dma.dma &&
@@ -420,22 +407,75 @@ function sumTotalReactionsFromActions(actions: FacebookAction[]): number {
     .reduce((sum, a) => sum + (parseInt(a.value, 10) || 0), 0)
 }
 
-export const fetchAdWiseInsights = async (
-  token: string,
-  accountId: string,
-  apiVersion: string,
-  datePreset: string
-): Promise<AdWiseInsight[]> => {
+// --- DMA to State Mapping (Standalone) ---
+// (Partial, for brevity. In production, use the full mapping from adInsights.js)
+
+function normalizeDMA(dma: string): string {
+  return dma
+    .replace(/\s*DMA$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .normalize('NFC')
+}
+
+function fuzzyFindDMA(dmaInput: string, candidates: string[]): string | null {
+  if (!dmaInput || candidates.length === 0) return null
+  const inputNorm = normalizeDMA(dmaInput)
+  for (const key of candidates) {
+    if (normalizeDMA(key) === inputNorm) return key
+  }
+  // Fuzzy match using fuzzysort
+  const results = fuzzysort.go(inputNorm, candidates, { threshold: -1000 })
+  if (results.length > 0) {
+    return results[0].target
+  }
+  return null
+}
+
+type FetchAdWiseInsightsParams =
+  | {
+      /** If accountId is present, this should not be defined */
+      ad_id: string | null | undefined
+      apiVersion?: string
+      datePreset?: string
+      accountId?: never
+    }
+  | {
+      /** If ad_id is present, this should not be defined */
+      accountId: string
+      apiVersion?: string
+      datePreset?: string
+      ad_id?: never
+    }
+
+// --- Ad Wise Insights ---
+/**
+ * ```
+ * await util_fetchAdWiseInsights ({
+      accountId || ad_id,
+      apiVersion?,
+      datePreset?,
+  })
+ * ```
+ */
+export const util_fetchAdWiseInsights = async ({
+  accountId,
+  ad_id,
+  apiVersion = 'v22.0',
+  datePreset = 'maximum',
+}: FetchAdWiseInsightsParams): Promise<AdWiseInsight[]> => {
+  const token = process.env.FACEBOOK_API_KEY!
   try {
-    const formattedAccountId = formatAccountId(accountId)
-    // 1. Fetch geo breakdown (country,region)
+    const formattedAccountId = accountId ? formatAccountId(accountId) : ad_id
+    // 1. Fetch geo breakdown (country,region) - fetch all pages
     const geoUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const geoParams = {
       access_token: token,
       level: 'ad',
       fields:
-        'ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,impressions,reach',
-      breakdowns: 'country,region',
+        'ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,impressions,reach', // Only valid fields
+      breakdowns: 'country,region', // Use as breakdowns, not fields
       date_preset: datePreset,
       limit: '1000',
     }
@@ -443,34 +483,8 @@ export const fetchAdWiseInsights = async (
     const geoInsights = await fetchAllPages<FacebookInsight>(
       `${geoUrl}?${geoQueryString}`
     )
-    // 2. If US present, fetch DMA
-    // let dmaInsights: FacebookInsight[] = []
-    // if (
-    //   geoInsights.some(
-    //     (i) => i.country && ['US', 'USA', 'United States'].includes(i.country)
-    //   )
-    // ) {
-    //   // Filter out any with undefined ad_id, region, or country before passing
-    //   const dmaUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
-    //   const dmaParams = {
-    //     access_token: token,
-    //     level: 'ad',
-    //     fields: 'ad_id,ad_name,impressions,reach,country,region',
-    //     breakdowns: 'dma,country,region',
-    //     date_preset: datePreset,
-    //     limit: '1000',
-    //   }
-    //   const dmaQueryString = new URLSearchParams(dmaParams).toString()
-    //   try {
-    //     const allDma = await fetchAllPages<FacebookInsight>(
-    //       `${dmaUrl}?${dmaQueryString}`
-    //     )
-    //     dmaInsights = allDma.filter(
-    //       (dma) => dma.ad_id && dma.region && dma.country
-    //     )
-    //   } catch {}
-    // }
-    // 3. Fetch reactions (action_breakdowns=action_reaction)
+
+    // 3. Fetch reactions (action_breakdowns=action_reaction, all pages)
     const reactUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactParams = {
       access_token: token,
@@ -495,10 +509,20 @@ export const fetchAdWiseInsights = async (
         heart = 0,
         hug = 0
       for (const action of insight.actions) {
-        if (
+        // Facebook API v22: action_type can be 'post_reaction' and action_reaction is the type
+        if (action.action_type === 'post_reaction' && action.action_reaction) {
+          if (action.action_reaction === 'like')
+            like += parseInt(action.value, 10) || 0
+          else if (action.action_reaction === 'love')
+            heart += parseInt(action.value, 10) || 0
+          else if (
+            action.action_reaction === 'care' ||
+            action.action_reaction === 'hug'
+          )
+            hug += parseInt(action.value, 10) || 0
+        } else if (
           action.action_type === 'like' ||
-          action.action_type === 'post_reaction:like' ||
-          action.action_type === 'post_reaction'
+          action.action_type === 'post_reaction:like'
         )
           like += parseInt(action.value, 10) || 0
         else if (
@@ -508,7 +532,9 @@ export const fetchAdWiseInsights = async (
           heart += parseInt(action.value, 10) || 0
         else if (
           action.action_type === 'care' ||
-          action.action_type === 'post_reaction:care'
+          action.action_type === 'post_reaction:care' ||
+          action.action_type === 'hug' ||
+          action.action_type === 'post_reaction:hug'
         )
           hug += parseInt(action.value, 10) || 0
       }
@@ -523,8 +549,8 @@ export const fetchAdWiseInsights = async (
       adMap.set(insight.ad_id, arr)
     })
     const results: AdWiseInsight[] = []
-    adMap.forEach((regions, adId) => {
-      const reactions = adReactionsMap.get(adId) || {
+    adMap.forEach((regions, ad_id) => {
+      const reactions = adReactionsMap.get(ad_id) || {
         like: 0,
         heart: 0,
         hug: 0,
@@ -532,68 +558,71 @@ export const fetchAdWiseInsights = async (
       const locations: AdWiseLocation[] = regions
         .filter((i) => i.region && i.impressions)
         .map((insight) => {
-          // const city = getCityName(
-          //   insight.region ?? 'Unknown',
-          //   insight.ad_id ?? 'Unknown',
-          //   insight.country ?? 'Unknown',
-          //   (Array.isArray(dmaInsights)
-          //     ? dmaInsights.filter(
-          //         (dma) =>
-          //           typeof dma.ad_id === 'string' &&
-          //           typeof dma.region === 'string' &&
-          //           typeof dma.country === 'string'
-          //       )
-          //     : []) as {
-          //     ad_id: string
-          //     region: string
-          //     country: string
-          //     dma?: string
-          //   }[]
-          // )
+          let cl_country = getCountryFullName(insight.country || 'Unknown')
+          const cl_region = insight.region!
+          const cl_city = insight.region!
+          // --- US logic: use DMA as city, region as state, with fuzzy DMA matching ---
+          if (
+            insight.country &&
+            ['US', 'USA', 'United States'].includes(insight.country)
+          ) {
+            cl_country = 'United States'
+          }
           return {
-            adId: insight.ad_id!,
-            adName: insight.ad_name || '',
-            adsetId: insight.adset_id || '',
-            adsetName: insight.adset_name || '',
-            campaignId: insight.campaign_id || '',
-            campaignName: insight.campaign_name || '',
-            clCountry: getCountryFullName(insight.country || 'Unknown'),
-            clRegion: insight.region || 'Unknown',
-            clCity: '(not set)',
+            ad_id: insight.ad_id!,
+            ad_name: insight.ad_name || '',
+            adset_id: insight.adset_id || '',
+            adset_name: insight.adset_name || '',
+            campaign_id: insight.campaign_id || '',
+            campaign_name: insight.campaign_name || '',
+            cl_country,
+            cl_country_code: insight.country || '', // Add country code to match interface
+            cl_region,
+            cl_city,
             impressions: parseInt(insight.impressions || '0', 10),
-            clImpressions: parseInt(insight.impressions || '0', 10),
-            clReach: parseInt(insight.reach || '0', 10),
+            cl_impressions: parseInt(insight.impressions || '0', 10),
+            cl_reach: parseInt(insight.reach || '0', 10),
           }
         })
       const withLike = distributeReactionsByImpressionsTyped(
         locations,
         reactions.like,
-        'clLikeReactions'
+        'cl_like_reactions'
       )
       const withHeart = distributeReactionsByImpressionsTyped(
         withLike,
         reactions.heart,
-        'clHeartReactions'
+        'cl_heart_reactions'
       )
       const withHug = distributeReactionsByImpressionsTyped(
         withHeart,
         reactions.hug,
-        'clHugReactions'
+        'cl_hug_reactions'
       )
       withHug.forEach((l) => {
         results.push({
-          clCountry: l.clCountry,
-          clRegion: l.clRegion,
-          clCity: l.clCity,
-          clImpressions: l.clImpressions,
-          clReach: l.clReach,
-          clLikeReactions: l.clLikeReactions ?? 0,
-          clHeartReactions: l.clHeartReactions ?? 0,
-          clHugReactions: l.clHugReactions ?? 0,
-          clTotalReactions:
-            (l.clLikeReactions ?? 0) +
-            (l.clHeartReactions ?? 0) +
-            (l.clHugReactions ?? 0),
+          ad_id: l.ad_id,
+          ad_name: l.ad_name,
+          adset_id: l.adset_id,
+          adset_name: l.adset_name,
+          campaign_id: l.campaign_id,
+          campaign_name: l.campaign_name,
+          cl_country: l.cl_country,
+          cl_country_code:
+            typeof l.cl_country_code === 'string'
+              ? l.cl_country_code
+              : String(l.cl_country_code ?? ''), // Ensure string type
+          cl_region: l.cl_region,
+          cl_city: l.cl_city,
+          cl_impressions: l.cl_impressions,
+          cl_reach: l.cl_reach,
+          cl_like_reactions: l.cl_like_reactions ?? 0,
+          cl_heart_reactions: l.cl_heart_reactions ?? 0,
+          cl_hug_reactions: l.cl_hug_reactions ?? 0,
+          cl_total_reactions:
+            (l.cl_like_reactions ?? 0) +
+            (l.cl_heart_reactions ?? 0) +
+            (l.cl_hug_reactions ?? 0),
         })
       })
     })
@@ -606,16 +635,16 @@ export const fetchAdWiseInsights = async (
 
 // --- Account Wise Insights ---
 interface AccountLocation {
-  clCountry: string
-  clCountryCode: string
-  clRegion: string
-  clCity: string
+  cl_country: string
+  cl_country_code: string
+  cl_region: string
+  cl_city: string
   impressions: number
-  clImpressions: number
-  clReach: number
-  clLikeReactions?: number
-  clHeartReactions?: number
-  clHugReactions?: number
+  cl_impressions: number
+  cl_reach: number
+  cl_like_reactions?: number
+  cl_heart_reactions?: number
+  cl_hug_reactions?: number
 }
 
 export const fetchAccountInsights = async (
@@ -626,7 +655,7 @@ export const fetchAccountInsights = async (
 ): Promise<AccountInsight[]> => {
   try {
     const formattedAccountId = formatAccountId(accountId)
-    // 1. Fetch geo breakdown (region)
+    // 1. Fetch geo breakdown (region) - fetch all pages
     const geoUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const geoParams = {
       access_token: token,
@@ -640,19 +669,18 @@ export const fetchAccountInsights = async (
     const geoInsights = await fetchAllPages<FacebookInsight>(
       `${geoUrl}?${geoQueryString}`
     )
-    // 2. If US present, fetch DMA
+    // 2. Fetch DMA data for US (all pages)
     let dmaInsights: FacebookInsight[] = []
-    if (
-      geoInsights.some(
-        (i) => i.country && ['US', 'USA', 'United States'].includes(i.country)
-      )
-    ) {
+    const usRegions = geoInsights.filter(
+      (i) => i.country && ['US', 'USA', 'United States'].includes(i.country)
+    )
+    if (usRegions.length > 0) {
       const dmaUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
       const dmaParams = {
         access_token: token,
         level: 'account',
-        fields: 'impressions,reach',
-        breakdowns: 'dma',
+        fields: 'impressions,reach', // Only valid fields
+        breakdowns: 'dma', // Use as breakdown, not field
         date_preset: datePreset,
         limit: '1000',
       }
@@ -661,12 +689,10 @@ export const fetchAccountInsights = async (
         const allDma = await fetchAllPages<FacebookInsight>(
           `${dmaUrl}?${dmaQueryString}`
         )
-        dmaInsights = allDma.filter(
-          (dma) => dma.ad_id && dma.region && dma.country
-        )
+        dmaInsights = allDma.filter((dma) => dma.dma)
       } catch {}
     }
-    // 3. Fetch reactions (action_breakdowns=action_reaction)
+    // 3. Fetch reactions (action_breakdowns=action_reaction, all pages)
     const reactUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactParams = {
       access_token: token,
@@ -687,28 +713,36 @@ export const fetchAccountInsights = async (
     let totalReactions = 0
     reactInsights.forEach((insight) => {
       if (insight.actions) {
-        // Sum all post_reaction values for true total
         totalReactions += sumTotalReactionsFromActions(insight.actions)
         for (const action of insight.actions) {
           if (
-            (action.action_type === 'like' ||
-              action.action_type === 'post_reaction:like' ||
-              action.action_type === 'post_reaction') &&
-            action.action_reaction === 'like'
+            action.action_type === 'post_reaction' &&
+            action.action_reaction
+          ) {
+            if (action.action_reaction === 'like')
+              totalLike += parseInt(action.value, 10) || 0
+            else if (action.action_reaction === 'love')
+              totalHeart += parseInt(action.value, 10) || 0
+            else if (
+              action.action_reaction === 'care' ||
+              action.action_reaction === 'hug'
+            )
+              totalHug += parseInt(action.value, 10) || 0
+          } else if (
+            action.action_type === 'like' ||
+            action.action_type === 'post_reaction:like'
           )
             totalLike += parseInt(action.value, 10) || 0
           else if (
-            (action.action_type === 'love' ||
-              action.action_type === 'post_reaction:love' ||
-              action.action_type === 'post_reaction') &&
-            action.action_reaction === 'love'
+            action.action_type === 'love' ||
+            action.action_type === 'post_reaction:love'
           )
             totalHeart += parseInt(action.value, 10) || 0
           else if (
-            (action.action_type === 'care' ||
-              action.action_type === 'post_reaction:care' ||
-              action.action_type === 'post_reaction') &&
-            action.action_reaction === 'care'
+            action.action_type === 'care' ||
+            action.action_type === 'post_reaction:care' ||
+            action.action_type === 'hug' ||
+            action.action_type === 'post_reaction:hug'
           )
             totalHug += parseInt(action.value, 10) || 0
         }
@@ -718,65 +752,57 @@ export const fetchAccountInsights = async (
     const locations: AccountLocation[] = geoInsights
       .filter((i) => i.region && i.impressions)
       .map((insight) => {
-        const city = getCityName(
-          insight.region ?? 'Unknown',
-          insight.ad_id ?? 'Unknown',
-          insight.country ?? 'Unknown',
-          (Array.isArray(dmaInsights)
-            ? dmaInsights.filter(
-                (dma) =>
-                  typeof dma.ad_id === 'string' &&
-                  typeof dma.region === 'string' &&
-                  typeof dma.country === 'string'
-              )
-            : []) as {
-            ad_id: string
-            region: string
-            country: string
-            dma?: string
-          }[]
-        )
+        let city = insight.region ?? 'Unknown'
+        // For US, try to fuzzy match DMA for city
+        if (
+          insight.country &&
+          ['US', 'USA', 'United States'].includes(insight.country) &&
+          dmaInsights.length > 0
+        ) {
+          const candidateNames = dmaInsights.map((d) => d.dma!)
+          const fuzzyDma = fuzzyFindDMA(insight.region!, candidateNames)
+          if (fuzzyDma) city = fuzzyDma
+        }
         return {
-          clCountry: getCountryFullName(insight.country || 'Unknown'),
-          clCountryCode: insight.country || 'Unknown',
-          clRegion: insight.region!,
-          clCity: city,
+          cl_country: getCountryFullName(insight.country || 'Unknown'),
+          cl_country_code: insight.country || 'Unknown',
+          cl_region: insight.region!,
+          cl_city: city,
           impressions: parseInt(insight.impressions || '0', 10),
-          clImpressions: parseInt(insight.impressions || '0', 10),
-          clReach: parseInt(insight.reach || '0', 10),
+          cl_impressions: parseInt(insight.impressions || '0', 10),
+          cl_reach: parseInt(insight.reach || '0', 10),
         }
       })
     const withLike = distributeReactionsByImpressionsTyped(
       locations,
       totalLike,
-      'clLikeReactions'
+      'cl_like_reactions'
     )
     const withHeart = distributeReactionsByImpressionsTyped(
       withLike,
       totalHeart,
-      'clHeartReactions'
+      'cl_heart_reactions'
     )
     const withHug = distributeReactionsByImpressionsTyped(
       withHeart,
       totalHug,
-      'clHugReactions'
+      'cl_hug_reactions'
     )
     const result = withHug.map((l) => ({
-      clCity: l.clCity,
-      clRegion: l.clRegion,
-      clCountry: l.clCountry,
-      clCountryCode: l.clCountryCode,
-      clTotalReactions:
-        (l.clLikeReactions ?? 0) +
-        (l.clHeartReactions ?? 0) +
-        (l.clHugReactions ?? 0),
-      clHeartReactions: l.clHeartReactions ?? 0,
-      clHugReactions: l.clHugReactions ?? 0,
-      clLikeReactions: l.clLikeReactions ?? 0,
-      clImpressions: l.clImpressions,
-      clReach: l.clReach,
+      cl_city: l.cl_city,
+      cl_region: l.cl_region,
+      cl_country: l.cl_country,
+      cl_country_code: l.cl_country_code,
+      cl_total_reactions:
+        (l.cl_like_reactions ?? 0) +
+        (l.cl_heart_reactions ?? 0) +
+        (l.cl_hug_reactions ?? 0),
+      cl_heart_reactions: l.cl_heart_reactions ?? 0,
+      cl_hug_reactions: l.cl_hug_reactions ?? 0,
+      cl_like_reactions: l.cl_like_reactions ?? 0,
+      cl_impressions: l.cl_impressions,
+      cl_reach: l.cl_reach,
     }))
-    // Attach the true totalReactions to the first item for summary (use a type assertion)
     if (result.length > 0) (result[0] as any).totalReactions = totalReactions
     return result
   } catch (error) {
@@ -812,14 +838,15 @@ export const fetchAdInsights = async (
       `${geoUrl}?${geoQueryString}`
     )
 
-    // console.log('Ad geo insights fetched:', geoInsights.length)
+    console.log('Ad geo insights fetched:', geoInsights.length)
 
     // Second: Fetch ad insights with reaction data (without conflicting breakdowns)
     const reactionsUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactionsParams = {
       access_token: token,
       level: 'ad',
-      fields: 'ad_id,ad_name,actions',
+      fields:
+        'ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,impressions,reach,actions',
       action_breakdowns: 'action_reaction',
       date_preset: datePreset,
       limit: '1000',
@@ -830,14 +857,15 @@ export const fetchAdInsights = async (
       `${reactionsUrl}?${reactionsQueryString}`
     )
 
-    // console.log('Ad reaction data fetched:', reactionsInsights.length)
+    console.log('Ad reaction data fetched:', reactionsInsights.length)
 
     // Fetch DMA data separately (still needed for US locations)
     const dmaUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const dmaParams = {
       access_token: token,
       level: 'ad',
-      fields: 'ad_id,ad_name,impressions,reach',
+      fields:
+        'ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,impressions,reach',
       breakdowns: 'dma',
       date_preset: datePreset,
       limit: '1000',
@@ -869,8 +897,8 @@ export const fetchAdInsights = async (
     reactionsInsights.forEach((insight) => {
       if (!insight.ad_id || !insight.actions) return
 
-      const adId = insight.ad_id
-      const reactions = adReactionsMap.get(adId) || {
+      const ad_id = insight.ad_id
+      const reactions = adReactionsMap.get(ad_id) || {
         likes: 0,
         hearts: 0,
         hugs: 0,
@@ -897,7 +925,7 @@ export const fetchAdInsights = async (
         }
       })
 
-      adReactionsMap.set(adId, reactions)
+      adReactionsMap.set(ad_id, reactions)
     })
 
     // Group geo insights by ad_id
@@ -911,17 +939,17 @@ export const fetchAdInsights = async (
     // Process the insights and extract reaction data
     const results: AdInsight[] = []
 
-    adMap.forEach((fbInsights, adId) => {
+    adMap.forEach((fbInsights, ad_id) => {
       // Get reactions for this ad from our reactions map
-      const reactions = adReactionsMap.get(adId) || {
+      const reactions = adReactionsMap.get(ad_id) || {
         likes: 0,
         hearts: 0,
         hugs: 0,
       }
 
-      // console.log(
-      //   `Ad ${adId} reactions - Likes: ${reactions.likes}, Hearts: ${reactions.hearts}, Hugs: ${reactions.hugs}`
-      // )
+      console.log(
+        `Ad ${ad_id} reactions - Likes: ${reactions.likes}, Hearts: ${reactions.hearts}, Hugs: ${reactions.hugs}`
+      )
 
       // Calculate total impressions for this ad across all regions
       const totalImpressions = fbInsights.reduce((sum, insight) => {
@@ -1051,27 +1079,28 @@ export const fetchAdInsights = async (
 
         // Create a new AdInsight object and add it to results array
         results.push({
-          adId: insight.ad_id!,
-          adName: insight.ad_name!,
-          adsetId: insight.adset_id,
-          adsetName: insight.adset_name,
-          campaignId: insight.campaign_id,
-          campaignName: insight.campaign_name,
-          clCountry: getCountryFullName(insight.country || 'Unknown'),
-          clRegion: insight.region!,
-          clCity: cityName,
-          clImpressions: loc.impressions,
-          clReach: loc.reach,
-          clLikeReactions: loc.finalLike,
-          clHeartReactions: loc.finalHeart,
-          clHugReactions: loc.finalHug,
-          clTotalReactions: loc.finalLike + loc.finalHeart + loc.finalHug,
+          ad_id: insight.ad_id!,
+          ad_name: insight.ad_name!,
+          adset_id: insight.adset_id,
+          adset_name: insight.adset_name,
+          campaign_id: insight.campaign_id,
+          campaign_name: insight.campaign_name,
+          cl_country: getCountryFullName(insight.country || 'Unknown'),
+          cl_country_code: insight.country || 'Unknown',
+          cl_region: insight.region!,
+          cl_city: cityName,
+          cl_impressions: loc.impressions,
+          cl_reach: loc.reach,
+          cl_like_reactions: loc.finalLike,
+          cl_heart_reactions: loc.finalHeart,
+          cl_hug_reactions: loc.finalHug,
+          cl_total_reactions: loc.finalLike + loc.finalHeart + loc.finalHug,
         })
       })
     })
 
     // Sort by total reactions descending
-    return results.sort((a, b) => b.clTotalReactions - a.clTotalReactions)
+    return results.sort((a, b) => b.cl_total_reactions - a.cl_total_reactions)
   } catch (error: any) {
     console.error('Error fetching ad insights:', error)
 

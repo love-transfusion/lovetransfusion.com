@@ -9,6 +9,77 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      fb_adwise_insights: {
+        Row: {
+          ad_id: string
+          ad_name: string | null
+          adset_id: string | null
+          adset_name: string | null
+          campaign_id: string | null
+          campaign_name: string | null
+          cl_city: string | null
+          cl_country: string | null
+          cl_country_code: string | null
+          cl_heart_reactions: number
+          cl_hug_reactions: number
+          cl_impressions: number
+          cl_like_reactions: number
+          cl_reach: number
+          cl_region: string | null
+          cl_total_reactions: number
+          fetched_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          ad_name?: string | null
+          adset_id?: string | null
+          adset_name?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          cl_city?: string | null
+          cl_country?: string | null
+          cl_country_code?: string | null
+          cl_heart_reactions?: number
+          cl_hug_reactions?: number
+          cl_impressions?: number
+          cl_like_reactions?: number
+          cl_reach?: number
+          cl_region?: string | null
+          cl_total_reactions?: number
+          fetched_at?: string
+          user_id?: string
+        }
+        Update: {
+          ad_id?: string
+          ad_name?: string | null
+          adset_id?: string | null
+          adset_name?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          cl_city?: string | null
+          cl_country?: string | null
+          cl_country_code?: string | null
+          cl_heart_reactions?: number
+          cl_hug_reactions?: number
+          cl_impressions?: number
+          cl_like_reactions?: number
+          cl_reach?: number
+          cl_region?: string | null
+          cl_total_reactions?: number
+          fetched_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fb_adwise_insights_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["fb_ad_id"]
+          },
+        ]
+      }
       profile_pictures: {
         Row: {
           blur_data_url: string | null
@@ -84,6 +155,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string
+          fb_ad_id: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -98,6 +170,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email: string
+          fb_ad_id?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -112,6 +185,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string
+          fb_ad_id?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null

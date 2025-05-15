@@ -9,11 +9,13 @@ import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsF
 interface I_TotalEngagements {
   clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
   clUserAccount: I_supa_users_data_website_row
+  totalFacebookLikeHugCare: number
 }
 
 const TotalEngagements = ({
   clRecipientOBj,
   clUserAccount,
+  totalFacebookLikeHugCare,
 }: I_TotalEngagements) => {
   // const { setuserInStore } = useStore(utilityStore)
   const { total } = useEngagementsFromWeb(clRecipientOBj)
@@ -49,7 +51,7 @@ const TotalEngagements = ({
             'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
           }
         >
-          {total}
+          {total + totalFacebookLikeHugCare}
         </p>
       </div>
     </div>

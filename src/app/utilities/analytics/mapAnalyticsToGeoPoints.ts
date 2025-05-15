@@ -33,9 +33,9 @@ export const mapAnalyticsToGeoPoints = async (
   const resultMap = new Map<string, GeoPoint>()
 
   for (const entry of analytics) {
-    const rawCity = entry.clCity || ''
+    const rawCity = entry.cl_city || ''
     const city = formatReadyToSearchRemoveCity(rawCity)
-    const countryCode = formatReadyToSearchRemoveCity(entry.clCountryCode || '')
+    const countryCode = formatReadyToSearchRemoveCity(entry.cl_country_code || '')
 
     const isCityUnset =
       !rawCity ||

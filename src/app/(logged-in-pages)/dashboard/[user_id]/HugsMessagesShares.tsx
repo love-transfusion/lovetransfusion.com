@@ -9,9 +9,13 @@ import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsF
 
 interface I_HugsMessagesShares {
   clRecipientObj: I_supaorg_recipient_hugs_counters_comments
+  totalFacebookLikeHugCare: number
 }
 
-const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {
+const HugsMessagesShares = ({
+  clRecipientObj,
+  totalFacebookLikeHugCare,
+}: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
     comments: totalComments,
@@ -46,14 +50,12 @@ const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {
               'rounded-lg text-white ring-[1px] ring-primary-300 text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {total}
+            {total + totalFacebookLikeHugCare}
           </p>
         </div>
       </div>
       <div className={'text-center'}>
-        <p className={'uppercase text-xl 2xl:text-2xl text-[#C5DFEF]'}>
-          hugs
-        </p>
+        <p className={'uppercase text-xl 2xl:text-2xl text-[#C5DFEF]'}>hugs</p>
         <div
           className={
             'flex gap-3 items-center bg-white shadow-[0px_0px_20px_0px_#2FABDD9C] py-3 px-4 2xl:px-6 mt-[7px] md:mt-5 rounded-lg w-fit mx-auto'
@@ -65,7 +67,7 @@ const HugsMessagesShares = ({ clRecipientObj }: I_HugsMessagesShares) => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalHugs}
+            {totalHugs + totalFacebookLikeHugCare}
           </p>
         </div>
       </div>

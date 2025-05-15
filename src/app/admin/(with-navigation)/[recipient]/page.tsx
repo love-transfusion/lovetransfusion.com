@@ -1,18 +1,11 @@
 import Icon_left from '@/app/components/icons/Icon_left'
 import React from 'react'
-import facebookAdId from './images/facebook-ad.webp'
-import facebook from './images/facebook.webp'
-import insta from './images/insta.webp'
-import lovetransfusion from './images/lovetransfusion.webp'
-import pinterest from './images/pinterest.webp'
-import twitter from './images/twitter.webp'
 import Image from 'next/image'
-import Input from '@/app/components/inputs/basic-input/Input'
 import Link from 'next/link'
-import CreateAccountButton from './CreateAccountButton'
 import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import { supa_admin_select_recipient_data } from '@/app/_actions/admin/actions'
+import RecipientForm from './RecipientForm'
 
 type Params = Promise<{ recipient: UUID }>
 
@@ -22,16 +15,16 @@ const RecipientPage = async (props: { params: Params }) => {
     recipient
   )
 
-  let user
-  if (foundRecipient?.user_id) {
-    const { data } = await supa_select_user(foundRecipient?.user_id)
-    user = data
-  }
+  const { data: user }: { data: I_supa_users_with_profpic_dataweb | null } =
+    foundRecipient?.user_id
+      ? await supa_select_user(foundRecipient?.user_id)
+      : { data: null }
 
   const recipientData: {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
   } = await fetchDataFromLTOrg(recipient)
   const recipientObject = recipientData.recipients[0]
+  console.log('[recipient]', { user })
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] h-full 2xl:h-[calc(100vh-85px)]">
       <div className={'w-fit'}>
@@ -86,7 +79,7 @@ const RecipientPage = async (props: { params: Params }) => {
             <p className={''}>Date Of Birth</p>
             <p className={'md:text-xl font-bold'}>
               {user?.birthday
-                ? new Date(user?.birthday).toLocaleDateString()
+                ? new Date(user.birthday).toLocaleDateString()
                 : '-'}
             </p>
           </div>
@@ -122,104 +115,10 @@ const RecipientPage = async (props: { params: Params }) => {
             on June 11th, 2020 when she was only 2 years old.
           </p>
         </div>
-        <div
-          className={'grid grid-cols-1 md:grid-cols-2 w-full gap-4 mt-[15px]'}
-        >
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={facebook}
-              quality={100}
-              alt="facebook"
-              className="max-h-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-            />
-          </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={twitter}
-              quality={100}
-              alt="twitterX"
-              className="max-h-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-            />
-          </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={insta}
-              quality={100}
-              alt="Instagram"
-              className="max-h-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-            />
-          </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={pinterest}
-              quality={100}
-              alt="Pinterest"
-              className="max-h-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-            />
-          </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={lovetransfusion}
-              quality={100}
-              alt="Love Transfusion Logo"
-              className="max-h-[42px] min-w-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              defaultValue={
-                recipientObject.path_url
-                  ? `https://www.lovetransfusion.org/${recipientObject.path_url}`
-                  : ''
-              }
-              clDisabled={true}
-              clContainerClassName="w-full text-neutral-400"
-            />
-          </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={facebookAdId}
-              quality={100}
-              alt="Facebook ad logo"
-              className="max-h-[42px] min-w-[42px]"
-            />
-            <Input
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-            />
-          </div>
-        </div>
-        <CreateAccountButton
-          orgRecipient={recipientObject}
-          foundRecipient={foundRecipient}
-          uuid={recipient}
+        <RecipientForm
+          recipientObject={recipientObject}
+          recipient={recipient}
+          user={user}
         />
       </div>
     </div>

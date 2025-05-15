@@ -62,7 +62,7 @@ const ForgotPassword = () => {
                   Email *
                 </label>
                 <Input
-                  clDisabled={isSuccessful}
+                  disabled={isSuccessful}
                   clPlaceholder="Email address"
                   {...register('email')}
                   className={

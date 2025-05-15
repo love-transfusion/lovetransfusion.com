@@ -4,13 +4,22 @@ import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { createServer } from '@/app/config/supabase/supabaseServer'
 import { isAdmin } from '@/app/lib/adminCheck'
+import { revalidatePath } from 'next/cache'
 
-export const supa_update_users = async (data: I_supa_users_insert) => {
+export const supa_update_users = async (data: I_supa_users_update) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  const supabase = isadmin ? await createAdmin() : await createServer()
-  const { error } = await supabase.from('users').update(data).eq('id', data.id)
-  return { error: error?.message ?? null }
+  if (data.id) {
+    const supabase = isadmin ? await createAdmin() : await createServer()
+    const { error } = await supabase
+      .from('users')
+      .update(data)
+      .eq('id', data.id)
+    revalidatePath('/')
+    return { error: error?.message ?? null }
+  } else {
+    return { error: 'Recipient ID is required' }
+  }
 }
 
 export const supa_select_user = async (user_id: string) => {

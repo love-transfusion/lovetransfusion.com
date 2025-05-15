@@ -45,10 +45,22 @@ declare global {
   type I_supa_profile_pictures_row_unextended =
     DB['public']['Tables']['profile_pictures']['Row']
 
+  // fb_adwise_insights table
+  type I_supa_fb_adwise_insights_insert =
+    DB['public']['Tables']['fb_adwise_insights']['Insert']
+  type I_supa_fb_adwise_insights_update =
+    DB['public']['Tables']['fb_adwise_insights']['Update']
+  type I_supa_fb_adwise_insights_row_unextended =
+    DB['public']['Tables']['fb_adwise_insights']['Row']
+
   // users table
   type I_supa_users_insert = DB['public']['Tables']['users']['Insert']
   type I_supa_users_update = DB['public']['Tables']['users']['Update']
   type I_supa_users_row = DB['public']['Tables']['users']['Row']
+  interface I_supa_users_with_profpic_dataweb extends I_supa_users_row {
+    profile_pictures: I_supa_profile_pictures_row_unextended | null
+    users_data_website: I_supa_users_data_website_row[]
+  }
 
   // Enums
   type I_supa_enumTypes_role = DB['public']['Enums']['role']

@@ -12,7 +12,6 @@ interface I_Input extends React.InputHTMLAttributes<HTMLInputElement> {
   // type?: string
   clErrorMessage?: string | undefined
   clValue?: string
-  clDisabled?: boolean
 }
 
 const getVariant = (
@@ -40,7 +39,6 @@ const Input = forwardRef<HTMLInputElement, I_Input>(function Input(
     clRightIcon,
     clLeftIcon,
     className,
-    clDisabled,
     clVariant,
     clValue,
     ...props
@@ -74,7 +72,6 @@ const Input = forwardRef<HTMLInputElement, I_Input>(function Input(
         ref={ref}
         {...props}
         value={clValue}
-        disabled={clDisabled}
         placeholder={clPlaceholder}
         className={twMerge(``, variantStyles, className)}
       />

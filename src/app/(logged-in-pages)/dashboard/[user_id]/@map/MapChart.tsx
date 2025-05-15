@@ -10,13 +10,15 @@ import {
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
+import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 
 interface Props {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
+  selectedUser: I_supa_users_with_profpic_dataweb | null
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
-const MapChart = ({ recipientObj }: Props) => {
+const MapChart = ({ recipientObj, selectedUser }: Props) => {
   const [option, setOption] = useState<any>({
     series: [],
   })
@@ -103,14 +105,43 @@ const MapChart = ({ recipientObj }: Props) => {
         clSpecificPath: `/${recipientObj.path_url}`,
       })
 
+      // Prepare data to be mapped
       const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
         clGoogleAnalytics,
         clRecipient: recipientObj,
       })
 
-      const mapped = await mapAnalyticsToGeoPoints(
-        analyticsWithCountryPathTotal || []
-      )
+      // fetch facebook Ad data
+      const facebookAdData = await util_fetchAdWiseInsights({
+        ad_id: selectedUser?.fb_ad_id,
+      })
+      console.log({ facebookAdData })
+      // remove the keys that are not needed
+      const ommittedFacebookAdDataArray = facebookAdData.map((fbdata) => {
+        const {
+          cl_region,
+          cl_country,
+          cl_country_code,
+          cl_city,
+          cl_total_reactions,
+        } = fbdata
+        return {
+          cl_region,
+          cl_country,
+          cl_country_code,
+          cl_city,
+          clViews: 0,
+          clMessages: 0,
+          clHugs: cl_total_reactions,
+        }
+      })
+
+      const combinedAnalytics = [
+        ...analyticsWithCountryPathTotal,
+        ...ommittedFacebookAdDataArray,
+      ]
+
+      const mapped = await mapAnalyticsToGeoPoints(combinedAnalytics || [])
       setMappedData(mapped)
       setLoading(false)
     }
@@ -145,7 +176,7 @@ const MapChart = ({ recipientObj }: Props) => {
     <>
       {loading ? (
         <div className="echarts-for-react text-center text-gray-500 py-10">
-          <LoadingComponent clLoadingText='Loading map...' />
+          <LoadingComponent clLoadingText="Loading map..." />
         </div>
       ) : (
         <ReactECharts option={option} style={{ width: '100%' }} />

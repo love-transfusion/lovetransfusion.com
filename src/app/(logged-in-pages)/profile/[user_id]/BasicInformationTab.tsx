@@ -155,7 +155,7 @@ const BasicInformation = ({
             Email address *
           </label>
           <Input
-            clDisabled={true}
+            disabled={true}
             clPlaceholder="Enter your email *"
             id="email"
             {...register('email', {

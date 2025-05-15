@@ -11,6 +11,7 @@ import { filter_comments } from './actions'
 import MessagesSection from './MessagesSection'
 import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
+import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 // import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 // import { redirect } from 'next/navigation'
 
@@ -39,6 +40,14 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     recipientObj.comments,
     recipientRow.receipients_deleted_messages
   )
+  const facebookAdData = await util_fetchAdWiseInsights({
+    ad_id: selectedUser?.fb_ad_id,
+  })
+  const totalFacebookLikeHugCare = facebookAdData.reduce(
+    (sum, item) => sum + item.cl_total_reactions,
+    0
+  )
+
   return (
     <div className="">
       <WelcomeMessage />
@@ -76,6 +85,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
               clRecipientOBj={recipientObj}
               clUserAccount={recipientRow}
             />
@@ -94,12 +104,18 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         >
           {map}
           <div className={'hidden xl:block'}>
-            <HugsMessagesShares clRecipientObj={recipientObj} />
+            <HugsMessagesShares
+              clRecipientObj={recipientObj}
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
+            />
           </div>
         </div>
         <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
-            <HugsMessagesShares clRecipientObj={recipientObj} />
+            <HugsMessagesShares
+              clRecipientObj={recipientObj}
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
+            />
           </div>
           <MostRecentEngagements clRecipientOBj={recipientObj} />
         </div>

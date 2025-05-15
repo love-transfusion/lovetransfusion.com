@@ -79,36 +79,12 @@ const FaqItems = ({ clContainerClassName }: I_FaqItems) => {
             <Link
               href={'https://www.lovetransfusion.org/submit-story'}
               target="_blank"
+              className="underline"
             >
-              LoveTransfusion.org
+              https://www.lovetransfusion.org/submit-story
             </Link>
             . Once the application is approved, the recipient can view the
             messages of support by logging into their account.
-          </p>
-        }
-      />
-      <FAQItem
-        clTitle="Why do some Love Transfusions not show a name or profile picture?"
-        clContent={
-          <p className={'text-[#999] text-lg'}>
-            Some platforms, due to privacy restrictions, do not allow us to
-            display the profile pictures or names of those engaging with your
-            story. In these cases, a placeholder picture and generic name (like
-            “Facebook User”) is shown. Rest assured; these are all genuine
-            expressions of support from real people.
-          </p>
-        }
-      />
-      <FAQItem
-        clTitle="How do I create an account for my child or someone I care for?"
-        clContent={
-          <p className={'text-[#999] text-lg'}>
-            Parents or guardians can create an account and set up a profile for
-            a child or another person by submitting their story through
-            LoveTransfusion.org (link:
-            https://www.lovetransfusion.org/submitstory). Once the application
-            is approved, the recipient can view the messages of support by
-            logging into their account.
           </p>
         }
       />
