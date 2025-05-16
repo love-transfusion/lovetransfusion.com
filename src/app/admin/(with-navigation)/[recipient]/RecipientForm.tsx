@@ -52,7 +52,6 @@ const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
   const { settoast } = useStore(utilityStore)
 
   const updateUser = async (data: recipientFormTypes, recipient_id: string) => {
-    console.log({ data, recipient_id })
     await supa_update_users({ id: recipient_id, fb_ad_id: data.fbAdID || null })
   }
 

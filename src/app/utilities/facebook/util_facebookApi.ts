@@ -436,7 +436,7 @@ function fuzzyFindDMA(dmaInput: string, candidates: string[]): string | null {
 type FetchAdWiseInsightsParams =
   | {
       /** If accountId is present, this should not be defined */
-      ad_id: string | null | undefined
+      ad_id: string
       apiVersion?: string
       datePreset?: string
       accountId?: never
@@ -465,6 +465,7 @@ export const util_fetchAdWiseInsights = async ({
   apiVersion = 'v22.0',
   datePreset = 'maximum',
 }: FetchAdWiseInsightsParams): Promise<AdWiseInsight[]> => {
+  console.log('triggered util_fetchAdWiseInsights')
   const token = process.env.FACEBOOK_API_KEY!
   try {
     const formattedAccountId = accountId ? formatAccountId(accountId) : ad_id
@@ -483,7 +484,7 @@ export const util_fetchAdWiseInsights = async ({
     const geoInsights = await fetchAllPages<FacebookInsight>(
       `${geoUrl}?${geoQueryString}`
     )
-
+    console.log({ geoInsights, query: `${geoUrl}?${geoQueryString}` })
     // 3. Fetch reactions (action_breakdowns=action_reaction, all pages)
     const reactUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactParams = {
@@ -838,8 +839,6 @@ export const fetchAdInsights = async (
       `${geoUrl}?${geoQueryString}`
     )
 
-    console.log('Ad geo insights fetched:', geoInsights.length)
-
     // Second: Fetch ad insights with reaction data (without conflicting breakdowns)
     const reactionsUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactionsParams = {
@@ -856,8 +855,6 @@ export const fetchAdInsights = async (
     const reactionsInsights = await fetchAllPages<FacebookInsight>(
       `${reactionsUrl}?${reactionsQueryString}`
     )
-
-    console.log('Ad reaction data fetched:', reactionsInsights.length)
 
     // Fetch DMA data separately (still needed for US locations)
     const dmaUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`

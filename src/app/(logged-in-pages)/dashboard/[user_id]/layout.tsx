@@ -40,9 +40,11 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     recipientObj.comments,
     recipientRow.receipients_deleted_messages
   )
-  const facebookAdData = await util_fetchAdWiseInsights({
-    ad_id: selectedUser?.fb_ad_id,
-  })
+  const facebookAdData = selectedUser?.fb_ad_id
+    ? await util_fetchAdWiseInsights({
+        ad_id: selectedUser?.fb_ad_id,
+      })
+    : []
   const totalFacebookLikeHugCare = facebookAdData.reduce(
     (sum, item) => sum + item.cl_total_reactions,
     0

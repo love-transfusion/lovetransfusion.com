@@ -7,7 +7,6 @@ type Params = Promise<{ user_id: string }>
 
 const MapSlot = async ({ params }: { params: Params }) => {
   const { user_id } = await params
-  console.log({ user_id })
   const { data: selectedUser }= await supa_select_user(user_id)
   const { data: recipientRow } = await supa_select_recipient(user_id)
   if (!recipientRow) return null

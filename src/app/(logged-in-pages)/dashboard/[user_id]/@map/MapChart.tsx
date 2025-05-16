@@ -111,11 +111,11 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         clRecipient: recipientObj,
       })
 
+      console.log({ selectedUser })
       // fetch facebook Ad data
-      const facebookAdData = await util_fetchAdWiseInsights({
+      const facebookAdData = selectedUser?.fb_ad_id  ? await util_fetchAdWiseInsights({
         ad_id: selectedUser?.fb_ad_id,
-      })
-      console.log({ facebookAdData })
+      }) : []
       // remove the keys that are not needed
       const ommittedFacebookAdDataArray = facebookAdData.map((fbdata) => {
         const {

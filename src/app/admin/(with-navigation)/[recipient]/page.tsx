@@ -24,7 +24,6 @@ const RecipientPage = async (props: { params: Params }) => {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
   } = await fetchDataFromLTOrg(recipient)
   const recipientObject = recipientData.recipients[0]
-  console.log('[recipient]', { user })
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] h-full 2xl:h-[calc(100vh-85px)]">
       <div className={'w-fit'}>
