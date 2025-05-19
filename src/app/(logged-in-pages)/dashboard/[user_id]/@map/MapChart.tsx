@@ -18,6 +18,11 @@ interface Props {
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
+const calculateSymbolSize = (val: any[]) => {
+  const total = val[3] + val[4]
+  return Math.max(5, Math.min(Math.log10(Math.max(total, 1)) * 10, 100))
+}
+
 const MapChart = ({ recipientObj, selectedUser }: Props) => {
   const [option, setOption] = useState<any>({
     series: [],
@@ -61,14 +66,14 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         geo: {
           map: 'world',
           roam: true, // Enable zoom and pan
-          // zoom: 1, // Adjust zoom level to fit screen
+          zoom: 1, // Adjust zoom level to fit screen
           layoutSize: '100%',
           label: {
             show: false,
           },
           scaleLimit: {
             min: 1,
-            max: 3.5,
+            max: 3,
           },
           itemStyle: {
             areaColor: '#E2F2FA',
@@ -90,12 +95,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
             itemStyle: {
               color: '#63B6AC',
             },
-            symbolSize: (val: any[]) => {
-              const total = val[2] + val[3] + val[4] // [lng, lat, views, hugs, messages]
-              const safeTotal = Math.max(total, 1) // avoid log(0)
-              const size = Math.log10(safeTotal) * 10 // Log scaling
-              return Math.max(5, Math.min(size, 100)) // clamp between 5 and 100
-            },
+            symbolSize: calculateSymbolSize,
           },
         ],
       })
@@ -161,17 +161,12 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         {
           ...prev.series?.[0],
           data: mappedData,
-          symbolSize: (val: any[]) => {
-            const total = val[3] + val[4]
-            return Math.max(
-              5,
-              Math.min(Math.log10(Math.max(total, 1)) * 10, 100)
-            )
-          },
+          symbolSize: calculateSymbolSize,
         },
       ],
     }))
-  }, [mappedData])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappedData, calculateSymbolSize])
 
   // return <ReactECharts option={option} style={{ width: '100%' }} />
   return (
