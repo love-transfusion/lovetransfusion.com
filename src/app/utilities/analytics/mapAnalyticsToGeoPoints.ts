@@ -1,6 +1,5 @@
 'use server'
-// import fs from 'fs'
-// import path from 'path'
+
 import { I_CountryPathTotalFormat } from './getAnalyticsCountryPathTotal'
 import rawCities from '@/app/lib/geonames/cities.json'
 
@@ -27,48 +26,53 @@ const formatReadyToSearchRemoveCity = (str: string) => {
     .toLowerCase()
 }
 
+// 🧠 Pre-index for instant lookup
+const cityMap = new Map<string, CityEntry>()
+const regionMap = new Map<string, CityEntry>()
+
+for (const key of Object.keys(cities)) {
+  const entry = cities[key]
+  const cityKey = `${formatReadyToSearchRemoveCity(entry.city)}_${key.slice(-2).toLowerCase()}`
+  cityMap.set(cityKey, entry)
+
+  const regionKey = `${formatReadyToSearchRemoveCity(entry.state)}_${key.slice(-2).toLowerCase()}`
+  if (entry.state) {
+    regionMap.set(regionKey, entry)
+  }
+}
+
 export const mapAnalyticsToGeoPoints = async (
   analytics: I_CountryPathTotalFormat[]
 ): Promise<GeoPoint[]> => {
   const resultMap = new Map<string, GeoPoint>()
+  console.time('geoMappingLoop')
 
   for (const entry of analytics) {
     const rawCity = entry.cl_city || ''
     const rawRegion = entry.cl_region || ''
-    const city = formatReadyToSearchRemoveCity(rawCity)
     const countryCode = formatReadyToSearchRemoveCity(entry.cl_country_code || '')
+    const city = formatReadyToSearchRemoveCity(rawCity)
     const region = formatReadyToSearchRemoveCity(rawRegion)
 
     const isCityUnset =
-      !rawCity ||
-      rawCity.trim().toLowerCase() === '(not set)' ||
-      city === '' ||
-      city === '(notset)'
+      !rawCity || rawCity.trim().toLowerCase() === '(not set)' || city === '' || city === '(notset)'
 
-    let matchedKey = Object.keys(cities).find((key) => {
-      const lowerCasedKey = key.slice(0, key.length - 3).toLowerCase()
-      const formattedKey = formatReadyToSearchRemoveCity(lowerCasedKey)
-      const countryCodeKey = key.slice(-2).toLowerCase()
+    // Fast O(1) match
+    console.time('cityExactMatch')
+    const matchFromCity = cityMap.get(`${city}_${countryCode}`)
+    console.timeEnd('cityExactMatch')
 
-      return formattedKey === city && countryCodeKey === countryCode
-    })
+    let match = matchFromCity
 
-    // Fallback: match by region if city is missing or no match
-    if (!matchedKey && (isCityUnset || city)) {
-      matchedKey = Object.keys(cities).find((key) => {
-        const cityEntry = cities[key]
-        const countryCodeKey = key.slice(-2).toLowerCase()
-
-        return (
-          countryCodeKey === countryCode &&
-          formatReadyToSearchRemoveCity(cityEntry.state) === region
-        )
-      })
+    // Fallback to region if needed
+    if (!match && (isCityUnset || city)) {
+      console.time('regionFallbackMatch')
+      match = regionMap.get(`${region}_${countryCode}`)
+      console.timeEnd('regionFallbackMatch')
     }
 
-    if (!matchedKey) continue
+    if (!match) continue
 
-    const match = cities[matchedKey]
     const lng = parseFloat(match.lng.toFixed(6))
     const lat = parseFloat(match.lat.toFixed(6))
     const key = `${lng},${lat}`
@@ -86,5 +90,6 @@ export const mapAnalyticsToGeoPoints = async (
     }
   }
 
+  console.timeEnd('geoMappingLoop')
   return Array.from(resultMap.values())
 }

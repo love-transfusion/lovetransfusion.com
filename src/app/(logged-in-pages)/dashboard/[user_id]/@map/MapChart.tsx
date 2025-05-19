@@ -35,9 +35,17 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
       if (mappedData.length < 1) {
         setLoading(true)
       }
+      console.time('fetchmap')
       const res = await fetch('/maps/world.json')
+      console.timeEnd('fetchmap')
+
+      console.time('worldJson')
       const worldJson = await res.json()
+      console.timeEnd('worldJson')
+
+      console.time('registerMap')
       registerMap('world', worldJson)
+      console.timeEnd('registerMap')
 
       // Initial map render (no data yet)
       setOption({
@@ -101,22 +109,28 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
       })
 
       // Fetch and map data
+      console.time('ga_selectGoogleAnalyticsData')
       const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
         clSpecificPath: `/${recipientObj.path_url}`,
       })
+      console.timeEnd('ga_selectGoogleAnalyticsData')
 
       // Prepare data to be mapped
+      console.time('getAnalyticsCountryPathTotal')
       const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
         clGoogleAnalytics,
         clRecipient: recipientObj,
       })
+      console.timeEnd('getAnalyticsCountryPathTotal')
 
       // fetch facebook Ad data
+      console.time('util_fetchAdWiseInsights')
       const facebookAdData = selectedUser?.fb_ad_id
         ? await util_fetchAdWiseInsights({
             ad_id: selectedUser?.fb_ad_id,
           })
         : []
+      console.timeEnd('util_fetchAdWiseInsights')
       // remove the keys that are not needed
       const ommittedFacebookAdDataArray = facebookAdData.map((fbdata) => {
         const {
@@ -143,7 +157,12 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         ...ommittedFacebookAdDataArray,
       ]
 
+      console.time('mapped')
+      console.log({ combinedAnalytics })
       const mapped = await mapAnalyticsToGeoPoints(combinedAnalytics || [])
+      console.log({ mapped })
+      console.timeEnd('mapped')
+
       setMappedData(mapped)
       setLoading(false)
     }
@@ -165,7 +184,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         },
       ],
     }))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedData, calculateSymbolSize])
 
   // return <ReactECharts option={option} style={{ width: '100%' }} />

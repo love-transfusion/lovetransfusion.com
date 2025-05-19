@@ -67,15 +67,5 @@ export const ga_selectGoogleAnalyticsData = async ({
     property: `properties/${process.env.GOOGLE_PROPERTY}`,
     requestBody: requestBody,
   })
-  // const arrValues =
-  //   response.data.rows?.map(
-  //     (item) =>
-  //       (item.metricValues &&
-  //         (item.metricValues[0].value
-  //           ? parseInt(item.metricValues[0].value)
-  //           : 0)) ??
-  //       0
-  //   ) ?? []
-  // const total = arrValues?.reduce((a, b) => a + b)
   return response.data
 }
