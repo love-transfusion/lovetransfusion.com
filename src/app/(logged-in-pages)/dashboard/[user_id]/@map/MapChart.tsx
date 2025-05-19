@@ -18,121 +18,34 @@ interface Props {
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
-const calculateSymbolSize = (val: any[]) => {
-  const total = val[3] + val[4]
-  return Math.max(5, Math.min(Math.log10(Math.max(total, 1)) * 10, 100))
-}
-
 const MapChart = ({ recipientObj, selectedUser }: Props) => {
-  const [option, setOption] = useState<any>({
-    series: [],
-  })
+  const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const loadMap = async () => {
-      if (mappedData.length < 1) {
-        setLoading(true)
-      }
-      console.time('fetchmap')
+      if (mappedData.length < 1) setLoading(true)
+
       const res = await fetch('/maps/world.json')
-      console.timeEnd('fetchmap')
-
-      console.time('worldJson')
       const worldJson = await res.json()
-      console.timeEnd('worldJson')
-
-      console.time('registerMap')
       registerMap('world', worldJson)
-      console.timeEnd('registerMap')
 
-      // Initial map render (no data yet)
-      setOption({
-        tooltip: {
-          trigger: 'item',
-          borderColor: '#5470C6',
-          formatter: (params: {
-            name: string
-            value?: I_Parameters
-            seriesName: string
-          }) => {
-            if (Array.isArray(params.value)) {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const [lon, lat, views, hugs, messages] = params.value
-              return `
-                <strong>${params.name}</strong><br/>
-                views: ${views}<br/>
-                hugs: ${hugs}<br/>
-                messages: ${messages}
-              `
-            } else {
-              return `<strong>${params.name}</strong><br/>No data`
-            }
-          },
-        },
-        geo: {
-          map: 'world',
-          roam: true, // Enable zoom and pan
-          zoom: 1, // Adjust zoom level to fit screen
-          layoutSize: '100%',
-          label: {
-            show: false,
-          },
-          scaleLimit: {
-            min: 1,
-            max: 3,
-          },
-          itemStyle: {
-            areaColor: '#E2F2FA',
-            borderColor: '#DAEBFA',
-          },
-          emphasis: {
-            label: { show: false },
-            itemStyle: {
-              areaColor: '#A5D8FF',
-            },
-          },
-        },
-        series: [
-          {
-            name: 'Effect Points',
-            type: 'effectScatter',
-            coordinateSystem: 'geo',
-            data: mappedData,
-            itemStyle: {
-              color: '#63B6AC',
-            },
-            symbolSize: calculateSymbolSize,
-          },
-        ],
-      })
-
-      // Fetch and map data
-      console.time('ga_selectGoogleAnalyticsData')
+      // Fetch analytics
       const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
         clSpecificPath: `/${recipientObj.path_url}`,
       })
-      console.timeEnd('ga_selectGoogleAnalyticsData')
 
-      // Prepare data to be mapped
-      console.time('getAnalyticsCountryPathTotal')
       const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
         clGoogleAnalytics,
         clRecipient: recipientObj,
       })
-      console.timeEnd('getAnalyticsCountryPathTotal')
 
-      // fetch facebook Ad data
-      console.time('util_fetchAdWiseInsights')
       const facebookAdData = selectedUser?.fb_ad_id
-        ? await util_fetchAdWiseInsights({
-            ad_id: selectedUser?.fb_ad_id,
-          })
+        ? await util_fetchAdWiseInsights({ ad_id: selectedUser?.fb_ad_id })
         : []
-      console.timeEnd('util_fetchAdWiseInsights')
-      // remove the keys that are not needed
-      const ommittedFacebookAdDataArray = facebookAdData.map((fbdata) => {
+
+      const formattedFacebookData = facebookAdData.map((fbdata) => {
         const {
           cl_region,
           cl_country,
@@ -154,40 +67,85 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
 
       const combinedAnalytics = [
         ...analyticsWithCountryPathTotal,
-        ...ommittedFacebookAdDataArray,
+        ...formattedFacebookData,
       ]
 
-      console.time('mapped')
-      console.log({ combinedAnalytics })
       const mapped = await mapAnalyticsToGeoPoints(combinedAnalytics || [])
-      console.log({ mapped })
-      console.timeEnd('mapped')
-
       setMappedData(mapped)
+
+      // 🧠 Calculate min/max
+      const totals = mapped.map((d) => d.value[3] + d.value[4])
+      const minTotal = Math.min(...totals)
+      const maxTotal = Math.max(...totals)
+
+      const calculateSymbolSize = (val: any[]) => {
+        const total = val[3] + val[4]
+        const minSize = 5
+        const maxSize = 20
+
+        if (maxTotal === minTotal) return (minSize + maxSize) / 2
+        const normalized = (total - minTotal) / (maxTotal - minTotal)
+        return minSize + normalized * (maxSize - minSize)
+      }
+
+      setOption({
+        tooltip: {
+          trigger: 'item',
+          borderColor: '#5470C6',
+          formatter: (params: {
+            name: string
+            value?: I_Parameters
+            seriesName: string
+          }) => {
+            if (Array.isArray(params.value)) {
+              const [, , views, hugs, messages] = params.value
+              return `
+                <strong>${params.name}</strong><br/>
+                views: ${views}<br/>
+                hugs: ${hugs}<br/>
+                messages: ${messages}
+              `
+            } else {
+              return `<strong>${params.name}</strong><br/>No data`
+            }
+          },
+        },
+        geo: {
+          map: 'world',
+          roam: true,
+          zoom: 1.2,
+          layoutSize: '100%',
+          label: { show: false },
+          scaleLimit: { min: 1, max: 10 },
+          itemStyle: {
+            areaColor: '#E2F2FA',
+            borderColor: '#DAEBFA',
+          },
+          emphasis: {
+            label: { show: false },
+            itemStyle: {
+              areaColor: '#A5D8FF',
+            },
+          },
+        },
+        series: [
+          {
+            name: 'Effect Points',
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            data: mapped,
+            itemStyle: { color: '#63B6AC' },
+            symbolSize: calculateSymbolSize,
+          },
+        ],
+      })
+
       setLoading(false)
     }
 
     loadMap()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientObj])
+  }, [recipientObj, selectedUser])
 
-  useEffect(() => {
-    // Update just the series data without resetting the entire option
-
-    setOption((prev: any) => ({
-      ...prev,
-      series: [
-        {
-          ...prev.series?.[0],
-          data: mappedData,
-          symbolSize: calculateSymbolSize,
-        },
-      ],
-    }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappedData, calculateSymbolSize])
-
-  // return <ReactECharts option={option} style={{ width: '100%' }} />
   return (
     <>
       {loading ? (
