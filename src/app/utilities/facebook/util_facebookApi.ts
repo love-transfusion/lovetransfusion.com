@@ -437,15 +437,11 @@ type FetchAdWiseInsightsParams =
   | {
       /** If accountId is present, this should not be defined */
       ad_id: string
-      apiVersion?: string
-      datePreset?: string
       accountId?: never
     }
   | {
       /** If ad_id is present, this should not be defined */
       accountId: string
-      apiVersion?: string
-      datePreset?: string
       ad_id?: never
     }
 
@@ -458,15 +454,15 @@ type FetchAdWiseInsightsParams =
       datePreset?,
   })
  * ```
+  @returns AdWiseInsight[]
  */
 export const util_fetchAdWiseInsights = async ({
   accountId,
   ad_id,
-  apiVersion = 'v22.0',
-  datePreset = 'maximum',
 }: FetchAdWiseInsightsParams): Promise<AdWiseInsight[]> => {
-  console.log('triggered util_fetchAdWiseInsights')
-  const token = process.env.FACEBOOK_API_KEY!
+  const apiVersion = 'v22.0'
+  const datePreset = 'maximum'
+  const token = process.env.FACEBOOK_USER_TOKEN!
   try {
     const formattedAccountId = accountId ? formatAccountId(accountId) : ad_id
     // 1. Fetch geo breakdown (country,region) - fetch all pages
@@ -484,7 +480,6 @@ export const util_fetchAdWiseInsights = async ({
     const geoInsights = await fetchAllPages<FacebookInsight>(
       `${geoUrl}?${geoQueryString}`
     )
-    console.log({ geoInsights, query: `${geoUrl}?${geoQueryString}` })
     // 3. Fetch reactions (action_breakdowns=action_reaction, all pages)
     const reactUrl = `https://graph.facebook.com/${apiVersion}/${formattedAccountId}/insights`
     const reactParams = {
@@ -943,10 +938,6 @@ export const fetchAdInsights = async (
         hearts: 0,
         hugs: 0,
       }
-
-      console.log(
-        `Ad ${ad_id} reactions - Likes: ${reactions.likes}, Hearts: ${reactions.hearts}, Hugs: ${reactions.hugs}`
-      )
 
       // Calculate total impressions for this ad across all regions
       const totalImpressions = fbInsights.reduce((sum, insight) => {

@@ -1,11 +1,15 @@
 'use server'
 
-import { createServer } from '@/app/config/supabase/supabaseServer'
+import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
+import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
+import { isAdmin } from '@/app/lib/adminCheck'
 
 export const supa_insert_fb_adwise_insights = async (
   rawData: I_supa_fb_adwise_insights_insert[]
 ) => {
-  const supabase = await createServer()
+  const user = await getCurrentUser()
+  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
+  const supabase = await createAdmin()
   try {
     const { data, error } = await supabase
       .from('fb_adwise_insights')

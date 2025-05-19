@@ -14,6 +14,10 @@ import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
 import ResetUserInStore from './ResetUserInStore'
 import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
 import DeleteUser from './DeleteUser'
+import {
+  AdWiseInsight,
+  util_fetchAdWiseInsights,
+} from '@/app/utilities/facebook/util_facebookApi'
 
 interface I_recipient_data {
   id: string
@@ -25,8 +29,10 @@ interface I_orgRecipients {
   recipients: I_recipient_data[] | null
 }
 
-export interface I_combineddataOfRecipient extends I_supa_users_data_website_row {
+export interface I_combineddataOfRecipient
+  extends I_supa_users_data_website_row {
   user: I_supa_users_row | null
+  userFBInsights: { ad_id: AdWiseInsight[] } | undefined
 }
 
 export const maxDuration = 60
@@ -50,14 +56,47 @@ const AdminDashboard = async () => {
     .map((item) => item.user_id)
     .filter((item): item is string => Boolean(item))
 
+  // Search multiple users to get birthdate
   const { data: listOfusers } = await supa_admin_search_multiple_users(IDs)
 
-  const combinedData: I_combineddataOfRecipient[] = comRecipients.map((item) => {
-    return {
-      ...item,
-      user: listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
+  // Get users that has fb_ad_id
+  const usersWithFbID = listOfusers?.filter((user) => user.fb_ad_id) ?? []
+
+  const fbInsights: {
+    ad_id: AdWiseInsight[]
+  }[] = []
+
+  for (const user of usersWithFbID) {
+    if (user.fb_ad_id) {
+      const ad_id = user.fb_ad_id
+      const result = await util_fetchAdWiseInsights({
+        ad_id,
+      })
+      const newObj = { ad_id: result }
+      fbInsights.push(newObj)
     }
-  })
+  }
+
+  const combinedData: I_combineddataOfRecipient[] = comRecipients.map(
+    (item) => {
+      return {
+        ...item,
+        user:
+          listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
+        userFBInsights: (() => {
+          const selectedUser = listOfusers?.find(
+            (userObj) => userObj.id === item.user_id
+          )?.fb_ad_id
+          if (selectedUser) {
+            return fbInsights.find((insight) =>
+              insight.ad_id.some((p) => p.ad_id === selectedUser)
+            )
+          }
+        })(),
+      }
+    }
+  )
+  console.log({ combinedData })
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
@@ -104,6 +143,11 @@ const AdminDashboard = async () => {
                     const recipientData = comRecipient.recipient as unknown
                     const recipient =
                       recipientData as I_supaorg_recipient_hugs_counters_comments
+                    const totalFBReactions =
+                      comRecipient.userFBInsights?.ad_id.reduce(
+                        (sum, accu) => sum + accu.cl_total_reactions,
+                        0
+                      )
                     return (
                       <tr
                         key={recipient.id}
@@ -141,7 +185,10 @@ const AdminDashboard = async () => {
                           </p>
                         </td>
                         <td className="py-[6px] px-3">
-                          <Engagements recipient={recipient} />
+                          <Engagements
+                            totalFBReactions={totalFBReactions}
+                            recipient={recipient}
+                          />
                         </td>
                         <td className="py-[6px] px-3">
                           {!draftRecipients.includes(recipient.id) ? (

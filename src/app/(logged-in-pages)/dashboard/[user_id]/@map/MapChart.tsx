@@ -68,7 +68,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
           },
           scaleLimit: {
             min: 1,
-            max: 2.5,
+            max: 3.5,
           },
           itemStyle: {
             areaColor: '#E2F2FA',
@@ -111,11 +111,12 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         clRecipient: recipientObj,
       })
 
-      console.log({ selectedUser })
       // fetch facebook Ad data
-      const facebookAdData = selectedUser?.fb_ad_id  ? await util_fetchAdWiseInsights({
-        ad_id: selectedUser?.fb_ad_id,
-      }) : []
+      const facebookAdData = selectedUser?.fb_ad_id
+        ? await util_fetchAdWiseInsights({
+            ad_id: selectedUser?.fb_ad_id,
+          })
+        : []
       // remove the keys that are not needed
       const ommittedFacebookAdDataArray = facebookAdData.map((fbdata) => {
         const {
@@ -124,13 +125,14 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
           cl_country_code,
           cl_city,
           cl_total_reactions,
+          cl_impressions,
         } = fbdata
         return {
           cl_region,
           cl_country,
           cl_country_code,
           cl_city,
-          clViews: 0,
+          clViews: cl_impressions,
           clMessages: 0,
           clHugs: cl_total_reactions,
         }
@@ -160,7 +162,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
           ...prev.series?.[0],
           data: mappedData,
           symbolSize: (val: any[]) => {
-            const total = val[2] + val[3] + val[4]
+            const total = val[3] + val[4]
             return Math.max(
               5,
               Math.min(Math.log10(Math.max(total, 1)) * 10, 100)

@@ -34,8 +34,10 @@ export const mapAnalyticsToGeoPoints = async (
 
   for (const entry of analytics) {
     const rawCity = entry.cl_city || ''
+    const rawRegion = entry.cl_region || ''
     const city = formatReadyToSearchRemoveCity(rawCity)
     const countryCode = formatReadyToSearchRemoveCity(entry.cl_country_code || '')
+    const region = formatReadyToSearchRemoveCity(rawRegion)
 
     const isCityUnset =
       !rawCity ||
@@ -43,16 +45,26 @@ export const mapAnalyticsToGeoPoints = async (
       city === '' ||
       city === '(notset)'
 
-    const matchedKey = Object.keys(cities).find((key) => {
+    let matchedKey = Object.keys(cities).find((key) => {
       const lowerCasedKey = key.slice(0, key.length - 3).toLowerCase()
-      const theKey = formatReadyToSearchRemoveCity(lowerCasedKey)
+      const formattedKey = formatReadyToSearchRemoveCity(lowerCasedKey)
       const countryCodeKey = key.slice(-2).toLowerCase()
 
-      if (theKey === city && countryCodeKey === countryCode) return true
-      if (isCityUnset && countryCodeKey === countryCode) return true
-
-      return false
+      return formattedKey === city && countryCodeKey === countryCode
     })
+
+    // Fallback: match by region if city is missing or no match
+    if (!matchedKey && (isCityUnset || city)) {
+      matchedKey = Object.keys(cities).find((key) => {
+        const cityEntry = cities[key]
+        const countryCodeKey = key.slice(-2).toLowerCase()
+
+        return (
+          countryCodeKey === countryCode &&
+          formatReadyToSearchRemoveCity(cityEntry.state) === region
+        )
+      })
+    }
 
     if (!matchedKey) continue
 

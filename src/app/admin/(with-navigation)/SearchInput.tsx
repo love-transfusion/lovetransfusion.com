@@ -11,9 +11,7 @@ import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import Icon_refresh from '@/app/components/icons/Icon_refresh'
 
 const SearchInput = () => {
-  const [searchResults, setsearchResults] = useState<
-    I_supa_users_data_website_row[] | null
-  >(null)
+  const [searchResults, setsearchResults] = useState<I_supa_users_data_website_row[] | null>(null)
   const [isSubmitting, setisSubmitting] = useState<boolean>(false)
   const [searchKeyword, setsearchKeyword] = useState<string>('')
   const { clToggleMenu, clIsOpen, clRef, Menu } = useMenu()
