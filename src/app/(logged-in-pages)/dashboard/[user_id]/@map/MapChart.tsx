@@ -61,7 +61,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         geo: {
           map: 'world',
           roam: true, // Enable zoom and pan
-          zoom: 1, // Adjust zoom level to fit screen
+          // zoom: 1, // Adjust zoom level to fit screen
           layoutSize: '100%',
           label: {
             show: false,
