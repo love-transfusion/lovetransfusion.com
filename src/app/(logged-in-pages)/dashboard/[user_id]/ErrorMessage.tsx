@@ -7,7 +7,7 @@ interface ErrorMessage {
 }
 
 const ErrorMessage = ({ error }: ErrorMessage) => {
-  const [isClosed, setisClosed] = useState<boolean>(false)
+  const [isClosed, setisClosed] = useState<boolean>(!!error)
   return (
     <>
       {!isClosed && (
