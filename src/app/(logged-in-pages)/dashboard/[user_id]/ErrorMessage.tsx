@@ -8,6 +8,7 @@ interface ErrorMessage {
 
 const ErrorMessage = ({ error }: ErrorMessage) => {
   const [isError, setisError] = useState<boolean>(!!error)
+  
   return (
     <>
       {isError && (
