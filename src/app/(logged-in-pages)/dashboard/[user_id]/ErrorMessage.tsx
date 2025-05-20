@@ -7,10 +7,10 @@ interface ErrorMessage {
 }
 
 const ErrorMessage = ({ error }: ErrorMessage) => {
-  const [isClosed, setisClosed] = useState<boolean>(!!error)
+  const [isError, setisError] = useState<boolean>(!!error)
   return (
     <>
-      {!isClosed && (
+      {isError && (
         <div
           className={
             'px-3 w-full md:px-6 lg:px-10 xl:px-5 bg-red-100 py-1 md:py-[2px] z-[999]'
@@ -26,9 +26,10 @@ const ErrorMessage = ({ error }: ErrorMessage) => {
             </p>
             <Icon_close
               className="block md:hidden min-w-5 min-h-5"
-              onClick={() => setisClosed(true)}
+              onClick={() => setisError(true)}
             />
-            <p onClick={() => setisClosed(true)}
+            <p
+              onClick={() => setisError(true)}
               className={
                 'hidden md:flex bg-red-50 border border-red-300 items-center bg-opacity-90 rounded-md px-2 py-[1px] md:absolute md:inset-y-0 md:right-5 cursor-pointer'
               }
