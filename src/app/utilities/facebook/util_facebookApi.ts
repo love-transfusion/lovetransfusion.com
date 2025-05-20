@@ -459,7 +459,10 @@ type FetchAdWiseInsightsParams =
 export const util_fetchAdWiseInsights = async ({
   accountId,
   ad_id,
-}: FetchAdWiseInsightsParams): Promise<AdWiseInsight[]> => {
+}: FetchAdWiseInsightsParams): Promise<{
+  data: AdWiseInsight[] | null
+  error: string | null
+}> => {
   const apiVersion = 'v22.0'
   const datePreset = 'maximum'
   const token = process.env.FACEBOOK_USER_TOKEN!
@@ -622,10 +625,11 @@ export const util_fetchAdWiseInsights = async ({
         })
       })
     })
-    return results
-  } catch (error) {
+    return { data: results, error: null }
+  } catch (error: any) {
     console.error('Error fetching ad-wise insights:', error)
-    throw error
+    const thisError = error?.message as string
+    return { data: null, error: thisError }
   }
 }
 
@@ -648,7 +652,7 @@ export const fetchAccountInsights = async (
   accountId: string,
   apiVersion: string,
   datePreset: string
-): Promise<AccountInsight[]> => {
+): Promise<{ data: AccountInsight[] | null; error: string | null }> => {
   try {
     const formattedAccountId = formatAccountId(accountId)
     // 1. Fetch geo breakdown (region) - fetch all pages
@@ -800,10 +804,11 @@ export const fetchAccountInsights = async (
       cl_reach: l.cl_reach,
     }))
     if (result.length > 0) (result[0] as any).totalReactions = totalReactions
-    return result
-  } catch (error) {
+    return { data: result, error: null }
+  } catch (error: any) {
     console.error('Error fetching account insights:', error)
-    throw error
+    const thisError = error?.message as string
+    return { data: null, error: thisError }
   }
 }
 

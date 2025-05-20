@@ -69,10 +69,10 @@ const AdminDashboard = async () => {
   for (const user of usersWithFbID) {
     if (user.fb_ad_id) {
       const ad_id = user.fb_ad_id
-      const result = await util_fetchAdWiseInsights({
+      const { data: result } = await util_fetchAdWiseInsights({
         ad_id,
       })
-      const newObj = { ad_id: result }
+      const newObj = { ad_id: result ?? [] }
       fbInsights.push(newObj)
     }
   }

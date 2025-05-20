@@ -41,29 +41,30 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         clRecipient: recipientObj,
       })
 
-      const facebookAdData = selectedUser?.fb_ad_id
+      const { data: facebookAdData } = selectedUser?.fb_ad_id
         ? await util_fetchAdWiseInsights({ ad_id: selectedUser?.fb_ad_id })
-        : []
+        : { data: [] }
 
-      const formattedFacebookData = facebookAdData.map((fbdata) => {
-        const {
-          cl_region,
-          cl_country,
-          cl_country_code,
-          cl_city,
-          cl_total_reactions,
-          cl_impressions,
-        } = fbdata
-        return {
-          cl_region,
-          cl_country,
-          cl_country_code,
-          cl_city,
-          clViews: cl_impressions,
-          clMessages: 0,
-          clHugs: cl_total_reactions,
-        }
-      })
+      const formattedFacebookData =
+        facebookAdData?.map((fbdata) => {
+          const {
+            cl_region,
+            cl_country,
+            cl_country_code,
+            cl_city,
+            cl_total_reactions,
+            cl_impressions,
+          } = fbdata
+          return {
+            cl_region,
+            cl_country,
+            cl_country_code,
+            cl_city,
+            clViews: cl_impressions,
+            clMessages: 0,
+            clHugs: cl_total_reactions,
+          }
+        }) ?? []
 
       const combinedAnalytics = [
         ...analyticsWithCountryPathTotal,
@@ -144,7 +145,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
     }
 
     loadMap()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipientObj, selectedUser])
 
   return (

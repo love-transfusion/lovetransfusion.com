@@ -40,12 +40,12 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     recipientObj.comments,
     recipientRow.receipients_deleted_messages
   )
-  const facebookAdData = selectedUser?.fb_ad_id
+  const { data: facebookAdData } = selectedUser?.fb_ad_id
     ? await util_fetchAdWiseInsights({
         ad_id: selectedUser?.fb_ad_id,
       })
-    : []
-  const totalFacebookLikeHugCare = facebookAdData.reduce(
+    : { data: [] }
+  const totalFacebookLikeHugCare = facebookAdData?.reduce(
     (sum, item) => sum + item.cl_total_reactions,
     0
   )
@@ -87,7 +87,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
               clRecipientOBj={recipientObj}
               clUserAccount={recipientRow}
             />
@@ -108,7 +108,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'hidden xl:block'}>
             <HugsMessagesShares
               clRecipientObj={recipientObj}
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
             />
           </div>
         </div>
@@ -116,7 +116,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'xl:hidden'}>
             <HugsMessagesShares
               clRecipientObj={recipientObj}
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare}
+              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
             />
           </div>
           <MostRecentEngagements clRecipientOBj={recipientObj} />
