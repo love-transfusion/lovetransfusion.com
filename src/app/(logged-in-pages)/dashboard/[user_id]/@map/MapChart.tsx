@@ -144,6 +144,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
     }
 
     loadMap()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipientObj, selectedUser])
 
   return (
