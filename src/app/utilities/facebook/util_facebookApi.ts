@@ -629,7 +629,11 @@ export const util_fetchAdWiseInsights = async ({
   } catch (error: any) {
     console.error('Error fetching ad-wise insights:', error)
     const thisError = error?.message as string
-    return { data: null, error: thisError }
+    const specifyError =
+      thisError === 'Request failed with status code 400'
+        ? `We’re experiencing a brief technical issue. Support for you is still coming in, but some may not be visible in the meantime. This is only temporary while we work to restore the connection.`
+        : thisError
+    return { data: null, error: specifyError }
   }
 }
 
@@ -806,9 +810,13 @@ export const fetchAccountInsights = async (
     if (result.length > 0) (result[0] as any).totalReactions = totalReactions
     return { data: result, error: null }
   } catch (error: any) {
-    console.error('Error fetching account insights:', error)
+    console.error('Error fetching ad-wise insights:', error)
     const thisError = error?.message as string
-    return { data: null, error: thisError }
+    const specifyError =
+      thisError === 'Request failed with status code 400'
+        ? `We’re experiencing a brief technical issue. Support for you is still coming in, but some may not be visible in the meantime. This is only temporary while we work to restore the connection.`
+        : thisError
+    return { data: null, error: specifyError }
   }
 }
 

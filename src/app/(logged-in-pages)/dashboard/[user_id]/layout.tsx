@@ -12,6 +12,7 @@ import MessagesSection from './MessagesSection'
 import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import ErrorMessage from './ErrorMessage'
 // import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 // import { redirect } from 'next/navigation'
 
@@ -40,7 +41,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     recipientObj.comments,
     recipientRow.receipients_deleted_messages
   )
-  const { data: facebookAdData } = selectedUser?.fb_ad_id
+  const { data: facebookAdData, error: facebookError } = selectedUser?.fb_ad_id
     ? await util_fetchAdWiseInsights({
         ad_id: selectedUser?.fb_ad_id,
       })
@@ -49,9 +50,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     (sum, item) => sum + item.cl_total_reactions,
     0
   )
-
+  
   return (
     <div className="">
+      <ErrorMessage error={facebookError} />
       <WelcomeMessage />
       <SlidingSupportersName clRecipient={recipientObj} />
       {/* Profile and Map Section */}

@@ -39,7 +39,7 @@ const Toast = ({ clCloseStyle }: I_CloseStyle) => {
     const timeout = setTimeout(() => {
       handleCloseToast()
       if (toast?.clRedirect) {
-        router.push(toast?.clRedirect)
+        router.push(toast.clRedirect)
       }
     }, toast?.clDuration ?? 3000)
 
@@ -94,7 +94,7 @@ const Toast = ({ clCloseStyle }: I_CloseStyle) => {
                   <div
                     onClick={handleCloseToast}
                     className={twMerge(
-                      'absolute top-1 right-1 bg-neutral-50 rounded-full p-[2px]',
+                      'absolute top-1 right-1 bg-neutral-50 rounded-full p-[2px] cursor-pointer',
                       clCloseStyle
                     )}
                   >
