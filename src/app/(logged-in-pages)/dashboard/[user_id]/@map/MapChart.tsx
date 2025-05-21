@@ -135,7 +135,7 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
             type: 'effectScatter',
             coordinateSystem: 'geo',
             data: mapped,
-            itemStyle: { color: '#63B6AC' },
+            itemStyle: { color: '#4399e0' },
             symbolSize: calculateSymbolSize,
           },
         ],

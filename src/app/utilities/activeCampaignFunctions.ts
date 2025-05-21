@@ -25,6 +25,10 @@ import {
   ac_lists,
 } from '../lib/(activecampaign)/library/ac_lists'
 import { ac_tag_types, ac_tags } from '../lib/(activecampaign)/library/ac_tags'
+import {
+  ac_ActiveCampaignContactResponse,
+  I_ac_ActiveCampaignContactPayload,
+} from '@/types/ActiveCampaign/contact/updateContact.types'
 
 const headers: I_Options['headers'] = {
   accept: 'application/json',
@@ -107,6 +111,42 @@ export const ac_create_contact = async (data: I_ac_CreateContactRequest) => {
   } catch (error: any) {
     const theError = error?.message as string
     return { data: null, error: theError }
+  }
+}
+
+/**
+ * @example
+ * ```
+ * { id: number } // This is the id number of the contact
+ * ```
+ */
+export const ac_update_contact = async ({
+  clID,
+  clContact,
+}: I_ac_ActiveCampaignContactPayload): Promise<{
+  data: ac_ActiveCampaignContactResponse | null
+  error: string | null
+}> => {
+  const options: I_Options = {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ contact: clContact }),
+  }
+  try {
+    const response: ac_ActiveCampaignContactResponse = await fetchACData(
+      `https://lovetransfusion.api-us1.com/api/3/contacts/${clID}`,
+      options
+    )
+    if (response.message) {
+      throw new Error(response.message)
+    } else if (response.errors) {
+      throw new Error(response.errors[0].detail)
+    } else {
+      return { data: response, error: null }
+    }
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { data: null, error: thisError }
   }
 }
 
