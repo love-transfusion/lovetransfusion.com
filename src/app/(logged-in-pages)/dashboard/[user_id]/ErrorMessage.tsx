@@ -8,7 +8,7 @@ interface ErrorMessage {
 
 const ErrorMessage = ({ error }: ErrorMessage) => {
   const [isError, setisError] = useState<boolean>(!!error)
-  
+
   return (
     <>
       {isError && (
@@ -27,10 +27,10 @@ const ErrorMessage = ({ error }: ErrorMessage) => {
             </p>
             <Icon_close
               className="block md:hidden min-w-5 min-h-5"
-              onClick={() => setisError(true)}
+              onClick={() => setisError(false)}
             />
             <p
-              onClick={() => setisError(true)}
+              onClick={() => setisError(false)}
               className={
                 'hidden md:flex bg-red-50 border border-red-300 items-center bg-opacity-90 rounded-md px-2 py-[1px] md:absolute md:inset-y-0 md:right-5 cursor-pointer'
               }
