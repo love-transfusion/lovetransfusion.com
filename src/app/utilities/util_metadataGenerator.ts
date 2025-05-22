@@ -1,4 +1,4 @@
-export interface CustomMetadataType {
+interface CustomMetadataType {
   title:
     | {
         default: string
