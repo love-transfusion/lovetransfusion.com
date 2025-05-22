@@ -117,7 +117,12 @@ export const ac_create_contact = async (data: I_ac_CreateContactRequest) => {
 /**
  * @example
  * ```
- * { id: number } // This is the id number of the contact
+ * {clID: number, clContact: {
+      email?: string
+      firstName?: string
+      lastName?: string
+      fieldValues?: ActiveCampaignFieldValue[]
+ }}
  * ```
  */
 export const ac_update_contact = async ({
@@ -202,6 +207,15 @@ export const ac_find_contact_using_email = async (contactEmailStr: string) => {
   }
 }
 
+/**
+ * @example
+ * ```
+ * {
+    contact: `${number}`
+    tag: `${number}`
+   }
+  ```
+ */
 export const ac_add_tag_to_contact = async (data: I_ac_add_TagRequest) => {
   const options = {
     method: 'POST',
