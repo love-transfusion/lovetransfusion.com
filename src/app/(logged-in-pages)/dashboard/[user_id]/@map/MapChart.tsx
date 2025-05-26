@@ -70,8 +70,12 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         ...analyticsWithCountryPathTotal,
         ...formattedFacebookData,
       ]
+      // Remove item with hugs and messages
+      const removedHugsAndMessages = combinedAnalytics.filter(
+        (item) => item.clViews
+      )
 
-      const mapped = await mapAnalyticsToGeoPoints(combinedAnalytics || [])
+      const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages || [])
       setMappedData(mapped)
 
       // 🧠 Calculate min/max
