@@ -99,13 +99,14 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
             seriesName: string
           }) => {
             if (Array.isArray(params.value)) {
-              const [, , views, hugs, messages] = params.value
+              // const [, , views, hugs, messages] = params.value
+              const [, , views] = params.value
               return `
                 <strong>${params.name}</strong><br/>
                 views: ${views}<br/>
-                hugs: ${hugs}<br/>
-                messages: ${messages}
-              `
+                `
+              // hugs: ${hugs}<br/>
+              // messages: ${messages}
             } else {
               return `<strong>${params.name}</strong><br/>No data`
             }

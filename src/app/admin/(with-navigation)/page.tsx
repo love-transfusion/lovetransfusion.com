@@ -96,7 +96,7 @@ const AdminDashboard = async () => {
       }
     }
   )
-  console.log({ combinedData })
+  // console.log({ combinedData })
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
