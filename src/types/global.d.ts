@@ -53,6 +53,22 @@ declare global {
   type I_supa_fb_adwise_insights_row_unextended =
     DB['public']['Tables']['fb_adwise_insights']['Row']
 
+  // tooltips table
+  type I_supa_tooltips_insert =
+    DB['public']['Tables']['tooltips']['Insert']
+  type I_supa_tooltips_update =
+    DB['public']['Tables']['tooltips']['Update']
+  type I_supa_tooltips_row_unextended =
+    DB['public']['Tables']['tooltips']['Row']
+
+  // tooltips_user_status table
+  type I_supa_tooltips_user_status_insert =
+    DB['public']['Tables']['tooltips_user_status']['Insert']
+  type I_supa_tooltips_user_status_update =
+    DB['public']['Tables']['tooltips_user_status']['Update']
+  type I_supa_tooltips_user_status_row_unextended =
+    DB['public']['Tables']['tooltips_user_status']['Row']
+
   // users table
   type I_supa_users_insert = DB['public']['Tables']['users']['Insert']
   type I_supa_users_update = DB['public']['Tables']['users']['Update']

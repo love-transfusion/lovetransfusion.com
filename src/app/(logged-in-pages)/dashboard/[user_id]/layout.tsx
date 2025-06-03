@@ -3,7 +3,6 @@ import SlidingSupportersName from './SlidingSupportersName'
 import RecipientProfilePicture from './RecipientProfilePicture'
 import arrow from './images/arrow.png'
 import Image from 'next/image'
-import MostRecentEngagements from './MostRecentEngagements'
 import HugsMessagesShares from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
@@ -13,6 +12,8 @@ import { supa_select_recipient } from '@/app/_actions/users_data_website/actions
 import { supa_select_user } from '@/app/_actions/users/actions'
 import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 import ErrorMessage from './ErrorMessage'
+import MostRecentEngagements from './MostRecentEngagements'
+import MostRecentEngagementContainer from './MostRecentEngagementContainer'
 // import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 // import { redirect } from 'next/navigation'
 
@@ -50,7 +51,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     (sum, item) => sum + item.cl_total_reactions,
     0
   )
-  
+
   return (
     <div className="">
       <ErrorMessage error={facebookError} />
@@ -91,7 +92,6 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <TotalEngagements
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
               clRecipientOBj={recipientObj}
-              clUserAccount={recipientRow}
             />
             <Image
               src={arrow}
@@ -121,7 +121,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
             />
           </div>
-          <MostRecentEngagements clRecipientOBj={recipientObj} />
+          <MostRecentEngagementContainer>
+            <MostRecentEngagements clRecipientOBj={recipientObj} />
+          </MostRecentEngagementContainer>
         </div>
       </div>
       {/* Messages Section */}

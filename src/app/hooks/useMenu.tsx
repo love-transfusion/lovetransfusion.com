@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import useDeviceSize from './useDeviceSize'
 import { twMerge } from 'tailwind-merge'
@@ -8,6 +9,7 @@ interface I_Menu {
   clArrowStyles?: string
   clDisableArrow?: boolean
   className?: string
+  clIsAbsolute?: boolean
 }
 
 const useMenu = <T extends HTMLElement = HTMLElement>() => {
@@ -117,26 +119,6 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
           posTop = top + buttonHeight + marginY + 1
           arrowTop = -8
         }
-
-        // console.log({
-        //   top,
-        //   right,
-        //   bottom,
-        //   left,
-        //   buttonHeight,
-        //   buttonWidth,
-        //   modalHeight,
-        //   viewportWidth,
-        //   viewportHeight,
-        //   scrollableWidth,
-        //   scrollableHeight,
-        //   buttonHalfWidth,
-        //   modalHalfWidth,
-        //   isRightPositioned,
-        //   isRightPositionedMobile,
-        //   remaining,
-        //   isTopPositioned,
-        // })
 
         setMenuPosition({
           posTop,

@@ -58,9 +58,7 @@ export const mapAnalyticsToGeoPoints = async (
       !rawCity || rawCity.trim().toLowerCase() === '(not set)' || city === '' || city === '(notset)'
 
     // Fast O(1) match
-    console.time('cityExactMatch')
     const matchFromCity = cityMap.get(`${city}_${countryCode}`)
-    console.timeEnd('cityExactMatch')
 
     let match = matchFromCity
 

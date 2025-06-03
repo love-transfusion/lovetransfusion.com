@@ -90,12 +90,17 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
                     height={37.8}
                     className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
                   />
-                  <p className={'text-[#009933]'}>
+                  {index === 0 ? <p className={'text-[#009933]'}>
+                    {item.public_profiles
+                      ? item.public_profiles?.full_name ||
+                        `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
+                      : 'Someone Who Caresss'}
+                  </p> : <p className={'text-[#009933]'}>
                     {item.public_profiles
                       ? item.public_profiles?.full_name ||
                         `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
                       : 'Someone Who Cares'}
-                  </p>
+                  </p>}
                 </div>
                 <Image
                   src={ltWebsiteIcon}

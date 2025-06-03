@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { registerMap } from 'echarts/core'
 import {
@@ -11,6 +11,7 @@ import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAn
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
 import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import MapControls from './MapControls'
 
 interface Props {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
@@ -18,10 +19,24 @@ interface Props {
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
+const defaultPoint = [
+  {
+    cl_city: 'Ashburn',
+    cl_region: 'Virginia',
+    cl_country: 'United States',
+    cl_country_code: 'US',
+    clViews: 1,
+    clHugs: 0,
+    clMessages: 0,
+  },
+]
+
 const MapChart = ({ recipientObj, selectedUser }: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+
+  const chartRef = useRef<any>(null)
 
   useEffect(() => {
     const loadMap = async () => {
@@ -69,7 +84,9 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
       const combinedAnalytics = [
         ...analyticsWithCountryPathTotal,
         ...formattedFacebookData,
+        ...defaultPoint,
       ]
+
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
         (item) => item.clViews
@@ -160,7 +177,15 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
           <LoadingComponent clLoadingText="Loading map..." />
         </div>
       ) : (
-        <ReactECharts option={option} style={{ width: '100%' }} />
+        <div className="relative w-full">
+          <ReactECharts
+            ref={chartRef}
+            option={option}
+            style={{ width: '100%' }}
+          />
+          {/* Floating Controls */}
+          <MapControls chartRef={chartRef} />
+        </div>
       )}
     </>
   )

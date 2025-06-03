@@ -47,7 +47,7 @@ const Messages = ({
   return (
     <div
       className={
-        'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] overflow-hidden mt-4 md:mt-[29px]'
+        'rounded-lg shadow-[0px_0px_25.27px_0px_#2FABDD40] mt-4 md:mt-[29px]'
       }
     >
       <div

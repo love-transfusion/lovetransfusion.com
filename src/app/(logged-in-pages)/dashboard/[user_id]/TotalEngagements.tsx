@@ -1,35 +1,25 @@
 'use client'
 import Image from 'next/image'
-import React, { useEffect } from 'react'
+import React from 'react'
 import ripple from './images/ripple.png'
 import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
+import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 // import { useStore } from 'zustand'
 // import utilityStore from '@/app/utilities/store/utilityStore'
 
 interface I_TotalEngagements {
   clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
-  clUserAccount: I_supa_users_data_website_row
   totalFacebookLikeHugCare: number
 }
 
 const TotalEngagements = ({
   clRecipientOBj,
-  clUserAccount,
   totalFacebookLikeHugCare,
 }: I_TotalEngagements) => {
   // const { setuserInStore } = useStore(utilityStore)
   const { total } = useEngagementsFromWeb(clRecipientOBj)
-  useEffect(() => {
-    if (clRecipientOBj && clUserAccount) {
-      // setuserInStore({
-      //   id: clUserAccount.user_id ?? '',
-      //   first_name: clRecipientOBj.first_name ?? '',
-      //   parent_name: clRecipientOBj.parent_name ?? '',
-      //   recipient_id: clRecipientOBj.id,
-      // })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const { Tooltip } = useTooltip({ clTooltipTitle: 'Updates' })
+
   return (
     <div
       className={
@@ -44,16 +34,22 @@ const TotalEngagements = ({
         height={68}
         className="w-10 h-10 md:w-[70px] md:h-[68px]"
       />
-      <div className={''}>
-        <p className={'max-sm:text-[12px]'}>TOTAL</p>
-        <p
-          className={
-            'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
-          }
-        >
-          {total + totalFacebookLikeHugCare}
-        </p>
-      </div>
+      <Tooltip
+        clContainerClassName="text-black text-left"
+        clArrowStylesCustom="bg-white"
+        clScrollTo_IDOrClass=".supporters-tooltip"
+      >
+        <div className={'text-white text-center'}>
+          <p className={'max-sm:text-[12px]'}>TOTAL</p>
+          <p
+            className={
+              'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
+            }
+          >
+            {total + totalFacebookLikeHugCare}
+          </p>
+        </div>
+      </Tooltip>
     </div>
   )
 }

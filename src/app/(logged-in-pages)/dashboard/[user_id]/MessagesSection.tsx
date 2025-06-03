@@ -17,6 +17,10 @@ const MessagesSection = ({
   useEffect(() => {
     setcomments(clRecipientObj.comments)
   }, [clRecipientObj.comments])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [])
   return (
     <div
       className={

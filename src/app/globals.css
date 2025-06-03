@@ -81,3 +81,221 @@
     transform: translateX(-100%);
   }
 }
+
+/* Custom */
+@media (min-width: 2571px) {
+  .echarts-tooltip {
+    top: 8.5vw;
+    left: 20vw;
+  }
+}
+@media (min-width: 2521px) and (max-width: 2570px) {
+  .echarts-tooltip {
+    top: 8.5vw;
+    left: 19.6vw;
+  }
+}
+@media (min-width: 2491px) and (max-width: 2520px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 19.4vw;
+  }
+}
+@media (min-width: 2451px) and (max-width: 2490px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 19vw;
+  }
+}
+@media (min-width: 2401px) and (max-width: 2450px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 18.7vw;
+  }
+}
+@media (min-width: 2361px) and (max-width: 2400px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 18.3vw;
+  }
+}
+@media (min-width: 2301px) and (max-width: 2360px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 18vw;
+  }
+}
+@media (min-width: 2261px) and (max-width: 2300px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 17.5vw;
+  }
+}
+@media (min-width: 2201px) and (max-width: 2260px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 17vw;
+  }
+}
+@media (min-width: 2151px) and (max-width: 2200px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 16.5vw;
+  }
+}
+@media (min-width: 2101px) and (max-width: 2150px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 16vw;
+  }
+}
+@media (min-width: 2061px) and (max-width: 2100px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 15.5vw;
+  }
+}
+@media (min-width: 2011px) and (max-width: 2060px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 15vw;
+  }
+}
+@media (min-width: 1971px) and (max-width: 2010px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 14.5vw;
+  }
+}
+@media (min-width: 1931px) and (max-width: 1970px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 14vw;
+  }
+}
+@media (min-width: 1921px) and (max-width: 1930px) {
+  .echarts-tooltip {
+    top: 8.4vw;
+    left: 13.5vw;
+  }
+}
+@media (min-width: 1881px) and (max-width: 1920px) {
+  .echarts-tooltip {
+    top: 8.4vw;
+    left: 13.8vw;
+  }
+}
+@media (min-width: 1821px) and (max-width: 1880px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 13.2vw;
+  }
+}
+@media (min-width: 1761px) and (max-width: 1820px) {
+  .echarts-tooltip {
+    top: 8.6vw;
+    left: 12.7vw;
+  }
+}
+@media (min-width: 1651px) and (max-width: 1760px) {
+  .echarts-tooltip {
+    top: 8.8vw;
+    left: 12.2vw;
+  }
+}
+@media (min-width: 1601px) and (max-width: 1650px) {
+  .echarts-tooltip {
+    top: 9.2vw;
+    left: 11.2vw;
+  }
+}
+@media (min-width: 1536px) and (max-width: 1600px) {
+  .echarts-tooltip {
+    top: 9.5vw;
+    left: 11vw;
+  }
+}
+@media (min-width: 1481px) and (max-width: 1535px) {
+  .echarts-tooltip {
+    top: 8.8vw;
+    left: 17.2vw;
+  }
+}
+@media (min-width: 1441px) and (max-width: 1480px) {
+  .echarts-tooltip {
+    top: 9vw;
+    left: 16.1vw;
+  }
+}
+@media (min-width: 1367px) and (max-width: 1440px) {
+  .echarts-tooltip {
+    top: 9vw;
+    left: 15.8vw;
+  }
+}
+@media (min-width: 1281px) and (max-width: 1366px) {
+  .echarts-tooltip {
+    top: 9vw;
+    left: 14.3vw;
+  }
+}
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .echarts-tooltip {
+    top: 10.1vw;
+    left: 13.2vw;
+  }
+}
+@media (min-width: 961px) and (max-width: 1024px) {
+  .echarts-tooltip {
+    top: 12.1vw;
+    left: 18vw;
+  }
+}
+@media (min-width: 845px) and (max-width: 960px) {
+  .echarts-tooltip {
+    top: 15.5vw;
+    left: 12.2vw;
+  }
+}
+@media (min-width: 769px) and (max-width: 844px) {
+  .echarts-tooltip {
+    top: 17.6vw;
+    left: 14vw;
+  }
+}
+@media (min-width: 641px) and (max-width: 768px) {
+  .echarts-tooltip {
+    top: 19.4vw;
+    left: 15.5vw;
+  }
+}
+@media (min-width: 569px) and (max-width: 640px) {
+  .echarts-tooltip {
+    top: 60px;
+    left: 240px;
+  }
+}
+@media (min-width: 415px) and (max-width: 568px) {
+  .echarts-tooltip {
+    top: 60px;
+    left: 205px;
+  }
+}
+@media (min-width: 381px) and (max-width: 414px) {
+  .echarts-tooltip {
+    top: 60px;
+    left: 128px;
+  }
+}
+@media (min-width: 361px) and (max-width: 380px) {
+  .echarts-tooltip {
+    top: 60px;
+    left: 112px;
+  }
+}
+@media (max-width: 360px) {
+  .echarts-tooltip {
+    top: 60px;
+    left: 100px;
+  }
+}

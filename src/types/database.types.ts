@@ -28,7 +28,7 @@ export type Database = {
           cl_region: string | null
           cl_total_reactions: number
           fetched_at: string
-          user_id: string
+          id: string
         }
         Insert: {
           ad_id: string
@@ -48,7 +48,7 @@ export type Database = {
           cl_region?: string | null
           cl_total_reactions?: number
           fetched_at?: string
-          user_id?: string
+          id?: string
         }
         Update: {
           ad_id?: string
@@ -68,7 +68,7 @@ export type Database = {
           cl_region?: string | null
           cl_total_reactions?: number
           fetched_at?: string
-          user_id?: string
+          id?: string
         }
         Relationships: [
           {
@@ -141,6 +141,81 @@ export type Database = {
           },
           {
             foreignKeyName: "receipients_deleted_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tooltips: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean
+          order_index: number
+          page: string | null
+          title: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          page?: string | null
+          title: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          page?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      tooltips_user_status: {
+        Row: {
+          dismissed: boolean | null
+          dismissed_at: string | null
+          id: string
+          seen: boolean | null
+          seen_at: string | null
+          tooltip_id: string
+          user_id: string | null
+        }
+        Insert: {
+          dismissed?: boolean | null
+          dismissed_at?: string | null
+          id?: string
+          seen?: boolean | null
+          seen_at?: string | null
+          tooltip_id: string
+          user_id?: string | null
+        }
+        Update: {
+          dismissed?: boolean | null
+          dismissed_at?: string | null
+          id?: string
+          seen?: boolean | null
+          seen_at?: string | null
+          tooltip_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tooltips_user_status_tooltip_id_fkey"
+            columns: ["tooltip_id"]
+            isOneToOne: false
+            referencedRelation: "tooltips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tooltips_user_status_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"

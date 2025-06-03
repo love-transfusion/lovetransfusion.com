@@ -23,7 +23,7 @@ const WelcomeMessage = () => {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 w-full h-full z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 w-full h-full z-[99]">
           <div
             className={`lg:w-[950px] max-h-[95vh] md:h-fit bg-white absolute inset-3 m-auto pb-6 shadow-lg animate-slide-up border-[10px] border-[#2F8EDD] rounded-[26px]`}
           >
