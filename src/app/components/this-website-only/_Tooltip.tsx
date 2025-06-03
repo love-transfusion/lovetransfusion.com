@@ -14,7 +14,6 @@ const Tooltip = ({
   clContainerClassName,
   clNextButtonFunction,
 }: TooltipTypes) => {
-  console.log('rendered Tooltip')
   const { ClMenuContainer, clToggleMenu, Menu } = useMenu2(true)
 
   const handleNext = () => {
@@ -22,7 +21,6 @@ const Tooltip = ({
   }
 
   useEffect(() => {
-    console.log('triggering clToggleMenu')
     clToggleMenu(true)
   }, [])
   return (

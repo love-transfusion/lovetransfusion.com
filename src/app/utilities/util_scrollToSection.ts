@@ -12,10 +12,8 @@ export const util_scrollToSection = ({
   clIDOrClass,
   clElementRef,
 }: util_scrollToSection_Types): void => {
-  console.log({ clIDOrClass })
   if (clIDOrClass) {
     const element = document.querySelector<HTMLElement>(clIDOrClass)
-    console.log({ element })
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   } else if (clElementRef?.current) {
     clElementRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })

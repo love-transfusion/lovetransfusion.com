@@ -22,7 +22,6 @@ const useToolTipFetchLazilyOrInsertTooltips = ({
       await supa_select_tooltips(clPath)
 
     if (data) {
-      console.log({ data })
       const hasAll = data.every((item) => {
         return item.tooltips_user_status.length > 0
       })
@@ -31,7 +30,6 @@ const useToolTipFetchLazilyOrInsertTooltips = ({
         // When the user has the selected tooltip records
         setdashboardTooltips(data)
       } else {
-        console.log('entered else')
         const rawUserTooltips = data.map((item) => {
           if (item.tooltips_user_status.length) {
             return { id: item.tooltips_user_status[0].id, tooltip_id: item.id }
@@ -39,9 +37,8 @@ const useToolTipFetchLazilyOrInsertTooltips = ({
             return { id: v4(), tooltip_id: item.id }
           }
         })
-        const { data: UserTooltipData, error } =
+        const { data: UserTooltipData } =
           await supa_upsert_tooltips_user_status(rawUserTooltips)
-        console.log({ UserTooltipData, error })
         if (UserTooltipData) {
           const newData = data.map((item) => {
             const tooltips_user_status = [

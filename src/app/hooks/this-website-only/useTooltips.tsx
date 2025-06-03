@@ -74,10 +74,9 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
         seen_at: util_formatDateToUTCString(new Date()),
       }
 
-      const { data, error } = await supa_upsert_tooltips_user_status([
+      await supa_upsert_tooltips_user_status([
         updatedUserTooltip,
       ])
-      console.log({ data, error })
     }
   }
 
@@ -159,7 +158,6 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
 
     useEffect(() => {
       if (hasNotDismissedTooltip) {
-        console.log('toggling', tooltipTitile, hasNotDismissedTooltip)
         clToggleMenu(true)
       }
     }, [hasNotDismissedTooltip])

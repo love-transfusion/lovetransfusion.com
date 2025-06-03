@@ -86,24 +86,16 @@ const useMenu2 = (disableBackgroundClick?: boolean) => {
       }
 
       // MenuContainer must be left aligned
-      console.log({
-        triggerX: trigger.x,
-        triggerWidth: trigger.width,
-        menuWidth: menu.width,
-      })
       if (trigger.x + menu.width > viewportWidth - 5) {
         // entered clamp right
-        console.log('entered clamp right')
         const maxLeft = viewportWidth - menu.width - trigger.x - 5
         left = maxLeft
         arrowLeft = trigger.x + trigger.width / 2 - (trigger.x + maxLeft) - 8
       } else if (trigger.x < menu.width / 2 && menu.width > trigger.width) {
         // entered clamp left
-        console.log('entered clamp left')
         left = 0
         arrowLeft = trigger.width / 2 - 8 - 5
       } else {
-        console.log('entered clamp center')
         // entered center
         left = trigger.width / 2 - menu.width / 2
         arrowLeft = menu.width / 2 - 8
