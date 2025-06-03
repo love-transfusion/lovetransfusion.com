@@ -2,9 +2,14 @@
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 import React from 'react'
 
-const MapTooltip = () => {
+interface MapTooltipTypes {
+  user_id: string
+}
+
+const MapTooltip = ({ user_id }: MapTooltipTypes) => {
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Awareness',
+    clUser_id: user_id,
   })
   return (
     <>

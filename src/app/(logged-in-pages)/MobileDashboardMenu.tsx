@@ -1,15 +1,25 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Icon_menu from '../components/icons/Icon_menu'
 import useDrawer from '../hooks/useDrawer'
 import { MenuTopPart } from '../components/this-website-only/navigation-menu/MobilePublicNavigation'
 import SubMenu from './SubMenu'
 import SubMenuBottom from './SubMenuBottom'
+import { usePathname } from 'next/navigation'
 interface I_MobileDashboardMenu {
   clIsAdmin: boolean
 }
 const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
   const { clIsOpen, clToggleDrawer, Drawer } = useDrawer()
+
+  const path = usePathname()
+
+  useEffect(() => {
+    if (clIsOpen) {
+      clToggleDrawer()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path])
   return (
     <>
       <Icon_menu
@@ -29,7 +39,7 @@ const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
       >
         <MenuTopPart />
         <SubMenu clIsAdmin={clIsAdmin} />
-        <SubMenuBottom />
+        <SubMenuBottom clToggleDrawer={clToggleDrawer} />
       </Drawer>
     </>
   )

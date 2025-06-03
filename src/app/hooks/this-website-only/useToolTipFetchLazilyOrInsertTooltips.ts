@@ -51,7 +51,6 @@ const useToolTipFetchLazilyOrInsertTooltips = ({
           setdashboardTooltips(newData)
           return
         }
-        setdashboardTooltips(data)
       }
     }
   }
@@ -59,7 +58,7 @@ const useToolTipFetchLazilyOrInsertTooltips = ({
     if (!dashboardTooltips) {
       fetchTooltips()
     }
-  }, [])
+  }, [dashboardTooltips])
   return
 }
 

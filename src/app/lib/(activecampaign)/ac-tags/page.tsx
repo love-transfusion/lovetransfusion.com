@@ -8,7 +8,6 @@ const TestPages = async () => {
   isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
 
   const { data } = await ac_retrieveAllTags()
-  // console.log({ data })
   const filteredTags = data?.tags.map((tag) => {
     return { name: tag.tag, id: tag.id }
   })

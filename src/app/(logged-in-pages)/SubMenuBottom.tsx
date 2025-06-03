@@ -2,34 +2,25 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import helpCenter from './images/Help.svg'
-import questionMark from './images/FAQ.svg'
+
 import aboutUsIcon from './images/About.svg'
 import messageIcon from './images/Contact.svg'
 import mousePointer from './images/Logout.svg'
 import SignoutContainerComponent from '../(auth)/signout/SignoutContainerComponent'
+import QuickTour from './QuickTour'
 
-const SubMenuBottom = () => {
+interface SubMenuBottomTypes {
+  clToggleDrawer?: (bool?: boolean | undefined) => void
+}
+
+const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
   return (
     <>
       <div className={'mt-[54px] flex flex-col gap-[15px]'}>
         <p className={'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light'}>
           HELP & SUPPORT
         </p>
-        <Link href={'/help-center'}>
-          <div
-            className={
-              'flex gap-5 items-center text-xl font-acumin-variable-90'
-            }
-          >
-            <Image
-              src={questionMark}
-              alt="heart"
-              quality={100}
-              className="size-[26px]"
-            />
-            <p className={'-mt-[1px]'}>FAQ</p>
-          </div>
-        </Link>
+        <QuickTour clToggleDrawer={clToggleDrawer} />
         <Link href={'/help-center'}>
           <div
             className={
@@ -90,7 +81,9 @@ const SubMenuBottom = () => {
             className="size-[26px]"
           />
           <SignoutContainerComponent>
-            <p className={'active:text-primary-300 select-none -mt-[1px]'}>Logout</p>
+            <p className={'active:text-primary-300 select-none -mt-[1px]'}>
+              Logout
+            </p>
           </SignoutContainerComponent>
         </div>
       </div>

@@ -44,7 +44,7 @@ const SlidingSupportersName = ({ clRecipient }: I_SlidingSupportersName) => {
               className={'flex gap-2 items-center text-primary px-6'}
             >
               <Icon_heart className="size-[14px]" />
-              <p className="w-[200px] text-nowrap text-sm">
+              <p className="w-fit text-nowrap text-sm">
                 {item.name ?? 'Someone Who Cares'}
                 <span className="capitalize">
                   {(item.location?.city &&

@@ -92,6 +92,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <TotalEngagements
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
               clRecipientOBj={recipientObj}
+              user_id={user_id}
             />
             <Image
               src={arrow}
@@ -111,6 +112,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <HugsMessagesShares
               clRecipientObj={recipientObj}
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
+              user_id={user_id}
             />
           </div>
         </div>
@@ -119,9 +121,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <HugsMessagesShares
               clRecipientObj={recipientObj}
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
+              user_id={user_id}
             />
           </div>
-          <MostRecentEngagementContainer>
+          <MostRecentEngagementContainer user_id={user_id}>
             <MostRecentEngagements clRecipientOBj={recipientObj} />
           </MostRecentEngagementContainer>
         </div>

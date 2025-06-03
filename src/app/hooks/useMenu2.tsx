@@ -22,7 +22,8 @@ interface MenuContainerTypes {
   className?: string
 }
 
-const useMenu2 = (disableBackgroundClick?: boolean) => {
+const useMenu2 = (disableBackgroundClick?: boolean, arrowSize?: number) => {
+  const halfArrowSize = arrowSize ? arrowSize / 2 : 8
   const clRef = useRef<HTMLDivElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const [clIsOpen, setclIsOpen] = useState(false)
@@ -77,12 +78,12 @@ const useMenu2 = (disableBackgroundClick?: boolean) => {
         viewportHeight
       ) {
         // MenuContainer must be on Top
-        top = -menu.height - 8
-        arrowTop = menu.height - 8
+        top = -menu.height - halfArrowSize
+        arrowTop = menu.height - halfArrowSize
       } else {
         // MenuContainer must be on Bottom
-        top = trigger.height + 8
-        arrowTop = -8
+        top = trigger.height + halfArrowSize
+        arrowTop = -halfArrowSize
       }
 
       // MenuContainer must be left aligned
@@ -90,15 +91,16 @@ const useMenu2 = (disableBackgroundClick?: boolean) => {
         // entered clamp right
         const maxLeft = viewportWidth - menu.width - trigger.x - 5
         left = maxLeft
-        arrowLeft = trigger.x + trigger.width / 2 - (trigger.x + maxLeft) - 8
+        arrowLeft =
+          trigger.x + trigger.width / 2 - (trigger.x + maxLeft) - halfArrowSize
       } else if (trigger.x < menu.width / 2 && menu.width > trigger.width) {
         // entered clamp left
         left = 0
-        arrowLeft = trigger.width / 2 - 8 - 5
+        arrowLeft = trigger.width / 2 - halfArrowSize - 5
       } else {
         // entered center
         left = trigger.width / 2 - menu.width / 2
-        arrowLeft = menu.width / 2 - 8
+        arrowLeft = menu.width / 2 - halfArrowSize
       }
 
       setMenuPosition({

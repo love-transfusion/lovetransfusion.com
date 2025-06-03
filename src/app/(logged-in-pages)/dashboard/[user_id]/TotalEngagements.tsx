@@ -10,15 +10,20 @@ import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 interface I_TotalEngagements {
   clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
   totalFacebookLikeHugCare: number
+  user_id: string
 }
 
 const TotalEngagements = ({
   clRecipientOBj,
   totalFacebookLikeHugCare,
+  user_id,
 }: I_TotalEngagements) => {
   // const { setuserInStore } = useStore(utilityStore)
   const { total } = useEngagementsFromWeb(clRecipientOBj)
-  const { Tooltip } = useTooltip({ clTooltipTitle: 'Updates' })
+  const { Tooltip } = useTooltip({
+    clTooltipTitle: 'Updates',
+    clUser_id: user_id,
+  })
 
   return (
     <div

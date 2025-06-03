@@ -19,7 +19,7 @@ const MapSlot = async ({ params }: { params: Params }) => {
   return (
     <div className="relative">
       <MapChart recipientObj={recipientObj} selectedUser={selectedUser} />
-      <MapTooltip />
+      <MapTooltip user_id={user_id} />
     </div>
   )
 }

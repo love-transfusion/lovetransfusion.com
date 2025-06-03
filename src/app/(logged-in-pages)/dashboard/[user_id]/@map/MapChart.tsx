@@ -184,7 +184,9 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
             style={{ width: '100%' }}
           />
           {/* Floating Controls */}
-          <MapControls chartRef={chartRef} />
+          {selectedUser?.id && (
+            <MapControls chartRef={chartRef} user_id={selectedUser.id} />
+          )}
         </div>
       )}
     </>

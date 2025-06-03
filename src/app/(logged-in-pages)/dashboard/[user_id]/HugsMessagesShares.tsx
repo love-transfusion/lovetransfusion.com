@@ -11,11 +11,13 @@ import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 interface I_HugsMessagesShares {
   clRecipientObj: I_supaorg_recipient_hugs_counters_comments
   totalFacebookLikeHugCare: number
+  user_id: string
 }
 
 const HugsMessagesShares = ({
   clRecipientObj,
   totalFacebookLikeHugCare,
+  user_id,
 }: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
@@ -23,9 +25,13 @@ const HugsMessagesShares = ({
     shares: totalShares,
     total,
   } = useEngagementsFromWeb(clRecipientObj)
-  const { Tooltip: ToolTipTotal } = useTooltip({ clTooltipTitle: 'Updates' })
+  const { Tooltip: ToolTipTotal } = useTooltip({
+    clTooltipTitle: 'Updates',
+    clUser_id: user_id,
+  })
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Engagements',
+    clUser_id: user_id,
   })
   return (
     <div
@@ -33,7 +39,10 @@ const HugsMessagesShares = ({
         'flex flex-col md:flex-row gap-3 2xl:gap-6 pl-3 pr-3 md:pl-[15px] justify-center'
       }
     >
-      <ToolTipTotal clContainerClassName="block md:hidden">
+      <ToolTipTotal
+        clContainerClassName="block md:hidden"
+        clScrollTo_IDOrClass=".supporters-tooltip"
+      >
         <div className={'block md:hidden text-center '}>
           <p className={'uppercase text-xl 2xl:text-2xl text-primary-300'}>
             Total

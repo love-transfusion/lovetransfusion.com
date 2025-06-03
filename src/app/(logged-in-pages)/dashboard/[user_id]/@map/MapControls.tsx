@@ -8,10 +8,14 @@ import React from 'react'
 interface MapControlsTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   chartRef: React.RefObject<any>
+  user_id: string
 }
 
-const MapControls = ({ chartRef }: MapControlsTypes) => {
-  const { Tooltip } = useTooltip({ clTooltipTitle: 'Controls' })
+const MapControls = ({ chartRef, user_id }: MapControlsTypes) => {
+  const { Tooltip } = useTooltip({
+    clTooltipTitle: 'Controls',
+    clUser_id: user_id,
+  })
 
   const handleZoom = (delta: number) => {
     const instance = chartRef.current?.getEchartsInstance()

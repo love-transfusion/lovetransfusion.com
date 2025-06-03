@@ -29,9 +29,22 @@ interface useTooltipTypes {
     | 'Controls'
     | 'Updates'
     | 'Supporters'
+  clUser_id: string
 }
 
-const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
+export const updateAllUserTooltipsFunction = async (
+  newDashboardTooltips: I_supa_tooltips_with_user_tooltips[]
+) => {
+  const userTooltips = newDashboardTooltips.map((item) => {
+    return item.tooltips_user_status[0]
+  })
+  await supa_upsert_tooltips_user_status(userTooltips)
+}
+
+const useTooltip = ({
+  clTooltipTitle: tooltipTitile,
+  clUser_id: user_id,
+}: useTooltipTypes) => {
   const [hasNotDismissedTooltip, sethasNotDismissedTooltip] =
     useState<boolean>(false)
   const { dashboardTooltips, setdashboardTooltips } = useStore(tooltipsStore)
@@ -43,26 +56,30 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
   const currentUserTooltip = currentTooltip?.tooltips_user_status[0]
 
   useEffect(() => {
-  if (!dashboardTooltips || !currentTooltip || !currentTooltip.is_active) {
-    sethasNotDismissedTooltip(false)
-    return
-  }
-
-  const isTooltipUserStatusDismissed = !!currentUserTooltip?.dismissed
-
-  const areTooltipsBeforeDismissed = dashboardTooltips.every((ttip) => {
-    if (currentTooltip.order_index === 0) return true
-    if (ttip.order_index < currentTooltip.order_index && ttip.is_active) {
-      return !!ttip.tooltips_user_status[0]?.dismissed
+    if (
+      !dashboardTooltips ||
+      !currentTooltip ||
+      !currentTooltip.is_active ||
+      currentUserTooltip?.user_id !== user_id
+    ) {
+      sethasNotDismissedTooltip(false)
+      return
     }
-    return true
-  })
 
-  sethasNotDismissedTooltip(
-    !isTooltipUserStatusDismissed && areTooltipsBeforeDismissed
-  )
-}, [dashboardTooltips, currentTooltip, currentUserTooltip])
+    const isTooltipUserStatusDismissed = !!currentUserTooltip?.dismissed
 
+    const areTooltipsBeforeDismissed = dashboardTooltips.every((ttip) => {
+      if (currentTooltip.order_index === 0) return true
+      if (ttip.order_index < currentTooltip.order_index && ttip.is_active) {
+        return !!ttip.tooltips_user_status[0]?.dismissed
+      }
+      return true
+    })
+
+    sethasNotDismissedTooltip(
+      !isTooltipUserStatusDismissed && areTooltipsBeforeDismissed
+    )
+  }, [dashboardTooltips, currentTooltip, currentUserTooltip])
 
   const updateFunction = async () => {
     if (currentUserTooltip) {
@@ -74,19 +91,8 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
         seen_at: util_formatDateToUTCString(new Date()),
       }
 
-      await supa_upsert_tooltips_user_status([
-        updatedUserTooltip,
-      ])
+      await supa_upsert_tooltips_user_status([updatedUserTooltip])
     }
-  }
-
-  const updateAllFunction = async (
-    newDashboardTooltips: I_supa_tooltips_with_user_tooltips[]
-  ) => {
-    const userTooltips = newDashboardTooltips.map((item) => {
-      return item.tooltips_user_status[0]
-    })
-    await supa_upsert_tooltips_user_status(userTooltips)
   }
 
   const isLast = useMemo(() => {
@@ -107,7 +113,7 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
     clScrollTo_IDOrClass: clIDOrClass,
     clArrowStylesCustom,
   }: TooltipTypes) => {
-    const { ClMenuContainer, clToggleMenu, Menu } = useMenu2(true)
+    const { ClMenuContainer, clToggleMenu, Menu } = useMenu2(true, 24)
 
     const handleNext = async () => {
       if (clIDOrClass) {
@@ -153,7 +159,7 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
         }) ?? []
       setdashboardTooltips(newdashboardTooltips)
 
-      await updateAllFunction(newdashboardTooltips)
+      await updateAllUserTooltipsFunction(newdashboardTooltips)
     }
 
     useEffect(() => {
@@ -167,9 +173,9 @@ const useTooltip = ({ clTooltipTitle: tooltipTitile }: useTooltipTypes) => {
           {children}
           {hasNotDismissedTooltip && (
             <Menu
-              className="p-0 border border-primary overflow-hidden"
-              clArrowStyles={`border border-primary bg-primary ${clArrowStylesCustom}`}
-              mainContainerClassName="animate-slide-up"
+              className="p-0 border-[3px] border-primary overflow-hidden shadow-custom1"
+              clArrowStyles={`border border-primary bg-primary ${clArrowStylesCustom} size-6`}
+              mainContainerClassName="animate-slide-up shadow-custom1"
             >
               <div className={'w-[320px] md:w-[400px] bg-primary'}>
                 <div className={'min-h-[150px] bg-white p-3 pb-6'}>
