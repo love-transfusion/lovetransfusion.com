@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export async function fetchPagePostComments(ad_id: string) {
-  const userToken = process.env.FACEBOOK_USER_TOKEN // User Long-Lived Token
+  const userToken = process.env.FACEBOOK_USER_TOKEN! // User Long-Lived Token
   const pageToken = process.env.FACEBOOK_PAGE_TOKEN! // Page Token (from Page itself)
 
   try {

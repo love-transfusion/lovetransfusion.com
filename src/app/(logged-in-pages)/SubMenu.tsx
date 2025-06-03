@@ -79,7 +79,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             src={privacy}
             alt="heart"
             quality={100}
-            className="size-[32px] -ml-[3px]"
+            className="size-[32px] px-[3px] -ml-[3px]"
           />
           <p className={'-mt-[1px]'}>Privacy</p>
         </div>
