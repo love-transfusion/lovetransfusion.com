@@ -31,7 +31,7 @@ const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
               src={helpCenter}
               alt="heart"
               quality={100}
-              className="size-[26px]"
+              className="size-[28px]"
             />
             <p className={'-mt-[1px]'}>Help Center</p>
           </div>
@@ -51,7 +51,7 @@ const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
               src={aboutUsIcon}
               alt="heart"
               quality={100}
-              className="size-[26px]"
+              className="size-[28px]"
             />
             <p className={'-mt-[1px]'}>About Us</p>
           </div>
@@ -66,7 +66,7 @@ const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
               src={messageIcon}
               alt="heart"
               quality={100}
-              className="size-[26px]"
+              className="size-[28px]"
             />
             <p className={'-mt-[1px]'}>Contact Us</p>
           </div>
@@ -78,7 +78,7 @@ const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
             src={mousePointer}
             alt="heart"
             quality={100}
-            className="size-[26px]"
+            className="size-[28px]"
           />
           <SignoutContainerComponent>
             <p className={'active:text-primary-300 select-none -mt-[1px]'}>

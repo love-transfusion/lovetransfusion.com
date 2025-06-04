@@ -56,7 +56,7 @@ const QuickTour = ({ clToggleDrawer }: QuickTourTypes) => {
         src={questionMark}
         alt="heart"
         quality={100}
-        className="size-[26px]"
+        className="size-[28px]"
       />
       <p className={'-mt-[1px]'}>Quick Tour</p>
     </div>

@@ -27,7 +27,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
               'flex gap-[13px] items-center text-xl font-acumin-variable-95 font-light'
             }
           >
-            <Icon_cog className="size-[34px] -ml-1" strokeWidth={0.8} />
+            <Icon_cog className="size-[36px] -ml-1" strokeWidth={0.8} />
             <p className={'ml-1 -mt-[1px]'}>Manage Recipients</p>
           </div>
         </Link>
@@ -46,7 +46,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             src={dashboard}
             alt="heart"
             quality={100}
-            className="size-[26px]"
+            className="size-[28px]"
           />
           <p className={'-mt-[1px]'}>Dashboard</p>
         </div>
@@ -64,7 +64,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             src={profile}
             alt="heart"
             quality={100}
-            className="size-[26px]"
+            className="size-[28px]"
           />
           <p className={'-mt-[1px]'}>Profile</p>
         </div>
@@ -79,7 +79,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             src={privacy}
             alt="heart"
             quality={100}
-            className="size-[32px] px-[3px] -ml-[3px]"
+            className="size-[34px] px-[3px] -ml-[3px]"
           />
           <p className={'-mt-[1px]'}>Privacy</p>
         </div>
