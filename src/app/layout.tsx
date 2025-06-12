@@ -1,15 +1,49 @@
+import { Metadata } from 'next'
 import './globals.css'
 import GlobalToast from './GlobalToast'
-import { util_metadataGenerator } from './utilities/util_metadataGenerator'
-
 export const revalidate = 30
 
-export const metadata = util_metadataGenerator({
-  title: 'Make a Difference in a Hurting Child’s Life—Effortlessly',
-  description:
-    'In just seconds, you can send a powerful expression of love and support to someone who needs it most.',
-  clTwitterUsername: '@LoveTransfusion',
-})
+const title = 'Make a Difference in a Hurting Child’s Life—Effortlessly'
+const description =
+  'In just seconds, you can send a powerful expression of love and support to someone who needs it most.'
+const url = 'https://www.lovetransfusion.com'
+const siteName = 'Love Transfusion'
+const imageUrl = '/images/meta-images/Love Transfusion Share.png'
+
+export const metadata: Metadata = {
+  title: {
+    default: title,
+    template: `%s | Love Transfusion`,
+  },
+  description,
+
+  // OpenGraph metadata
+  openGraph: {
+    title,
+    description,
+    url,
+    siteName,
+    images: [
+      {
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+
+  // Twitter/X Card metadata
+  twitter: {
+    card: 'summary_large_image',
+    title: title,
+    description,
+    creator: '@LoveTransfusion',
+    images: [imageUrl],
+  },
+}
 
 export default function RootLayout({
   children,

@@ -22,7 +22,10 @@ interface MenuContainerTypes {
   className?: string
 }
 
-const useMenu2 = (disableBackgroundClick?: boolean, arrowSize?: number) => {
+const useMenu_Absolute = (
+  disableBackgroundClick?: boolean,
+  arrowSize?: number
+) => {
   const halfArrowSize = arrowSize ? arrowSize / 2 : 8
   const clRef = useRef<HTMLDivElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
@@ -180,4 +183,4 @@ const useMenu2 = (disableBackgroundClick?: boolean, arrowSize?: number) => {
   }
 }
 
-export default useMenu2
+export default useMenu_Absolute

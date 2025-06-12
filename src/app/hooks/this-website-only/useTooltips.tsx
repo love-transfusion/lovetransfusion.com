@@ -6,7 +6,7 @@ import tooltipsStore from '@/app/utilities/store/tooltipsStore'
 import { useEffect, useMemo, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { useStore } from 'zustand'
-import useMenu2 from '../useMenu2'
+import useMenu_Absolute from '../useMenu_Absolute'
 import { util_scrollToSection } from '@/app/utilities/util_scrollToSection'
 import { supa_upsert_tooltips_user_status } from '@/app/_actions/tooltips_user_status/actions'
 import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
@@ -113,7 +113,7 @@ const useTooltip = ({
     clScrollTo_IDOrClass: clIDOrClass,
     clArrowStylesCustom,
   }: TooltipTypes) => {
-    const { ClMenuContainer, clToggleMenu, Menu } = useMenu2(true, 24)
+    const { ClMenuContainer, clToggleMenu, Menu } = useMenu_Absolute(true, 24)
 
     const handleNext = async () => {
       if (clIDOrClass) {

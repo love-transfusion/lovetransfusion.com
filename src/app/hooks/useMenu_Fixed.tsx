@@ -12,7 +12,7 @@ interface I_Menu {
   clIsAbsolute?: boolean
 }
 
-const useMenu = <T extends HTMLElement = HTMLElement>() => {
+const useMenu_Fixed = <T extends HTMLElement = HTMLElement>() => {
   const [clIsOpen, setclIsOpen] = useState<boolean>(false)
   const { clDeviceSize } = useDeviceSize()
 
@@ -199,4 +199,4 @@ const useMenu = <T extends HTMLElement = HTMLElement>() => {
   return { Menu, clToggleMenu, clIsOpen, clRef }
 }
 
-export default useMenu
+export default useMenu_Fixed
