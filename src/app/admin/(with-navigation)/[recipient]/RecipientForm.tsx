@@ -1,7 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React from 'react'
-import facebookAdId from './images/facebook-ad.webp'
+import React, { useState } from 'react'
 import facebook from './images/facebook.webp'
 import insta from './images/insta.webp'
 import lovetransfusion from './images/lovetransfusion.webp'
@@ -16,6 +15,7 @@ import { supa_admin_update_recipient_website } from './actions'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import { useForm } from 'react-hook-form'
 import { supa_update_users } from '@/app/_actions/users/actions'
+import FBAdIDs from './FBAdIDs'
 
 interface recipientFormTypes {
   facebookURL: string | null | undefined
@@ -23,7 +23,6 @@ interface recipientFormTypes {
   instagramURL: string | null | undefined
   pinteresetURL: string | null | undefined
   // websiteURL: string | null | undefined
-  fbAdID: string | null | undefined
 }
 
 interface RecipientForm {
@@ -33,6 +32,9 @@ interface RecipientForm {
 }
 
 const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
+  const unknown_FBAdIDsArray = user?.fb_ad_IDs as unknown
+  const initialFBAdIDs = unknown_FBAdIDsArray as string[] | undefined
+  const [FBAdIDsArray, setFBAdIDs] = useState<string[]>(initialFBAdIDs ?? [])
   const {
     handleSubmit,
     register,
@@ -45,14 +47,16 @@ const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
         instagramURL: '',
         pinteresetURL: '',
         // websiteURL: '',
-        fbAdID: user?.fb_ad_id,
       }
     },
   })
   const { settoast } = useStore(utilityStore)
 
   const updateUser = async (data: recipientFormTypes, recipient_id: string) => {
-    await supa_update_users({ id: recipient_id, fb_ad_id: data.fbAdID || null })
+    await supa_update_users({
+      id: recipient_id,
+      fb_ad_IDs: FBAdIDsArray || null,
+    })
   }
 
   const onSubmit = async (rawData: recipientFormTypes) => {
@@ -178,22 +182,10 @@ const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
               // {...register('websiteURL')}
             />
           </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={facebookAdId}
-              quality={100}
-              alt="Facebook ad logo"
-              className="max-h-[42px] min-w-[42px]"
-            />
-            <Input
-              clPlaceholder="Type facebook Ad ID"
-              className="placeholder:text-neutral-400 border-black py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-              {...register('fbAdID')}
-            />
-          </div>
         </div>
+
+        <FBAdIDs FBAdIDsArray={FBAdIDsArray} setFBAdIDs={setFBAdIDs} />
+
         <Button
           clType="submit"
           clDisabled={isLoading}

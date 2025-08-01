@@ -60,8 +60,6 @@ const AdminDashboard = async () => {
     comRecipients.some((item) => item.id === id)
   )
 
-  console.log({ activeRecipients })
-
   const IDs = comRecipients
     .map((item) => item.user_id)
     .filter((item): item is string => Boolean(item))
@@ -107,7 +105,6 @@ const AdminDashboard = async () => {
     }
   )
   const comIDS = comRecipients.map((item) => item.id)
-  console.log({ comIDS, orgRecipients })
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>

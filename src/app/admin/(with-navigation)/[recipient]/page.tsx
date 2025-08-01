@@ -25,7 +25,7 @@ const RecipientPage = async (props: { params: Params }) => {
   } = await fetchDataFromLTOrg(recipient)
   const recipientObject = recipientData.recipients[0]
   return (
-    <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] h-full 2xl:h-[calc(100vh-85px)]">
+    <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] min-h-full 2xl:min-h-[calc(100vh-85px)]">
       <div className={'w-fit'}>
         <Link href={'/admin'} className="flex gap-[5px] items-center ">
           <Icon_left className="size-7" />
