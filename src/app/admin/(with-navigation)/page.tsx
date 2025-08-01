@@ -18,6 +18,7 @@ import {
   AdWiseInsight,
   util_fetchAdWiseInsights,
 } from '@/app/utilities/facebook/util_facebookApi'
+import DeleteUsersDataWebsite from './DeleteUsersDataWebsite'
 
 interface I_recipient_data {
   id: string
@@ -51,6 +52,15 @@ const AdminDashboard = async () => {
     orgRecipients
       ?.filter((item) => item.page_status === 'draft')
       .map((item) => item.id) ?? []
+
+  // const deletedRecipients =
+
+  const orgIDs = orgRecipients?.map((item) => item.id) ?? []
+  const activeRecipients = orgIDs.filter((id) =>
+    comRecipients.some((item) => item.id === id)
+  )
+
+  console.log({ activeRecipients })
 
   const IDs = comRecipients
     .map((item) => item.user_id)
@@ -96,7 +106,8 @@ const AdminDashboard = async () => {
       }
     }
   )
-  // console.log({ combinedData })
+  const comIDS = comRecipients.map((item) => item.id)
+  console.log({ comIDS, orgRecipients })
   return (
     <>
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
@@ -191,7 +202,8 @@ const AdminDashboard = async () => {
                           />
                         </td>
                         <td className="py-[6px] px-3">
-                          {!draftRecipients.includes(recipient.id) ? (
+                          {!draftRecipients.includes(recipient.id) &&
+                          activeRecipients.includes(recipient.id) ? (
                             <div className={'flex gap-2 justify-start'}>
                               {comRecipient.user_id ? (
                                 <Link
@@ -219,15 +231,30 @@ const AdminDashboard = async () => {
                                 'flex gap-2 justify-start items-center'
                               }
                             >
-                              <p
-                                className={
-                                  'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
-                                }
-                              >
-                                draft
-                              </p>
-                              {comRecipient.user_id && (
+                              {draftRecipients.includes(recipient.id) && (
+                                <p
+                                  className={
+                                    'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
+                                  }
+                                >
+                                  draft
+                                </p>
+                              )}
+                              {!activeRecipients.includes(recipient.id) && (
+                                <p
+                                  className={
+                                    'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
+                                  }
+                                >
+                                  deleted in .org
+                                </p>
+                              )}
+                              {comRecipient.user_id ? (
                                 <DeleteUser user_id={comRecipient.user_id} />
+                              ) : (
+                                <DeleteUsersDataWebsite
+                                  user_id={recipient.id}
+                                />
                               )}
                             </div>
                           )}
@@ -256,6 +283,26 @@ const AdminDashboard = async () => {
         </div>
       </div>
       <ResetUserInStore />
+      <div>
+        <p className={''}>activeRecipients</p>
+        <pre>{JSON.stringify(activeRecipients, null, 2)}</pre>
+      </div>
+      <div>
+        <p className={''}>IDs</p>
+        <pre>{JSON.stringify(IDs, null, 2)}</pre>
+      </div>
+      <div>
+        <p className={''}>Org Recipients</p>
+        <pre>{JSON.stringify(orgRecipients, null, 2)}</pre>
+      </div>
+      <div>
+        <p className={''}>Com Recipients</p>
+        <pre>{JSON.stringify(comIDS, null, 2)}</pre>
+      </div>
+      <div>
+        <p className={''}>Combined Data</p>
+        <pre>{JSON.stringify(combinedData, null, 2)}</pre>
+      </div>
     </>
   )
 }

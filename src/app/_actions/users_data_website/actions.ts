@@ -3,6 +3,7 @@
 import { createServer } from '@/app/config/supabase/supabaseServer'
 import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
 import { PostgrestError } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
 
 interface I_custom_selected_recipient
   extends Omit<I_supa_unextended_users_data_website_row, 'recipient'> {
@@ -29,7 +30,7 @@ export const supa_select_recipient = async (
     .select('*, receipients_deleted_messages(*)')
     .eq('user_id', user_id)
     .single()
-    console.timeEnd('supa_select_recipient')
+  console.timeEnd('supa_select_recipient')
   return { data, error: error?.message ?? null }
 }
 
@@ -46,4 +47,23 @@ export const supa_select_paginated_recipients = async (optionsObject?: {
     .limit(clLimit ?? 20)
 
   return { data: data ?? [], error: error?.message ?? null }
+}
+
+export const supa_delete_users_data_website = async (user_id: string) => {
+  const supabase = await createServer()
+  try {
+    const { error }: I_selected_recipient = await supabase
+      .from('users_data_website')
+      .delete()
+      .eq('id', user_id)
+
+    console.log({ error })
+    if (error) throw new Error(error.message)
+    revalidatePath('/')
+    return { error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { error: thisError }
+  }
 }
