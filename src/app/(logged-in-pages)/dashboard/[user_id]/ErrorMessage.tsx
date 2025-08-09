@@ -20,7 +20,7 @@ const ErrorMessage = ({ error }: ErrorMessage) => {
           <div className={'relative w-full flex gap-0'}>
             <p
               className={
-                'md:text-center text-sm md:text-base leading-tight md:leading-normal'
+                'md:text-left text-sm md:text-base leading-tight md:leading-normal text-nowrap overflow-hidden'
               }
             >
               {error}

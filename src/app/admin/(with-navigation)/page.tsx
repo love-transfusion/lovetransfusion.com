@@ -1,6 +1,5 @@
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import Icon_left from '@/app/components/icons/Icon_left'
-import Icon_refresh from '@/app/components/icons/Icon_refresh'
 import Icon_right from '@/app/components/icons/Icon_right'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
@@ -16,9 +15,10 @@ import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
 import DeleteUser from './DeleteUser'
 import {
   AdWiseInsight,
-  util_fetchAdWiseInsights,
+  util_multiple_fetchAdWiseInsights,
 } from '@/app/utilities/facebook/util_facebookApi'
 import DeleteUsersDataWebsite from './DeleteUsersDataWebsite'
+import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
 
 interface I_recipient_data {
   id: string
@@ -33,7 +33,7 @@ interface I_orgRecipients {
 export interface I_combineddataOfRecipient
   extends I_supa_users_data_website_row {
   user: I_supa_users_row | null
-  userFBInsights: { ad_id: AdWiseInsight[] } | undefined
+  userFBInsights: AdWiseInsight[] | undefined
 }
 
 export const maxDuration = 60
@@ -64,23 +64,23 @@ const AdminDashboard = async () => {
     .map((item) => item.user_id)
     .filter((item): item is string => Boolean(item))
 
-  // Search multiple users to get birthdate
   const { data: listOfusers } = await supa_admin_search_multiple_users(IDs)
 
-  // Get users that has fb_ad_id
-  const usersWithFbID = listOfusers?.filter((user) => user.fb_ad_id) ?? []
+  const usersWithFbID =
+    listOfusers?.filter((user) => {
+      const adIDs = user.fb_ad_IDs as string[]
+      if (adIDs.length) return true
+      return false
+    }) ?? []
 
-  const fbInsights: {
-    ad_id: AdWiseInsight[]
-  }[] = []
+  const fbInsights: AdWiseInsight[][] = []
 
   for (const user of usersWithFbID) {
-    if (user.fb_ad_id) {
-      const ad_id = user.fb_ad_id
-      const { data: result } = await util_fetchAdWiseInsights({
-        ad_id,
-      })
-      const newObj = { ad_id: result ?? [] }
+    if (user.fb_ad_IDs) {
+      const unknown_adIDS = user?.fb_ad_IDs as unknown
+      const adIDS = unknown_adIDS as string[] | undefined
+      const { data: result } = await util_multiple_fetchAdWiseInsights(adIDS)
+      const newObj = result ?? []
       fbInsights.push(newObj)
     }
   }
@@ -92,21 +92,26 @@ const AdminDashboard = async () => {
         user:
           listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
         userFBInsights: (() => {
-          const selectedUser = listOfusers?.find(
+          const unknown_selectedUser = listOfusers?.find(
             (userObj) => userObj.id === item.user_id
-          )?.fb_ad_id
-          if (selectedUser) {
-            return fbInsights.find((insight) =>
-              insight.ad_id.some((p) => p.ad_id === selectedUser)
+          )?.fb_ad_IDs as unknown
+          const selectedUser_adIDS = unknown_selectedUser as
+            | string[]
+            | undefined
+
+          if (selectedUser_adIDS && !!selectedUser_adIDS.length) {
+            return fbInsights.find((insights) =>
+              insights.every((p) => selectedUser_adIDS.includes(p.ad_id))
             )
           }
         })(),
       }
     }
   )
-  const comIDS = comRecipients.map((item) => item.id)
+
   return (
     <>
+      {/* <pre>{JSON.stringify(combinedData, null, 2)}</pre> */}
       <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
         <div
           className={
@@ -152,7 +157,8 @@ const AdminDashboard = async () => {
                     const recipient =
                       recipientData as I_supaorg_recipient_hugs_counters_comments
                     const totalFBReactions =
-                      comRecipient.userFBInsights?.ad_id.reduce(
+                      comRecipient.userFBInsights &&
+                      comRecipient.userFBInsights.reduce(
                         (sum, accu) => sum + accu.cl_total_reactions,
                         0
                       )
@@ -206,7 +212,7 @@ const AdminDashboard = async () => {
                                 <Link
                                   href={`/dashboard/${comRecipient.user_id}`}
                                 >
-                                  <Icon_refresh className="size-5" />
+                                  <Icon_dashboard className="size-5" />
                                 </Link>
                               ) : (
                                 <div className={'flex size-5'} />
@@ -280,26 +286,6 @@ const AdminDashboard = async () => {
         </div>
       </div>
       <ResetUserInStore />
-      <div>
-        <p className={''}>activeRecipients</p>
-        <pre>{JSON.stringify(activeRecipients, null, 2)}</pre>
-      </div>
-      <div>
-        <p className={''}>IDs</p>
-        <pre>{JSON.stringify(IDs, null, 2)}</pre>
-      </div>
-      <div>
-        <p className={''}>Org Recipients</p>
-        <pre>{JSON.stringify(orgRecipients, null, 2)}</pre>
-      </div>
-      <div>
-        <p className={''}>Com Recipients</p>
-        <pre>{JSON.stringify(comIDS, null, 2)}</pre>
-      </div>
-      <div>
-        <p className={''}>Combined Data</p>
-        <pre>{JSON.stringify(combinedData, null, 2)}</pre>
-      </div>
     </>
   )
 }

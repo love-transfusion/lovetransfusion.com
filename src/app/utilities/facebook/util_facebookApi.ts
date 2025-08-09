@@ -1,6 +1,6 @@
 'use server'
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 import fuzzysort from 'fuzzysort'
 
 // Types for handling Facebook API responses
@@ -9,12 +9,12 @@ export interface FacebookAdAccount {
   name: string
 }
 
-export interface FacebookApiError {
+interface FacebookApiError {
   message: string
   type: string
   code: number
   error_subcode?: number
-  fbtrace_id: string
+  fbtrace_id?: string
 }
 
 // Add GeoLocation interface for region data
@@ -246,20 +246,34 @@ export const fetchAdAccounts = async (
 }
 
 // Helper function to handle paginated API results
-const fetchAllPages = async <T>(url: string): Promise<T[]> => {
-  let allData: T[] = []
-  let nextUrl = url
+export const fetchAllPages = async <T>(url: string): Promise<T[]> => {
+  const allData: T[] = []
+  let nextUrl: string | null = url
 
   while (nextUrl) {
     try {
-      const response = await axios.get<FacebookApiResponse<T>>(nextUrl)
-      const { data, paging } = response.data
+      const response: AxiosResponse<FacebookApiResponse<T>> = await axios.get(
+        nextUrl
+      )
+      const responseData: FacebookApiResponse<T> = response.data
+      const data: T[] = responseData.data
+      const paging: FacebookPaging | undefined = responseData.paging
 
-      allData = [...allData, ...data]
+      allData.push(...data)
       nextUrl = paging?.next || ''
-    } catch (error) {
-      console.error('Error fetching paginated data:', error)
-      throw error
+    } catch (err) {
+      const error = err as AxiosError
+
+      // if (error.response) {
+      //   console.error('Status:', error.response.status)
+      //   console.error('Data:', error.response.data)
+      // } else if (error.request) {
+      //   console.error('No response received:', error.request)
+      // } else {
+      //   console.error('Error message:', error.message)
+      // }
+
+      throw new Error(`Failed to fetch data at ${nextUrl}: ${error.message}`)
     }
   }
 
@@ -460,12 +474,12 @@ export const util_fetchAdWiseInsights = async ({
   accountId,
   ad_id,
 }: FetchAdWiseInsightsParams): Promise<{
-  data: AdWiseInsight[] | null
+  data: AdWiseInsight[] | []
   error: string | null
 }> => {
   const apiVersion = 'v22.0'
   const datePreset = 'maximum'
-  const token = process.env.FACEBOOK_USER_TOKEN!
+  const token = process.env.FACEBOOK_SYSTEM_TOKEN!
   try {
     const formattedAccountId = accountId ? formatAccountId(accountId) : ad_id
     // 1. Fetch geo breakdown (country,region) - fetch all pages
@@ -497,6 +511,7 @@ export const util_fetchAdWiseInsights = async ({
     const reactInsights = await fetchAllPages<FacebookInsight>(
       `${reactUrl}?${reactQueryString}`
     )
+
     // 4. Map reactions by ad_id
     const adReactionsMap = new Map<
       string,
@@ -627,14 +642,37 @@ export const util_fetchAdWiseInsights = async ({
     })
     return { data: results, error: null }
   } catch (error: any) {
-    console.error('Error fetching ad-wise insights:', error)
     const thisError = error?.message as string
     const specifyError =
       thisError === 'Request failed with status code 400'
         ? `We’re experiencing a brief technical issue. Support for you is still coming in, but some may not be visible in the meantime. This is only temporary while we work to restore the connection.`
         : thisError
-    return { data: null, error: specifyError }
+    return { data: [], error: specifyError }
   }
+}
+
+export const util_multiple_fetchAdWiseInsights = async (
+  ad_ids: string[] | undefined
+) => {
+  const customResult = ad_ids?.length
+    ? await Promise.all(
+        ad_ids.map(async (id) => {
+          return await util_fetchAdWiseInsights({
+            ad_id: id,
+          })
+        })
+      )
+    : [{ data: [], error: null }]
+
+  return customResult.reduce(
+    (a, b) => {
+      if (!!!a.data?.length && !!!b.data?.length) {
+        return { data: [], error: null }
+      }
+      return { data: [...a.data, ...b.data], error: a.error ?? b.error }
+    },
+    { data: [], error: null }
+  )
 }
 
 // --- Account Wise Insights ---
@@ -810,7 +848,6 @@ export const fetchAccountInsights = async (
     if (result.length > 0) (result[0] as any).totalReactions = totalReactions
     return { data: result, error: null }
   } catch (error: any) {
-    console.error('Error fetching ad-wise insights:', error)
     const thisError = error?.message as string
     const specifyError =
       thisError === 'Request failed with status code 400'
@@ -885,11 +922,8 @@ export const fetchAdInsights = async (
       dmaInsights = allDma.filter(
         (dma) => dma.ad_id && dma.region && dma.country
       )
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (dmaError) {
-      console.warn(
-        'Unable to fetch DMA data for ads, continuing without it:',
-        dmaError
-      )
     }
 
     // Create a map of reactions by ad_id
@@ -1103,7 +1137,6 @@ export const fetchAdInsights = async (
     // Sort by total reactions descending
     return results.sort((a, b) => b.cl_total_reactions - a.cl_total_reactions)
   } catch (error: any) {
-    console.error('Error fetching ad insights:', error)
 
     // Handle API-specific errors
     if (error.response) {
@@ -1162,7 +1195,6 @@ export const fetchSupportedRegions = async (
 
     return supportedRegions
   } catch (error: any) {
-    console.error('Error fetching supported regions:', error)
 
     // Add specific error handling for common Facebook API errors
     if (error.response) {

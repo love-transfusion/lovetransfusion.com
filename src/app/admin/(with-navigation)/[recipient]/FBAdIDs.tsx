@@ -4,24 +4,45 @@ import Icon_pencil from '@/app/components/icons/Icon_pencil'
 import Icon_right from '@/app/components/icons/Icon_right'
 import Icon_trash from '@/app/components/icons/Icon_trash'
 import Input from '@/app/components/inputs/basic-input/Input'
+import utilityStore from '@/app/utilities/store/utilityStore'
 import React, {
   ChangeEvent,
   Dispatch,
   KeyboardEvent,
   SetStateAction,
+  useEffect,
   useState,
 } from 'react'
+import { useStore } from 'zustand'
 
 interface FBAdIDsTypes {
   setFBAdIDs: Dispatch<SetStateAction<string[]>>
   FBAdIDsArray: string[]
+  existingAdIDs: string[] | null
+  setisFBAdIDActive: Dispatch<SetStateAction<boolean>>
 }
 
-const FBAdIDs = ({ FBAdIDsArray, setFBAdIDs }: FBAdIDsTypes) => {
+const FBAdIDs = ({
+  FBAdIDsArray,
+  setFBAdIDs,
+  existingAdIDs,
+  setisFBAdIDActive,
+}: FBAdIDsTypes) => {
   const [isEdit, setisEdit] = useState<string | null>(null)
   const [inputValue, setinputValue] = useState<string>('')
+  const { settoast } = useStore(utilityStore)
 
   const appendCurrentInputValue = () => {
+    if (
+      FBAdIDsArray.includes(inputValue) ||
+      existingAdIDs?.includes(inputValue)
+    ) {
+      settoast({
+        clDescription: 'The Ad ID you entered already exist',
+        clStatus: 'error',
+      })
+      return
+    }
     if (!inputValue.trim()) return
 
     setFBAdIDs((prev) => {
@@ -31,7 +52,16 @@ const FBAdIDs = ({ FBAdIDsArray, setFBAdIDs }: FBAdIDsTypes) => {
   }
 
   const handleSaveEdit = () => {
-    console.log('inputValue', inputValue)
+    if (
+      FBAdIDsArray.includes(inputValue) ||
+      existingAdIDs?.includes(inputValue)
+    ) {
+      settoast({
+        clDescription: 'The Ad ID you entered already exist',
+        clStatus: 'error',
+      })
+      return
+    }
     if (!inputValue.trim()) return
 
     setFBAdIDs((prev) => {
@@ -77,7 +107,14 @@ const FBAdIDs = ({ FBAdIDsArray, setFBAdIDs }: FBAdIDsTypes) => {
     setinputValue('')
   }
 
-  console.log({ inputValue, FBAdIDsArray })
+  useEffect(() => {
+    if (inputValue) {
+      setisFBAdIDActive(true)
+    } else {
+      setisFBAdIDActive(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue])
   return (
     <div>
       <p className={'mt-5 mb-2 font-semibold'}>Facebook Ad IDs</p>

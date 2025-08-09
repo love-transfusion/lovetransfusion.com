@@ -23,14 +23,12 @@ export interface I_selected_recipient_response {
 export const supa_select_recipient = async (
   user_id: string
 ): Promise<I_selected_recipient_response> => {
-  console.time('supa_select_recipient')
   const supabase = await createServer()
   const { data, error }: I_selected_recipient = await supabase
     .from('users_data_website')
     .select('*, receipients_deleted_messages(*)')
     .eq('user_id', user_id)
     .single()
-  console.timeEnd('supa_select_recipient')
   return { data, error: error?.message ?? null }
 }
 

@@ -3,7 +3,10 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
-import { supa_select_user } from '@/app/_actions/users/actions'
+import {
+  supa_select_all_fb_ad_ids,
+  supa_select_user,
+} from '@/app/_actions/users/actions'
 import { supa_admin_select_recipient_data } from '@/app/_actions/admin/actions'
 import RecipientForm from './RecipientForm'
 
@@ -20,10 +23,14 @@ const RecipientPage = async (props: { params: Params }) => {
       ? await supa_select_user(foundRecipient?.user_id)
       : { data: null }
 
+  const { data: existingAdIDs } = await supa_select_all_fb_ad_ids()
+
   const recipientData: {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
   } = await fetchDataFromLTOrg(recipient)
+
   const recipientObject = recipientData.recipients[0]
+
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] min-h-full 2xl:min-h-[calc(100vh-85px)]">
       <div className={'w-fit'}>
@@ -115,6 +122,7 @@ const RecipientPage = async (props: { params: Params }) => {
           </p>
         </div>
         <RecipientForm
+          existingAdIDs={existingAdIDs}
           recipientObject={recipientObject}
           recipient={recipient}
           user={user}

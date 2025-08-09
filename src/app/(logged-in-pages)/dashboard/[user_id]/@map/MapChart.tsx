@@ -10,7 +10,7 @@ import {
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
-import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 import MapControls from './MapControls'
 
 interface Props {
@@ -56,9 +56,12 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         clRecipient: recipientObj,
       })
 
-      const { data: facebookAdData } = selectedUser?.fb_ad_id
-        ? await util_fetchAdWiseInsights({ ad_id: selectedUser?.fb_ad_id })
-        : { data: [] }
+      const unknown_adIDs = selectedUser?.fb_ad_IDs as unknown
+      const adIDs = unknown_adIDs as string[]
+
+      const { data: facebookAdData } = await util_multiple_fetchAdWiseInsights(
+        adIDs
+      )
 
       const formattedFacebookData =
         facebookAdData?.map((fbdata) => {

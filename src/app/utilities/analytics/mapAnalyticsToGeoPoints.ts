@@ -45,7 +45,6 @@ export const mapAnalyticsToGeoPoints = async (
   analytics: I_CountryPathTotalFormat[]
 ): Promise<GeoPoint[]> => {
   const resultMap = new Map<string, GeoPoint>()
-  console.time('geoMappingLoop')
 
   for (const entry of analytics) {
     const rawCity = entry.cl_city || ''
@@ -64,9 +63,7 @@ export const mapAnalyticsToGeoPoints = async (
 
     // Fallback to region if needed
     if (!match && (isCityUnset || city)) {
-      console.time('regionFallbackMatch')
       match = regionMap.get(`${region}_${countryCode}`)
-      console.timeEnd('regionFallbackMatch')
     }
 
     if (!match) continue
@@ -88,6 +85,5 @@ export const mapAnalyticsToGeoPoints = async (
     }
   }
 
-  console.timeEnd('geoMappingLoop')
   return Array.from(resultMap.values())
 }

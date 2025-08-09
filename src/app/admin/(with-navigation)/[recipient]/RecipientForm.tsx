@@ -29,9 +29,16 @@ interface RecipientForm {
   recipientObject: I_supaorg_recipient_hugs_counters_comments
   recipient: UUID
   user: I_supa_users_with_profpic_dataweb | null
+  existingAdIDs: string[] | null
 }
 
-const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
+const RecipientForm = ({
+  user,
+  recipientObject,
+  recipient,
+  existingAdIDs,
+}: RecipientForm) => {
+  const [isFBAdIDActive, setisFBAdIDActive] = useState<boolean>(false)
   const unknown_FBAdIDsArray = user?.fb_ad_IDs as unknown
   const initialFBAdIDs = unknown_FBAdIDsArray as string[] | undefined
   const [FBAdIDsArray, setFBAdIDs] = useState<string[]>(initialFBAdIDs ?? [])
@@ -184,14 +191,20 @@ const RecipientForm = ({ user, recipientObject, recipient }: RecipientForm) => {
           </div>
         </div>
 
-        <FBAdIDs FBAdIDsArray={FBAdIDsArray} setFBAdIDs={setFBAdIDs} />
+        <FBAdIDs
+          FBAdIDsArray={FBAdIDsArray}
+          setFBAdIDs={setFBAdIDs}
+          existingAdIDs={existingAdIDs}
+          setisFBAdIDActive={setisFBAdIDActive}
+        />
 
         <Button
           clType="submit"
-          clDisabled={isLoading}
+          clDisabled={isLoading || isFBAdIDActive}
           clVariant="outlined"
           className={`flex py-1 shadow-custom1 w-[259px] h-[46px] items-center pr-5 rounded-[4px] max-sm:w-full mt-[26px] ml-auto mb-[18px] ${
-            isLoading && 'bg-neutral-300 hover:bg-neutral-300'
+            (isLoading || isFBAdIDActive) &&
+            'bg-neutral-300 hover:bg-neutral-300'
           }`}
         >
           <div
