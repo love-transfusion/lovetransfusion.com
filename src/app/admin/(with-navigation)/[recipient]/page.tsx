@@ -12,6 +12,17 @@ import RecipientForm from './RecipientForm'
 
 type Params = Promise<{ recipient: UUID }>
 
+export interface OpenGraph_Types {
+  description?: string
+  title?: string
+}
+
+export interface Editor_Type {
+  HtmlContent: string
+  plainText: string
+  charactersLength: number
+}
+
 const RecipientPage = async (props: { params: Params }) => {
   const { recipient } = await props.params
   const { data: foundRecipient } = await supa_admin_select_recipient_data(
@@ -30,6 +41,9 @@ const RecipientPage = async (props: { params: Params }) => {
   } = await fetchDataFromLTOrg(recipient)
 
   const recipientObject = recipientData.recipients[0]
+
+  const unknown_sec1 = recipientObject.sec_one_paragraph_2 as unknown
+  const sec_one_paragraph_2 = unknown_sec1 as Editor_Type
 
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] min-h-full 2xl:min-h-[calc(100vh-85px)]">
@@ -116,10 +130,14 @@ const RecipientPage = async (props: { params: Params }) => {
               'text-lg max-sm:max-w-[200px] md:text-xl font-bold bg-white px-2 absolute -top-7 md:-top-4 left-5'
             }
           >{`Description of the Recipient's situation:`}</p>
-          <p className={'text-[#4b5563]'}>
-            Claire was diagnosed with Neuroblastoma (a type of pediatric cancer)
-            on June 11th, 2020 when she was only 2 years old.
-          </p>
+          <div
+            className={
+              'recipient-content pr-0 md:pr-[50px] text-lg'
+            }
+            dangerouslySetInnerHTML={{
+              __html: sec_one_paragraph_2.HtmlContent,
+            }}
+          />
         </div>
         <RecipientForm
           existingAdIDs={existingAdIDs}

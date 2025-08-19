@@ -55,7 +55,6 @@ export const supa_delete_users_data_website = async (user_id: string) => {
       .delete()
       .eq('id', user_id)
 
-    console.log({ error })
     if (error) throw new Error(error.message)
     revalidatePath('/')
     return { error: null }

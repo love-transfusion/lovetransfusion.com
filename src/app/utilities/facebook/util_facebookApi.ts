@@ -512,6 +512,23 @@ export const util_fetchAdWiseInsights = async ({
       `${reactUrl}?${reactQueryString}`
     )
 
+    let like = 0,
+      love = 0,
+      care = 0
+    for (const i of reactInsights) {
+      for (const a of i.actions ?? []) {
+        if (a.action_type === 'post_reaction' && a.action_reaction) {
+          const v = parseInt(a.value, 10) || 0
+          const r = a.action_reaction.toLowerCase()
+          if (r === 'like') like += v
+          else if (r === 'love') love += v
+          else if (r === 'care' || r === 'hug') care += v
+        }
+      }
+    }
+    const adReactionsTotal = like + love + care
+    console.log({ like, love, care, adReactionsTotal })
+
     // 4. Map reactions by ad_id
     const adReactionsMap = new Map<
       string,
@@ -748,6 +765,7 @@ export const fetchAccountInsights = async (
     const reactInsights = await fetchAllPages<FacebookInsight>(
       `${reactUrl}?${reactQueryString}`
     )
+
     // 4. Sum reactions
     let totalLike = 0,
       totalHeart = 0,
@@ -922,9 +940,8 @@ export const fetchAdInsights = async (
       dmaInsights = allDma.filter(
         (dma) => dma.ad_id && dma.region && dma.country
       )
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (dmaError) {
-    }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (dmaError) {}
 
     // Create a map of reactions by ad_id
     const adReactionsMap = new Map<
@@ -1137,7 +1154,6 @@ export const fetchAdInsights = async (
     // Sort by total reactions descending
     return results.sort((a, b) => b.cl_total_reactions - a.cl_total_reactions)
   } catch (error: any) {
-
     // Handle API-specific errors
     if (error.response) {
       const { status, data } = error.response
@@ -1195,7 +1211,6 @@ export const fetchSupportedRegions = async (
 
     return supportedRegions
   } catch (error: any) {
-
     // Add specific error handling for common Facebook API errors
     if (error.response) {
       const { status, data } = error.response
