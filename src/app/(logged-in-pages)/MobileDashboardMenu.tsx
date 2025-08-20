@@ -39,7 +39,7 @@ const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
       >
         <MenuTopPart />
         <SubMenu clIsAdmin={clIsAdmin} />
-        <SubMenuBottom clToggleDrawer={clToggleDrawer} />
+        <SubMenuBottom clToggleDrawer={clToggleDrawer} clIsAdmin={clIsAdmin} />
       </Drawer>
     </>
   )
