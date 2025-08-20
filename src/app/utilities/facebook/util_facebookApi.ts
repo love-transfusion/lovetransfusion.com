@@ -512,23 +512,6 @@ export const util_fetchAdWiseInsights = async ({
       `${reactUrl}?${reactQueryString}`
     )
 
-    let like = 0,
-      love = 0,
-      care = 0
-    for (const i of reactInsights) {
-      for (const a of i.actions ?? []) {
-        if (a.action_type === 'post_reaction' && a.action_reaction) {
-          const v = parseInt(a.value, 10) || 0
-          const r = a.action_reaction.toLowerCase()
-          if (r === 'like') like += v
-          else if (r === 'love') love += v
-          else if (r === 'care' || r === 'hug') care += v
-        }
-      }
-    }
-    const adReactionsTotal = like + love + care
-    console.log({ like, love, care, adReactionsTotal })
-
     // 4. Map reactions by ad_id
     const adReactionsMap = new Map<
       string,

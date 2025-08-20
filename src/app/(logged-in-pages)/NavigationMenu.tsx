@@ -60,7 +60,7 @@ const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
             </p>
           </div>
           <SubMenu clIsAdmin={clIsAdmin} />
-          <SubMenuBottom />
+          <SubMenuBottom clIsAdmin={clIsAdmin} />
         </div>
       </div>
     </div>

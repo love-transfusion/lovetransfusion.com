@@ -11,16 +11,17 @@ import QuickTour from './QuickTour'
 
 interface SubMenuBottomTypes {
   clToggleDrawer?: (bool?: boolean | undefined) => void
+  clIsAdmin: boolean
 }
 
-const SubMenuBottom = ({ clToggleDrawer }: SubMenuBottomTypes) => {
+const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
   return (
     <>
       <div className={'mt-[54px] flex flex-col gap-[15px]'}>
         <p className={'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light'}>
           HELP & SUPPORT
         </p>
-        <QuickTour clToggleDrawer={clToggleDrawer} />
+        {!clIsAdmin && <QuickTour clToggleDrawer={clToggleDrawer} />}
         <Link href={'/help-center'}>
           <div
             className={

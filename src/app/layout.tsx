@@ -6,11 +6,12 @@ export const revalidate = 30
 const title = 'Make a Difference in a Hurting Child’s Life—Effortlessly'
 const description =
   'In just seconds, you can send a powerful expression of love and support to someone who needs it most.'
-const url = 'https://www.lovetransfusion.com'
+// const url = 'https://www.lovetransfusion.com'  // This should be present in other pages like /submit-story
 const siteName = 'Love Transfusion'
 const imageUrl = '/images/meta-images/Love Transfusion Share.png'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.lovetransfusion.com'), // This should be only in app layout
   title: {
     default: title,
     template: `%s | Love Transfusion`,
@@ -21,7 +22,6 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url,
     siteName,
     images: [
       {

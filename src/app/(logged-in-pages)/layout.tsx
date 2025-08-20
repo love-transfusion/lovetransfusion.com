@@ -10,6 +10,7 @@ import { isAdmin } from '../lib/adminCheck'
 import SetStore from './SetStore'
 import MobileDashboardMenu from './MobileDashboardMenu'
 import ltLogo from '@/app/images/main-logo.png'
+import { notFound } from 'next/navigation'
 
 // interface I_MembersLayout
 
@@ -22,7 +23,8 @@ const UserIDLayout = async ({
   params: Promise<{ user_id: string }>
 }) => {
   const user = await getCurrentUser()
-  const isadmin = isAdmin({ clRole: user?.role })
+  if (!user) notFound()
+  const isadmin = isAdmin({ clRole: user.role })
   return (
     <>
       <div
