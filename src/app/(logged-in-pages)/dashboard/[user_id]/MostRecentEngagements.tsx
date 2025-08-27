@@ -40,12 +40,12 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
   return (
     <div
       className={
-        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-[18px] pt-[3px] -mt-[6px] max-h-[586px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[337px] overflow-hidden relative mx-auto'
+        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-[18px] pt-[3px] -mt-[6px] max-h-[646px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[337px] overflow-hidden relative mx-auto'
       }
     >
       <div
         className={
-          'h-32 w-full bg-gradient-to-t from-[#FFFFFF] to-[#FFFFFF00] absolute -bottom-4'
+          'h-[170px] w-full bg-gradient-to-b from-black/0 from-[0%] via-white/80 via-[70%] to-white/100 to-[100%] absolute -bottom-4 -left-3'
         }
       />
       <p
@@ -90,17 +90,21 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
                     height={37.8}
                     className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
                   />
-                  {index === 0 ? <p className={'text-[#009933]'}>
-                    {item.public_profiles
-                      ? item.public_profiles?.full_name ||
-                        `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
-                      : 'Someone Who Caresss'}
-                  </p> : <p className={'text-[#009933]'}>
-                    {item.public_profiles
-                      ? item.public_profiles?.full_name ||
-                        `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
-                      : 'Someone Who Cares'}
-                  </p>}
+                  {index === 0 ? (
+                    <p className={'text-[#009933]'}>
+                      {item.public_profiles
+                        ? item.public_profiles?.full_name ||
+                          `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
+                        : 'Someone Who Caresss'}
+                    </p>
+                  ) : (
+                    <p className={'text-[#009933]'}>
+                      {item.public_profiles
+                        ? item.public_profiles?.full_name ||
+                          `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
+                        : 'Someone Who Cares'}
+                    </p>
+                  )}
                 </div>
                 <Image
                   src={ltWebsiteIcon}
