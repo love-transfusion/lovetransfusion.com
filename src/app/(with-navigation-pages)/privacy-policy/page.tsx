@@ -249,15 +249,15 @@ const PrivacyPage = () => {
               9. Facebook Interactions We Display
             </p>
             <p className={''}>
-              Facebook interactions we display. When people publicly interact
-              with our Facebook Page (e.g., comment on our posts), Facebook
-              classifies their name and profile picture as public information.
-              Our app, operating on behalf of our Page and subject to Meta’s
-              approvals, may display a commenter’s name and profile photo to
-              authorized caregivers and Page admins inside a private dashboard
-              to provide context and support moderation. We do not sell this
-              data or make it publicly searchable, and we remove it if Facebook
-              deletes or hides the underlying content or upon valid request.
+              When people publicly interact with our Facebook Page (e.g.,
+              comment on our posts), Facebook classifies their name and profile
+              picture as public information. Our app, operating on behalf of our
+              Page and subject to Meta’s approvals, may display a commenter’s
+              name and profile photo to authorized caregivers and Page admins
+              inside a private dashboard to provide context and support
+              moderation. We do not sell this data or make it publicly
+              searchable, and we remove it if Facebook deletes or hides the
+              underlying content or upon valid request.
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
