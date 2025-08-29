@@ -32,10 +32,14 @@ const regionMap = new Map<string, CityEntry>()
 
 for (const key of Object.keys(cities)) {
   const entry = cities[key]
-  const cityKey = `${formatReadyToSearchRemoveCity(entry.city)}_${key.slice(-2).toLowerCase()}`
+  const cityKey = `${formatReadyToSearchRemoveCity(entry.city)}_${key
+    .slice(-2)
+    .toLowerCase()}`
   cityMap.set(cityKey, entry)
 
-  const regionKey = `${formatReadyToSearchRemoveCity(entry.state)}_${key.slice(-2).toLowerCase()}`
+  const regionKey = `${formatReadyToSearchRemoveCity(entry.state)}_${key
+    .slice(-2)
+    .toLowerCase()}`
   if (entry.state) {
     regionMap.set(regionKey, entry)
   }
@@ -49,12 +53,17 @@ export const mapAnalyticsToGeoPoints = async (
   for (const entry of analytics) {
     const rawCity = entry.cl_city || ''
     const rawRegion = entry.cl_region || ''
-    const countryCode = formatReadyToSearchRemoveCity(entry.cl_country_code || '')
+    const countryCode = formatReadyToSearchRemoveCity(
+      entry.cl_country_code || ''
+    )
     const city = formatReadyToSearchRemoveCity(rawCity)
     const region = formatReadyToSearchRemoveCity(rawRegion)
 
     const isCityUnset =
-      !rawCity || rawCity.trim().toLowerCase() === '(not set)' || city === '' || city === '(notset)'
+      !rawCity ||
+      rawCity.trim().toLowerCase() === '(not set)' ||
+      city === '' ||
+      city === '(notset)'
 
     // Fast O(1) match
     const matchFromCity = cityMap.get(`${city}_${countryCode}`)
@@ -62,7 +71,7 @@ export const mapAnalyticsToGeoPoints = async (
     let match = matchFromCity
 
     // Fallback to region if needed
-    if (!match && (isCityUnset || city)) {
+    if (!match && (isCityUnset || !matchFromCity)) {
       match = regionMap.get(`${region}_${countryCode}`)
     }
 

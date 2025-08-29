@@ -17,7 +17,23 @@ interface Props {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
   selectedUser: I_supa_users_with_profpic_dataweb | null
 }
-type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
+type I_Parameters = [number, number, number, number, number]
+
+// ---------- module-scope cache/guard (prevents re-fetch + re-register) ----------
+let WORLD_JSON_PROMISE: Promise<any> | null = null
+let WORLD_REGISTERED = false
+async function ensureWorldRegistered() {
+  if (WORLD_REGISTERED) return
+  if (!WORLD_JSON_PROMISE) {
+    WORLD_JSON_PROMISE = fetch('/maps/world.json', {
+      cache: 'force-cache',
+    }).then((r) => r.json())
+  }
+  const worldJson = await WORLD_JSON_PROMISE
+  registerMap('world', worldJson as any)
+  WORLD_REGISTERED = true
+}
+// ------------------------------------------------------------------------------
 
 const defaultPoint = [
   {
@@ -35,54 +51,40 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
     const loadMap = async () => {
       if (mappedData.length < 1) setLoading(true)
 
-      const res = await fetch('/maps/world.json')
-      const worldJson = await res.json()
-      registerMap('world', worldJson)
+      // ✅ fetch + register only once per session
+      await ensureWorldRegistered()
 
       // Fetch analytics
-      const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
-        clSpecificPath: `/${recipientObj.path_url}`,
-      })
+      const [clGoogleAnalytics, fbResp] = await Promise.all([
+        ga_selectGoogleAnalyticsData({
+          clSpecificPath: `/${recipientObj.path_url}`,
+        }),
+        util_multiple_fetchAdWiseInsights(
+          (selectedUser?.fb_ad_IDs as unknown as string[]) ?? []
+        ),
+      ])
 
       const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
         clGoogleAnalytics,
         clRecipient: recipientObj,
       })
 
-      const unknown_adIDs = selectedUser?.fb_ad_IDs as unknown
-      const adIDs = unknown_adIDs as string[]
-
-      const { data: facebookAdData } = await util_multiple_fetchAdWiseInsights(
-        adIDs
-      )
-
       const formattedFacebookData =
-        facebookAdData?.map((fbdata) => {
-          const {
-            cl_region,
-            cl_country,
-            cl_country_code,
-            cl_city,
-            cl_total_reactions,
-            cl_impressions,
-          } = fbdata
-          return {
-            cl_region,
-            cl_country,
-            cl_country_code,
-            cl_city,
-            clViews: cl_impressions,
-            clMessages: 0,
-            clHugs: cl_total_reactions,
-          }
-        }) ?? []
+        (fbResp.data ?? []).map((fbdata) => ({
+          cl_region: fbdata.cl_region,
+          cl_country: fbdata.cl_country,
+          cl_country_code: fbdata.cl_country_code,
+          cl_city: fbdata.cl_city,
+          clViews: fbdata.cl_impressions,
+          clMessages: 0,
+          clHugs: fbdata.cl_total_reactions,
+        })) ?? []
 
       const combinedAnalytics = [
         ...analyticsWithCountryPathTotal,
@@ -90,7 +92,6 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         ...defaultPoint,
       ]
 
-      // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
         (item) => item.clViews
       )
@@ -107,30 +108,20 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
         const total = val[3] + val[4]
         const minSize = 5
         const maxSize = 20
-
         if (maxTotal === minTotal) return (minSize + maxSize) / 2
         const normalized = (total - minTotal) / (maxTotal - minTotal)
         return minSize + normalized * (maxSize - minSize)
       }
 
+      // ❗ layout/style unchanged from your version
       setOption({
         tooltip: {
           trigger: 'item',
           borderColor: '#5470C6',
-          formatter: (params: {
-            name: string
-            value?: I_Parameters
-            seriesName: string
-          }) => {
+          formatter: (params: { name: string; value?: I_Parameters }) => {
             if (Array.isArray(params.value)) {
-              // const [, , views, hugs, messages] = params.value
               const [, , views] = params.value
-              return `
-                <strong>${params.name}</strong><br/>
-                views: ${views}<br/>
-                `
-              // hugs: ${hugs}<br/>
-              // messages: ${messages}
+              return `<strong>${params.name}</strong><br/>views: ${views}<br/>`
             } else {
               return `<strong>${params.name}</strong><br/>No data`
             }
@@ -143,15 +134,10 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
           layoutSize: '100%',
           label: { show: false },
           scaleLimit: { min: 1, max: 10 },
-          itemStyle: {
-            areaColor: '#E2F2FA',
-            borderColor: '#DAEBFA',
-          },
+          itemStyle: { areaColor: '#E2F2FA', borderColor: '#DAEBFA' },
           emphasis: {
             label: { show: false },
-            itemStyle: {
-              areaColor: '#A5D8FF',
-            },
+            itemStyle: { areaColor: '#A5D8FF' },
           },
         },
         series: [
@@ -170,8 +156,8 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
     }
 
     loadMap()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientObj, selectedUser])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipientObj.path_url, selectedUser?.fb_ad_IDs]) // ⬅️ tightened deps
 
   return (
     <>

@@ -34,6 +34,12 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { data: recipientRow } = await supa_select_recipient(user_id)
   const { data: selectedUser } = await supa_select_user(user_id)
 
+  const unknown_adIDS = selectedUser?.fb_ad_IDs as unknown
+  const adIDS = unknown_adIDS as string[] | undefined
+
+  const { data: facebookAdData, error: facebookError } =
+    await util_multiple_fetchAdWiseInsights(adIDS)
+
   if (!recipientRow) return
   const unkRecipientObj = recipientRow?.recipient as unknown
   const recipientObj =
@@ -42,12 +48,6 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     recipientObj.comments,
     recipientRow.receipients_deleted_messages
   )
-
-  const unknown_adIDS = selectedUser?.fb_ad_IDs as unknown
-  const adIDS = unknown_adIDS as string[] | undefined
-
-  const { data: facebookAdData, error: facebookError } =
-    await util_multiple_fetchAdWiseInsights(adIDS)
 
   const totalFacebookLikeHugCare = facebookAdData?.reduce(
     (sum, item) => sum + item.cl_total_reactions,
