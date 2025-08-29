@@ -1,58 +1,36 @@
 import React from 'react'
-// import { fetchCommentsSmart } from './fetchCommentsSmart'
-import { fetchAdComments } from './fetchComments'
-// import { fetchPagesForAdAccount } from './fetchPagesForAdAccount'
-// import { fetchPostComments } from './fetchPostComments'
-// import { fetchAllPostIds } from './fetchPostIDs'
+import { util_fetchAdComments } from '../utilities/facebook/util_fetchAdComments'
+import { util_fetchFBAdShareCount } from '../utilities/facebook/util_fetchFBAdShareCount'
+import { util_getFBPageAccessToken } from '../utilities/facebook/util_getFBPageAccessToken'
+import { util_getFBPostID } from '../utilities/facebook/util_getFBPostID'
 
 const TestPage = async () => {
-  // await fetchPostComments({
-  //   postId:
-  //     '120231126192100267',
-  //   systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-  // })
-
-  //   await fetchAllPostIds({
-  //     systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-  //     adAccountId: process.env.Ad_Account_ID!,
-  //     pageId: '107794902571685',
-  //   })
-
-  //   await fetchPagesForAdAccount({
-  //     systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-  //     adAccountId: process.env.Ad_Account_ID!,
-  //   })
-  //   await fetchPagesForAdAccount({
-  //     systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-  //     adAccountId: process.env.Ad_Account_ID!,
-  //   })
-
-  //   const comments = await fetchCommentsSmart(
-  //     'https://www.facebook.com/LoveTransfusion/posts/pfbid02UtFAmoGfczUS5ucTUz77A5asje4mqJ6SedeWpUq4Fd4LyYpE6JXsvyVK2sLC2SAFl',
-  //     {
-  //       systemToken: process.env.FB_SYSTEM_USER_TOKEN!,
-  //       pageToken: process.env.FB_PAGE_ACCESS_TOKEN, // optional but fixes NPE feed/comments
-  //     },
-  //     {
-  //       pageId: '107794902571685',
-  //       order: 'chronological',
-  //       limit: 100,
-  //     }
-  //   )
+  const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN!
   const pageId = '107794902571685'
-  //   const adId = '120231016037920267'
-  const adId = '120225320012640267'
-  const { data, paging, error } = await fetchAdComments({
+  const adIds = ['120230770928740267']
+
+  const postID = await util_getFBPostID({ adId: adIds[0], systemToken })
+
+  const pageAccessToken = await util_getFBPageAccessToken({
     pageId,
-    adId,
-    // flatten: true,
-    limit: 100000,
+    systemToken,
   })
-  if (error) {
-    return <p className={''}>{error}</p>
+
+  const { data, paging, error } = await util_fetchAdComments({
+    limit: 10000000,
+    pageAccessToken,
+    postID,
+    systemToken,
+  })
+
+  const { count: shareCount, error: shareCountError } =
+    await util_fetchFBAdShareCount({ pageAccessToken, postID })
+  if (error || shareCountError) {
+    return <p className={''}>{error || shareCountError}</p>
   }
   return (
     <div>
+      <p className={''}>Shares: {shareCount}</p>
       <pre>{JSON.stringify(data, null, 2)}</pre>
       <pre>{JSON.stringify(paging, null, 2)}</pre>
     </div>

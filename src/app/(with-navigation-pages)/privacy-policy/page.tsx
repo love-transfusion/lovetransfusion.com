@@ -246,7 +246,23 @@ const PrivacyPage = () => {
           </div>
           <div className={'flex flex-col gap-1'}>
             <p className={'text-primary font-semibold'}>
-              9. Changes to This Privacy Policy
+              9. Facebook Interactions We Display
+            </p>
+            <p className={''}>
+              Facebook interactions we display. When people publicly interact
+              with our Facebook Page (e.g., comment on our posts), Facebook
+              classifies their name and profile picture as public information.
+              Our app, operating on behalf of our Page and subject to Meta’s
+              approvals, may display a commenter’s name and profile photo to
+              authorized caregivers and Page admins inside a private dashboard
+              to provide context and support moderation. We do not sell this
+              data or make it publicly searchable, and we remove it if Facebook
+              deletes or hides the underlying content or upon valid request.
+            </p>
+          </div>
+          <div className={'flex flex-col gap-1'}>
+            <p className={'text-primary font-semibold'}>
+              10. Changes to This Privacy Policy
             </p>
             <p className={''}>
               We may update this Privacy Policy from time to time to reflect
@@ -258,7 +274,7 @@ const PrivacyPage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-semibold'}>10. Contact Us</p>
+            <p className={'text-primary font-semibold'}>11. Contact Us</p>
             <p className={''}>
               If you have any questions about this Privacy Policy, please
               contact us at{' '}

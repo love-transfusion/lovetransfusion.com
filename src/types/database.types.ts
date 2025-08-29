@@ -7,84 +7,13 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
-      fb_adwise_insights: {
-        Row: {
-          ad_id: string
-          ad_name: string | null
-          adset_id: string | null
-          adset_name: string | null
-          campaign_id: string | null
-          campaign_name: string | null
-          cl_city: string | null
-          cl_country: string | null
-          cl_country_code: string | null
-          cl_heart_reactions: number
-          cl_hug_reactions: number
-          cl_impressions: number
-          cl_like_reactions: number
-          cl_reach: number
-          cl_region: string | null
-          cl_total_reactions: number
-          fetched_at: string
-          id: string
-        }
-        Insert: {
-          ad_id: string
-          ad_name?: string | null
-          adset_id?: string | null
-          adset_name?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          cl_city?: string | null
-          cl_country?: string | null
-          cl_country_code?: string | null
-          cl_heart_reactions?: number
-          cl_hug_reactions?: number
-          cl_impressions?: number
-          cl_like_reactions?: number
-          cl_reach?: number
-          cl_region?: string | null
-          cl_total_reactions?: number
-          fetched_at?: string
-          id?: string
-        }
-        Update: {
-          ad_id?: string
-          ad_name?: string | null
-          adset_id?: string | null
-          adset_name?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          cl_city?: string | null
-          cl_country?: string | null
-          cl_country_code?: string | null
-          cl_heart_reactions?: number
-          cl_hug_reactions?: number
-          cl_impressions?: number
-          cl_like_reactions?: number
-          cl_reach?: number
-          cl_region?: string | null
-          cl_total_reactions?: number
-          fetched_at?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fb_adwise_insights_ad_id_fkey"
-            columns: ["ad_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["fb_ad_id"]
-          },
-        ]
-      }
       profile_pictures: {
         Row: {
           blur_data_url: string | null

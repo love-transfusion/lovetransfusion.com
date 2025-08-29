@@ -14,38 +14,11 @@ type FBComment = {
   from?: { name: string; id: string }
 }
 
-export async function getPostIdFromAd(adId: string, systemToken: string) {
-  const { data } = await axios.get(`https://graph.facebook.com/v23.0/${adId}`, {
-    params: {
-      access_token: systemToken,
-      fields: 'creative{effective_object_story_id,object_story_id}',
-    },
-  })
-  const postId =
-    data?.creative?.effective_object_story_id ?? data?.creative?.object_story_id
-
-  if (!postId) throw new Error('No object_story_id found for this ad')
-  return postId as string
-}
-
-export async function getPageAccessToken(pageId: string, systemToken: string) {
-  const { data } = await axios.get(
-    `https://graph.facebook.com/v23.0/${pageId}`,
-    {
-      params: { access_token: systemToken, fields: 'access_token' },
-    }
-  )
-  const pageToken = data?.access_token
-  if (!pageToken)
-    throw new Error('Could not fetch Page Access Token. Check perms.')
-  return pageToken as string
-}
-
 type Order = 'chronological' | 'reverse_chronological'
 
 export async function fetchCommentsForPost(options: {
   postId: string
-  pageToken: string
+  pageAccessToken: string
   limit?: number
   after?: string
   since?: string | number
@@ -54,7 +27,7 @@ export async function fetchCommentsForPost(options: {
 }) {
   const {
     postId,
-    pageToken,
+    pageAccessToken,
     limit = 100,
     after,
     since,
@@ -63,13 +36,11 @@ export async function fetchCommentsForPost(options: {
   } = options
 
   const params: Record<string, string> = {
-    access_token: pageToken,
+    access_token: pageAccessToken,
     fields: [
       'id',
       'message',
       'created_time',
-      'like_count',
-      'comment_count',
       'from{name,id}',
     ].join(','),
     limit: String(limit),
@@ -104,34 +75,22 @@ export async function fetchCommentsForPost(options: {
 /**
  * One-call wrapper: Ad ID -> Post ID -> Page Token -> Comments
  */
-export async function fetchAdComments(options: {
-  adId: string
-  pageId: string
+export async function util_fetchAdComments(options: {
+  /**Only one of the recipients' ad IDs is needed. */
+  systemToken: string
+  postID: string
+  pageAccessToken: string
   limit?: number
   after?: string
   since?: string | number
   until?: string | number
   order?: Order
 }) {
-  const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
-  if (!systemToken)
-    return {
-      data: null,
-      paging: undefined,
-      error: 'FACEBOOK_SYSTEM_TOKEN is missing',
-    }
-
   try {
-    // 1) Ad -> Page Post ID
-    const postId = await getPostIdFromAd(options.adId, systemToken)
-
-    // 2) System -> Page token
-    const pageToken = await getPageAccessToken(options.pageId, systemToken)
-
     // 3) Post comments (with Page token)
     return await fetchCommentsForPost({
-      postId,
-      pageToken,
+      postId: options.postID,
+      pageAccessToken: options.pageAccessToken,
       limit: options.limit,
       after: options.after,
       since: options.since,
