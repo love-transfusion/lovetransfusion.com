@@ -14,6 +14,7 @@ import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util
 import ErrorMessage from './ErrorMessage'
 import MostRecentEngagements from './MostRecentEngagements'
 import MostRecentEngagementContainer from './MostRecentEngagementContainer'
+import { Metadata } from 'next'
 // import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 // import { redirect } from 'next/navigation'
 
@@ -26,6 +27,28 @@ interface I_userDashboardLayout extends Params {
 }
 
 export const maxDuration = 60
+
+const title = 'Emotional Support Dashboard'
+const description =
+  'In just seconds, you can send a powerful expression of love and support to someone who needs it most.'
+const url = 'https://www.lovetransfusion.com/dashboard' // This should be present in other pages like /submit-story
+
+export const metadata: Metadata = {
+  title,
+  description,
+
+  // OpenGraph metadata
+  openGraph: {
+    title,
+    description,
+    url,
+  },
+
+  // Twitter/X Card metadata
+  twitter: {
+    title: title,
+  },
+}
 
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params

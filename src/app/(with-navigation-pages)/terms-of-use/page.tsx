@@ -43,9 +43,43 @@ const TermsOfUsePage = () => {
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
-            <p className={'text-primary font-semibold'}>2. Eligibility</p>
+            <p className={'text-primary font-semibold'}>
+              2. Eligibility & Restricted Areas (18+)
+            </p>
+
             <p className={''}>
-              {`While users must generally be at least 18 years of age to register an account, a parent or guardian may create and manage an account on behalf of a child or disabled person under their care. In such cases, the parent or guardian is responsible for supervising the child's use of the App. By allowing a child under 18 to use the App, the parent or guardian consents to these Terms on behalf of the child and agrees to monitor their activity as necessary.`}
+              You must be at least 18 years old to register an account that
+              accesses any administrative features, including the
+              caregiver/admin dashboard, identity views (e.g., commenter names
+              and profile photos), and moderation tools (“Restricted Areas”).
+              Access to Restricted Areas is limited to authorized Page
+              administrators and verified adult caregivers.
+            </p>
+            <p className={'mt-2'}>
+              Parents or legal guardians may submit a story and manage
+              information on behalf of a child recipient. The child is the
+              subject of support, not a user of the Restricted Areas, and
+              children under 18 may not create accounts or access the
+              caregiver/admin dashboard.
+            </p>
+            <p className={'mt-2'}>
+              A child recipient may view the dashboard content on a shared
+              screen while an adult caregiver/admin (18+) is logged in; minors
+              do not hold accounts and may not access Restricted Areas using
+              their own credentials.
+            </p>
+
+            <p className={'mt-2'}>
+              You represent and warrant that you meet these requirements and
+              that any minor’s viewing occurs under your supervision. We may
+              suspend or revoke access to Restricted Areas at our discretion for
+              policy or safety reasons.
+            </p>
+            <p className={'mt-2'}>
+              Definition: “Restricted Areas” means the caregiver/admin
+              dashboard, identity views (including display of commenter names
+              and profile photos), moderation tools, and any administrative
+              settings or webhooks pages not intended for public use.
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>

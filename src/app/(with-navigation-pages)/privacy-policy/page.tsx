@@ -166,15 +166,10 @@ const PrivacyPage = () => {
           </div>
           <div className={'flex flex-col gap-1'}>
             <p className={'text-primary font-semibold'}>
-              {`5. Children's Privacy`}
+              {`5. Children’s Privacy (Adult-Only Access)`}
             </p>
             <p className={''}>
-              {`We understand the importance of protecting children's privacy.
-              While parents or guardians may set up accounts on behalf of
-              children under 18, the App is not intended for use by children
-              without supervision. We encourage parents and guardians to monitor
-              their child's use of the App and ensure the child’s privacy is
-              protected.`}
+              {`Our Services are not directed to children, and access to the caregiver/admin dashboard is limited to adults (18+) who are authorized Page admins or verified caregivers. The child is the subject of support, not a user of the dashboard. We do not knowingly collect personal information directly from children. If you believe a child has provided us personal information, please contact us at lovesupport@lovetransfusion.org so we can remove it.`}
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
@@ -258,6 +253,20 @@ const PrivacyPage = () => {
               moderation. We do not sell this data or make it publicly
               searchable, and we remove it if Facebook deletes or hides the
               underlying content or upon valid request.
+            </p>
+            <p className={'mt-2'}>
+              Display of commenter identities occurs only within the private
+              caregiver/admin dashboard, which is accessed by authorized adults
+              (18+). A child recipient may view the dashboard content on a
+              shared screen while an adult caregiver/admin is logged in; the
+              child does not require or use their own account. Names/photos are
+              shown only after Meta approval (BAUPA); otherwise, placeholders
+              are used.
+            </p>
+            <p className={'mt-2'}>
+              A child recipient may view content displayed by an adult
+              caregiver/admin who is logged in; the child does not require their
+              own account.
             </p>
           </div>
           <div className={'flex flex-col gap-1'}>
