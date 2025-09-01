@@ -6,11 +6,20 @@ import MapTooltip from './MapTooltip'
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
 import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 type Params = Promise<{ user_id: string }>
 
 const MapSlot = async ({ params }: { params: Params }) => {
   const { user_id } = await params
+
+  const text = await fs.readFile(
+    path.join(process.cwd(), 'public/maps/world.json'),
+    'utf8'
+  )
+  const worldJson = JSON.parse(text)
+
   const [{ data: selectedUser }, { data: recipientRow }] = await Promise.all([
     supa_select_user(user_id),
     supa_select_recipient(user_id),
@@ -35,6 +44,7 @@ const MapSlot = async ({ params }: { params: Params }) => {
     clGoogleAnalytics,
     clRecipient: recipientObj,
   })
+
   return (
     <div className="relative">
       <MapChart
@@ -42,6 +52,7 @@ const MapSlot = async ({ params }: { params: Params }) => {
         selectedUser={selectedUser}
         facebookAdData={facebookAdData}
         analyticsWithCountryPathTotal={analyticsWithCountryPathTotal}
+        worldJson={worldJson}
       />
       <MapTooltip user_id={user_id} />
     </div>

@@ -17,6 +17,7 @@ interface Props {
   selectedUser: I_supa_users_with_profpic_dataweb | null
   facebookAdData: [] | AdWiseInsight[]
   analyticsWithCountryPathTotal: I_CountryPathTotalFormat[]
+  worldJson: any
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
@@ -37,6 +38,7 @@ const MapChart = ({
   selectedUser,
   facebookAdData,
   analyticsWithCountryPathTotal,
+  worldJson,
 }: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
@@ -48,8 +50,6 @@ const MapChart = ({
     const loadMap = async () => {
       if (mappedData.length < 1) setLoading(true)
 
-      const res = await fetch('/maps/world.json')
-      const worldJson = await res.json()
       registerMap('world', worldJson)
 
       const formattedFacebookData =
