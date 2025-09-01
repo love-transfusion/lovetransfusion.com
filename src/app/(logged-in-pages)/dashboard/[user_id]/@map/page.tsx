@@ -14,16 +14,14 @@ type Params = Promise<{ user_id: string }>
 const MapSlot = async ({ params }: { params: Params }) => {
   const { user_id } = await params
 
-  const text = await fs.readFile(
-    path.join(process.cwd(), 'public/maps/world.json'),
-    'utf8'
-  )
-  const worldJson = JSON.parse(text)
+  const [{ data: selectedUser }, { data: recipientRow }, worldText] =
+    await Promise.all([
+      supa_select_user(user_id),
+      supa_select_recipient(user_id),
+      fs.readFile(path.join(process.cwd(), 'public/maps/world.json'), 'utf8'),
+    ])
 
-  const [{ data: selectedUser }, { data: recipientRow }] = await Promise.all([
-    supa_select_user(user_id),
-    supa_select_recipient(user_id),
-  ])
+  const worldJson = JSON.parse(worldText)
 
   if (!recipientRow) return null
 
