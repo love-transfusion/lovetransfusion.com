@@ -7,15 +7,16 @@ import {
   GeoPoint,
   mapAnalyticsToGeoPoints,
 } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
-import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
-import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
+import { I_CountryPathTotalFormat } from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
-import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
 import MapControls from './MapControls'
 
 interface Props {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
   selectedUser: I_supa_users_with_profpic_dataweb | null
+  facebookAdData: [] | AdWiseInsight[]
+  analyticsWithCountryPathTotal: I_CountryPathTotalFormat[]
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
@@ -31,7 +32,12 @@ const defaultPoint = [
   },
 ]
 
-const MapChart = ({ recipientObj, selectedUser }: Props) => {
+const MapChart = ({
+  recipientObj,
+  selectedUser,
+  facebookAdData,
+  analyticsWithCountryPathTotal,
+}: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -45,23 +51,6 @@ const MapChart = ({ recipientObj, selectedUser }: Props) => {
       const res = await fetch('/maps/world.json')
       const worldJson = await res.json()
       registerMap('world', worldJson)
-
-      // Fetch analytics
-      const clGoogleAnalytics = await ga_selectGoogleAnalyticsData({
-        clSpecificPath: `/${recipientObj.path_url}`,
-      })
-
-      const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
-        clGoogleAnalytics,
-        clRecipient: recipientObj,
-      })
-
-      const unknown_adIDs = selectedUser?.fb_ad_IDs as unknown
-      const adIDs = unknown_adIDs as string[]
-
-      const { data: facebookAdData } = await util_multiple_fetchAdWiseInsights(
-        adIDs
-      )
 
       const formattedFacebookData =
         facebookAdData?.map((fbdata) => {
