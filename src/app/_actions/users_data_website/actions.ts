@@ -20,17 +20,17 @@ export interface I_selected_recipient_response {
   error: string | null
 }
 
-export const supa_select_recipient = async (
-  user_id: string
-): Promise<I_selected_recipient_response> => {
-  const supabase = await createServer()
-  const { data, error }: I_selected_recipient = await supabase
-    .from('users_data_website')
-    .select('*, receipients_deleted_messages(*)')
-    .eq('user_id', user_id)
-    .single()
-  return { data, error: error?.message ?? null }
-}
+// export const supa_select_recipient = async (
+//   user_id: string
+// ): Promise<I_selected_recipient_response> => {
+//   const supabase = await createServer()
+//   const { data, error }: I_selected_recipient = await supabase
+//     .from('users_data_website')
+//     .select('*, receipients_deleted_messages(*)')
+//     .eq('user_id', user_id)
+//     .single()
+//   return { data, error: error?.message ?? null }
+// }
 
 export const supa_select_paginated_recipients = async (optionsObject?: {
   clFetchDateFrom?: Date

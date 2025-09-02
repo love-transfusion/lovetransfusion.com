@@ -4,7 +4,7 @@ import { Database as orgDB } from './ltorgDatabase.types'
 import { UUID } from './utils.types'
 import { User } from '@supabase/supabase-js'
 
-interface extended_supaorg_recipient extends I_supaorg_recipient {
+interface extended_supaorg_recipient extends I_supaOrg_recipients_row {
   profile_picture: {
     id: UUID
     path: string
@@ -37,6 +37,14 @@ declare global {
   type I_supa_receipients_deleted_messages_row =
     DB['public']['Tables']['receipients_deleted_messages']['Row']
 
+  // users_data_facebook table
+  type I_supa_users_data_facebook_insert =
+    DB['public']['Tables']['users_data_facebook']['Insert']
+  type I_supa_users_data_facebook_update =
+    DB['public']['Tables']['users_data_facebook']['Update']
+  type I_supa_users_data_facebook_row =
+    DB['public']['Tables']['users_data_facebook']['Row']
+
   // profile_pictures table
   type I_supa_profile_pictures_insert =
     DB['public']['Tables']['profile_pictures']['Insert']
@@ -54,10 +62,8 @@ declare global {
     DB['public']['Tables']['fb_adwise_insights']['Row']
 
   // tooltips table
-  type I_supa_tooltips_insert =
-    DB['public']['Tables']['tooltips']['Insert']
-  type I_supa_tooltips_update =
-    DB['public']['Tables']['tooltips']['Update']
+  type I_supa_tooltips_insert = DB['public']['Tables']['tooltips']['Insert']
+  type I_supa_tooltips_update = DB['public']['Tables']['tooltips']['Update']
   type I_supa_tooltips_row_unextended =
     DB['public']['Tables']['tooltips']['Row']
 
@@ -101,8 +107,6 @@ declare global {
 
   // LT.org Database
 
-  type I_supaorg_recipient = orgDB['public']['Tables']['recipients']['Row']
-
   type I_supaorg_public_profiles =
     | orgDB['public']['Tables']['public_profiles']['Row'] & {
         profile_picture: I_profile_picture | null
@@ -123,6 +127,20 @@ declare global {
     | null
     | undefined
 
+  // recipients table
+  type I_supaOrg_recipients_insert =
+    orgDB['public']['Tables']['recipients']['Insert']
+  type I_supaOrg_recipients_update =
+    orgDB['public']['Tables']['recipients']['Update']
+  type I_supaOrg_recipients_row = orgDB['public']['Tables']['recipients']['Row']
+
+  // comments table
+  type I_supaOrg_comments_insert =
+    orgDB['public']['Tables']['comments']['Insert']
+  type I_supaOrg_comments_update =
+    orgDB['public']['Tables']['comments']['Update']
+  type I_supaOrg_comments_row = orgDB['public']['Tables']['comments']['Row']
+
   interface I_supaorg_hug extends I_unextended_supaorg_hug {
     location: I_orgLocation | null
   }
@@ -130,7 +148,17 @@ declare global {
     public_profiles: I_supaorg_public_profiles | null
   }
 
-  type I_supaorg_recipient_counters =
+  // hugs table
+  type I_supaOrg_hugs_insert = orgDB['public']['Tables']['hugs']['Insert']
+  type I_supaOrg_hugs_update = orgDB['public']['Tables']['hugs']['Update']
+  type I_supaOrg_hugs_row = orgDB['public']['Tables']['hugs']['Row']
+
+  // recipient_counters table
+  type I_supaOrg_recipient_counters_insert =
+    orgDB['public']['Tables']['recipient_counters']['Insert']
+  type I_supaOrg_recipient_counters_update =
+    orgDB['public']['Tables']['recipient_counters']['Update']
+  type I_supaOrg_recipient_counters_row =
     orgDB['public']['Tables']['recipient_counters']['Row']
 
   interface I_supaorg_comments extends I_unextended_supaorg_comments {
@@ -144,7 +172,7 @@ declare global {
   type I_supaorg_recipient_hugs_counters_comments =
     extended_supaorg_recipient & {
       hugs: I_supaorg_hug[]
-      recipient_counters: I_supaorg_recipient_counters | null
+      recipient_counters: I_supaOrg_recipient_counters_row | null
       comments: I_supaorg_comments[]
     }
 }

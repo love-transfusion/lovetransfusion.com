@@ -208,6 +208,35 @@ export type Database = {
         }
         Relationships: []
       }
+      users_data_facebook: {
+        Row: {
+          comments: Json | null
+          id: string
+          share_count: number
+          updated_at: string
+        }
+        Insert: {
+          comments?: Json | null
+          id: string
+          share_count: number
+          updated_at?: string
+        }
+        Update: {
+          comments?: Json | null
+          id?: string
+          share_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_data_facebook_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users_data_website: {
         Row: {
           created_at: string

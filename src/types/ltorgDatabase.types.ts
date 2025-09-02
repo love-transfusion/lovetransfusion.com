@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.0.2 (a4e00ff)"
+  }
   public: {
     Tables: {
       admin_gallery: {
@@ -40,20 +45,20 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          name: string | null
-          subCategory: Json | null
+          name: string
+          subCategory: Json
         }
         Insert: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name: string
+          subCategory?: Json
         }
         Update: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name?: string
+          subCategory?: Json
         }
         Relationships: []
       }
@@ -61,20 +66,20 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          name: string | null
-          subCategory: Json | null
+          name: string
+          subCategory: Json
         }
         Insert: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name: string
+          subCategory?: Json
         }
         Update: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name?: string
+          subCategory?: Json
         }
         Relationships: []
       }
@@ -82,20 +87,20 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          name: string | null
-          subCategory: Json | null
+          name: string
+          subCategory: Json
         }
         Insert: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name: string
+          subCategory?: Json
         }
         Update: {
           created_at?: string
           id?: string
-          name?: string | null
-          subCategory?: Json | null
+          name?: string
+          subCategory?: Json
         }
         Relationships: []
       }
@@ -543,7 +548,7 @@ export type Database = {
           id: string
           owner_id: string | null
           path_url: string | null
-          post_type: string | null
+          post_type: Database["public"]["Enums"]["post_type"]
           status: string | null
           tags: Json
           title: string | null
@@ -554,7 +559,7 @@ export type Database = {
           id?: string
           owner_id?: string | null
           path_url?: string | null
-          post_type?: string | null
+          post_type?: Database["public"]["Enums"]["post_type"]
           status?: string | null
           tags?: Json
           title?: string | null
@@ -565,7 +570,7 @@ export type Database = {
           id?: string
           owner_id?: string | null
           path_url?: string | null
-          post_type?: string | null
+          post_type?: Database["public"]["Enums"]["post_type"]
           status?: string | null
           tags?: Json
           title?: string | null
@@ -582,7 +587,7 @@ export type Database = {
       }
       donations: {
         Row: {
-          amount: number | null
+          amount: number
           created_at: string | null
           donor_email: string | null
           first_name: string | null
@@ -591,10 +596,11 @@ export type Database = {
           metadata: Json | null
           payment_intent_id: string | null
           recipient: string | null
+          recipient_id: string | null
           source: string | null
         }
         Insert: {
-          amount?: number | null
+          amount: number
           created_at?: string | null
           donor_email?: string | null
           first_name?: string | null
@@ -603,10 +609,11 @@ export type Database = {
           metadata?: Json | null
           payment_intent_id?: string | null
           recipient?: string | null
+          recipient_id?: string | null
           source?: string | null
         }
         Update: {
-          amount?: number | null
+          amount?: number
           created_at?: string | null
           donor_email?: string | null
           first_name?: string | null
@@ -615,6 +622,7 @@ export type Database = {
           metadata?: Json | null
           payment_intent_id?: string | null
           recipient?: string | null
+          recipient_id?: string | null
           source?: string | null
         }
         Relationships: []
@@ -654,6 +662,186 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      new_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "new_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_comment_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      new_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          parent_id: string | null
+          post_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "new_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "new_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      new_post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "new_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      new_posts: {
+        Row: {
+          author_id: string
+          content: Json | null
+          created_at: string
+          id: string
+          path_url: string
+          post_status: Database["public"]["Enums"]["post_status"]
+          post_type: Database["public"]["Enums"]["post_type"]
+          tags: Json
+          title: string
+          total_comments: number
+          total_likes: number
+          total_popularity: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content?: Json | null
+          created_at?: string
+          id?: string
+          path_url: string
+          post_status?: Database["public"]["Enums"]["post_status"]
+          post_type?: Database["public"]["Enums"]["post_type"]
+          tags?: Json
+          title: string
+          total_comments?: number
+          total_likes?: number
+          total_popularity?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: Json | null
+          created_at?: string
+          id?: string
+          path_url?: string
+          post_status?: Database["public"]["Enums"]["post_status"]
+          post_type?: Database["public"]["Enums"]["post_type"]
+          tags?: Json
+          title?: string
+          total_comments?: number
+          total_likes?: number
+          total_popularity?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_posts_author_id_fkey1"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -754,6 +942,7 @@ export type Database = {
           id: string
           last_name: string | null
           profile_picture: Json | null
+          role: Database["public"]["Enums"]["role"] | null
         }
         Insert: {
           avatar?: string | null
@@ -764,6 +953,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           profile_picture?: Json | null
+          role?: Database["public"]["Enums"]["role"] | null
         }
         Update: {
           avatar?: string | null
@@ -774,6 +964,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           profile_picture?: Json | null
+          role?: Database["public"]["Enums"]["role"] | null
         }
         Relationships: [
           {
@@ -820,10 +1011,10 @@ export type Database = {
           created_at: string
           email: string
           end_of_campaign: string | null
-          first_name: string | null
-          gender: string | null
+          first_name: string
+          gender: Database["public"]["Enums"]["gender"] | null
           id: string
-          journey_updates: Json | null
+          journey_updates_2: Json | null
           learn_more_text: string | null
           learn_more_url: string | null
           more_ways_to_support: Json | null
@@ -832,16 +1023,20 @@ export type Database = {
           otherCategories: Json | null
           otherPages: string | null
           package_image: Json | null
-          page_status: string | null
+          page_status: Database["public"]["Enums"]["page_status"]
           parent_name: string | null
           path_url: string | null
           poster_image: Json | null
           profile_picture: Json | null
           recipientInterests: string | null
           recipientSituation: string | null
-          relationship: string | null
+          relationship: string
           sec_one_paragraph: string | null
           sec_one_paragraph_2: Json | null
+          soc_post_facebook: string | null
+          soc_post_instagram: string | null
+          soc_post_pinterest: string | null
+          soc_post_twitter: string | null
           sub_title: string | null
           type: Database["public"]["Enums"]["recipient_type"]
           what_is: string | null
@@ -855,10 +1050,10 @@ export type Database = {
           created_at?: string
           email: string
           end_of_campaign?: string | null
-          first_name?: string | null
-          gender?: string | null
+          first_name: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
-          journey_updates?: Json | null
+          journey_updates_2?: Json | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
@@ -867,16 +1062,20 @@ export type Database = {
           otherCategories?: Json | null
           otherPages?: string | null
           package_image?: Json | null
-          page_status?: string | null
+          page_status?: Database["public"]["Enums"]["page_status"]
           parent_name?: string | null
           path_url?: string | null
           poster_image?: Json | null
           profile_picture?: Json | null
           recipientInterests?: string | null
           recipientSituation?: string | null
-          relationship?: string | null
+          relationship: string
           sec_one_paragraph?: string | null
           sec_one_paragraph_2?: Json | null
+          soc_post_facebook?: string | null
+          soc_post_instagram?: string | null
+          soc_post_pinterest?: string | null
+          soc_post_twitter?: string | null
           sub_title?: string | null
           type?: Database["public"]["Enums"]["recipient_type"]
           what_is?: string | null
@@ -889,10 +1088,10 @@ export type Database = {
           created_at?: string
           email?: string
           end_of_campaign?: string | null
-          first_name?: string | null
-          gender?: string | null
+          first_name?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
-          journey_updates?: Json | null
+          journey_updates_2?: Json | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
@@ -901,19 +1100,88 @@ export type Database = {
           otherCategories?: Json | null
           otherPages?: string | null
           package_image?: Json | null
-          page_status?: string | null
+          page_status?: Database["public"]["Enums"]["page_status"]
           parent_name?: string | null
           path_url?: string | null
           poster_image?: Json | null
           profile_picture?: Json | null
           recipientInterests?: string | null
           recipientSituation?: string | null
-          relationship?: string | null
+          relationship?: string
           sec_one_paragraph?: string | null
           sec_one_paragraph_2?: Json | null
+          soc_post_facebook?: string | null
+          soc_post_instagram?: string | null
+          soc_post_pinterest?: string | null
+          soc_post_twitter?: string | null
           sub_title?: string | null
           type?: Database["public"]["Enums"]["recipient_type"]
           what_is?: string | null
+        }
+        Relationships: []
+      }
+      recipients_profile_pictures: {
+        Row: {
+          blur_data_url: string | null
+          bucket_name: string | null
+          created_at: string | null
+          id: string
+          storage_path: string | null
+        }
+        Insert: {
+          blur_data_url?: string | null
+          bucket_name?: string | null
+          created_at?: string | null
+          id: string
+          storage_path?: string | null
+        }
+        Update: {
+          blur_data_url?: string | null
+          bucket_name?: string | null
+          created_at?: string | null
+          id?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipients_profile_pictures_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      split_testing_segmented: {
+        Row: {
+          assigned_variant: string
+          conversion_date: string | null
+          conversion_status: Database["public"]["Enums"]["conversion_status"]
+          created_at: string
+          email: string | null
+          id: string
+          landing_page_url: string
+          referrer: string | null
+        }
+        Insert: {
+          assigned_variant: string
+          conversion_date?: string | null
+          conversion_status?: Database["public"]["Enums"]["conversion_status"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          landing_page_url: string
+          referrer?: string | null
+        }
+        Update: {
+          assigned_variant?: string
+          conversion_date?: string | null
+          conversion_status?: Database["public"]["Enums"]["conversion_status"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          landing_page_url?: string
+          referrer?: string | null
         }
         Relationships: []
       }
@@ -950,6 +1218,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_profile_pictures_owner_id_fkey1"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users: {
@@ -961,7 +1236,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          role: string | null
+          role: Database["public"]["Enums"]["role"]
         }
         Insert: {
           avatar?: string | null
@@ -971,7 +1246,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["role"]
         }
         Update: {
           avatar?: string | null
@@ -981,9 +1256,48 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
+      }
+      users_profile_pictures: {
+        Row: {
+          blur_data_url: string | null
+          bucket_name: string | null
+          created_at: string | null
+          id: string
+          storage_path: string | null
+        }
+        Insert: {
+          blur_data_url?: string | null
+          bucket_name?: string | null
+          created_at?: string | null
+          id: string
+          storage_path?: string | null
+        }
+        Update: {
+          blur_data_url?: string | null
+          bucket_name?: string | null
+          created_at?: string | null
+          id?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_profile_pictures_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_profile_pictures_id_fkey1"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users_stripe_data: {
         Row: {
@@ -1125,27 +1439,35 @@ export type Database = {
     }
     Functions: {
       decrement_likes_count: {
-        Args: {
-          comment_id: string
-        }
+        Args: { comment_id: string }
         Returns: undefined
       }
       first_name_parent_name_id_email: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["recipients"]["Row"] }
         Returns: string
       }
+      get_all_nested_comments: {
+        Args: { input_path_url: string; input_user_id: string }
+        Returns: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          level: number
+          liked_by_current_user: boolean
+          likes_count: number
+          parent_id: string
+          post_id: string
+          public_profiles: Json
+          updated_at: string
+        }[]
+      }
       get_user_id_by_email: {
-        Args: {
-          email_input: string
-        }
+        Args: { email_input: string }
         Returns: string
       }
       increment_likes_count: {
-        Args: {
-          comment_id: string
-        }
+        Args: { comment_id: string }
         Returns: undefined
       }
     }
@@ -1153,7 +1475,13 @@ export type Database = {
       chat_conversation_status: "blocked" | "accepted" | "waiting"
       chat_message_status: "sent" | "delivered" | "read"
       chat_message_type: "text" | "image" | "file"
+      conversion_status: "converted" | "initiated" | "abandoned"
+      gender: "male" | "female" | "other"
+      page_status: "draft" | "published"
+      post_status: "approved" | "rejected" | "pending"
+      post_type: "recipient-support" | "community-support-request"
       recipient_type: "child" | "adult" | "family"
+      role: "admin" | "super_admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1161,27 +1489,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1189,20 +1523,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1210,20 +1548,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1231,29 +1573,52 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      chat_conversation_status: ["blocked", "accepted", "waiting"],
+      chat_message_status: ["sent", "delivered", "read"],
+      chat_message_type: ["text", "image", "file"],
+      conversion_status: ["converted", "initiated", "abandoned"],
+      gender: ["male", "female", "other"],
+      page_status: ["draft", "published"],
+      post_status: ["approved", "rejected", "pending"],
+      post_type: ["recipient-support", "community-support-request"],
+      recipient_type: ["child", "adult", "family"],
+      role: ["admin", "super_admin", "user"],
+    },
+  },
+} as const

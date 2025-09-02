@@ -2,9 +2,11 @@
 import { useEffect } from 'react'
 import { fetchDataFromLTOrg_and_upsertto_users_data_website } from '../_actions/orgRecipients/actions'
 
-const useUpdateRecipientDatabase = (recipientId: string) => {
+const useUpdateUsersData = (recipientId: string, userID: string) => {
+  console.log({ userID })
   const updateRecipient = () => {
     if (recipientId) {
+      console.log({ recipientId })
       fetchDataFromLTOrg_and_upsertto_users_data_website(recipientId)
     }
   }
@@ -18,4 +20,4 @@ const useUpdateRecipientDatabase = (recipientId: string) => {
   return
 }
 
-export default useUpdateRecipientDatabase
+export default useUpdateUsersData

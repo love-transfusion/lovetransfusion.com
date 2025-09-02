@@ -51,13 +51,27 @@ export const supa_update_users = async (data: I_supa_users_update) => {
   }
 }
 
-export const supa_select_user = async (user_id: string) => {
+export interface I_supa_select_user_Response_Types extends I_supa_users_row {
+  profile_pictures: I_supa_profile_pictures_row_unextended | null
+  users_data_website: I_supa_users_data_website_row[]
+  users_data_facebook: I_supa_users_data_facebook_row | null
+  receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
+}
+
+export const supa_select_user = async (
+  user_id: string
+): Promise<{
+  data: I_supa_select_user_Response_Types | null
+  error: string | null
+}> => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
   const supabase = isadmin ? await createAdmin() : await createServer()
   const { data, error } = await supabase
     .from('users')
-    .select('*, profile_pictures(*), users_data_website(*)')
+    .select(
+      '*, profile_pictures(*), users_data_website(*), users_data_facebook(*), receipients_deleted_messages(*)'
+    )
     .eq('id', user_id)
     .single()
   return { data, error: error?.message ?? null }

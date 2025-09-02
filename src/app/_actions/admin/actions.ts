@@ -77,7 +77,7 @@ export const supa_admin_delete_auth_user = async (user_id: string) => {
  * ```
  *  await supa_admin_upsert_list_of_recipients({
       id: string, // recipient's id
-      recipient: I_supaorg_recipient // recipient object
+      recipient: I_supaOrg_recipients_row // recipient object
     })
  * ```
  * @returns 

@@ -4,7 +4,7 @@ import { createServer } from '@/app/config/supabase/supabaseServer'
 
 export interface I_Recipient_Data {
   id: string
-  recipient: I_supaorg_recipient
+  recipient: I_supaOrg_recipients_row
 }
 
 export const supa_insert_deleted_messages = async (

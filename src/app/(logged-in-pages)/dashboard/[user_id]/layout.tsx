@@ -8,7 +8,6 @@ import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { filter_comments } from './actions'
 import MessagesSection from './MessagesSection'
-import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
 import ErrorMessage from './ErrorMessage'
@@ -54,23 +53,28 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
   const { updateSlot, map } = props
 
-  const { data: recipientRow } = await supa_select_recipient(user_id)
-  const { data: selectedUser } = await supa_select_user(user_id)
+  const [{ data: selectedUser }] = await Promise.all([
+    supa_select_user(user_id),
+  ])
 
   const unknown_adIDS = selectedUser?.fb_ad_IDs as unknown
   const adIDS = unknown_adIDS as string[] | undefined
 
-  const { data: facebookAdData, error: facebookError } =
-    await util_multiple_fetchAdWiseInsights(adIDS)
+  if (!selectedUser) return
 
-  if (!recipientRow) return
-  const unkRecipientObj = recipientRow?.recipient as unknown
-  const recipientObj =
-    unkRecipientObj as I_supaorg_recipient_hugs_counters_comments
-  const clMessages = await filter_comments(
-    recipientObj.comments,
-    recipientRow.receipients_deleted_messages
-  )
+  const unknown_selectedRecipient = selectedUser.users_data_website[0]
+    .recipient as unknown
+  const selectedRecipient =
+    unknown_selectedRecipient as I_supaorg_recipient_hugs_counters_comments
+
+  const [{ data: facebookAdData, error: facebookError }, clMessages] =
+    await Promise.all([
+      util_multiple_fetchAdWiseInsights(adIDS),
+      filter_comments(
+        selectedRecipient.comments,
+        selectedUser.receipients_deleted_messages
+      ),
+    ])
 
   const totalFacebookLikeHugCare = facebookAdData?.reduce(
     (sum, item) => sum + item.cl_total_reactions,
@@ -81,7 +85,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     <div className="">
       <ErrorMessage error={facebookError} />
       <WelcomeMessage />
-      <SlidingSupportersName clRecipient={recipientObj} />
+      <SlidingSupportersName clRecipient={selectedRecipient} />
       {/* Profile and Map Section */}
       <div
         className={
@@ -94,7 +98,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           }
         >
           <RecipientProfilePicture
-            recipientObj={recipientObj}
+            recipientObj={selectedRecipient}
             selectedUser={selectedUser}
           />
           <div className={'mt-2 text-left md:text-center -ml-[9px]'}>
@@ -116,7 +120,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
-              clRecipientOBj={recipientObj}
+              clRecipientOBj={selectedRecipient}
               user_id={user_id}
             />
             <Image
@@ -135,7 +139,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           {map}
           <div className={'hidden xl:block'}>
             <HugsMessagesShares
-              clRecipientObj={recipientObj}
+              clRecipientObj={selectedRecipient}
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
               user_id={user_id}
             />
@@ -144,19 +148,19 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
             <HugsMessagesShares
-              clRecipientObj={recipientObj}
+              clRecipientObj={selectedRecipient}
               totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
               user_id={user_id}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>
-            <MostRecentEngagements clRecipientOBj={recipientObj} />
+            <MostRecentEngagements clRecipientOBj={selectedRecipient} />
           </MostRecentEngagementContainer>
         </div>
       </div>
       {/* Messages Section */}
       <MessagesSection
-        clRecipientObj={{ ...recipientObj, comments: clMessages }}
+        clRecipientObj={{ ...selectedRecipient, comments: clMessages }}
         clUser_id={user_id}
       />
       {updateSlot}

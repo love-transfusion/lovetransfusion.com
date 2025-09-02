@@ -1,6 +1,5 @@
 import React from 'react'
 import MapChart from './MapChart'
-import { supa_select_recipient } from '@/app/_actions/users_data_website/actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import MapTooltip from './MapTooltip'
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
@@ -11,35 +10,35 @@ type Params = Promise<{ user_id: string }>
 
 const MapSlot = async ({ params }: { params: Params }) => {
   const { user_id } = await params
-  const [{ data: selectedUser }, { data: recipientRow }] = await Promise.all([
+  const [{ data: selectedUser }] = await Promise.all([
     supa_select_user(user_id),
-    supa_select_recipient(user_id),
   ])
 
-  if (!recipientRow) return null
+  if (!selectedUser) return null
 
-  const recipientObj =
-    recipientRow.recipient as I_supaorg_recipient_hugs_counters_comments
+  const unknown_selectedRecipient = selectedUser.users_data_website[0]
+    .recipient as unknown
+  const selectedRecipient =
+    unknown_selectedRecipient as I_supaorg_recipient_hugs_counters_comments
 
   const unknown_adIDs = selectedUser?.fb_ad_IDs as unknown
   const adIDs = unknown_adIDs as string[]
 
   const [clGoogleAnalytics, { data: facebookAdData }] = await Promise.all([
     ga_selectGoogleAnalyticsData({
-      clSpecificPath: `/${recipientObj.path_url}`,
+      clSpecificPath: `/${selectedRecipient.path_url}`,
     }),
     util_multiple_fetchAdWiseInsights(adIDs),
   ])
 
   const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
     clGoogleAnalytics,
-    clRecipient: recipientObj,
+    clRecipient: selectedRecipient,
   })
-  
+
   return (
     <div className="relative">
       <MapChart
-        recipientObj={recipientObj}
         selectedUser={selectedUser}
         facebookAdData={facebookAdData}
         analyticsWithCountryPathTotal={analyticsWithCountryPathTotal}

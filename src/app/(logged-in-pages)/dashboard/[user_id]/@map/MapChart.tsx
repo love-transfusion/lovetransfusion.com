@@ -13,7 +13,6 @@ import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
 import MapControls from './MapControls'
 
 interface Props {
-  recipientObj: I_supaorg_recipient_hugs_counters_comments
   selectedUser: I_supa_users_with_profpic_dataweb | null
   facebookAdData: [] | AdWiseInsight[]
   analyticsWithCountryPathTotal: I_CountryPathTotalFormat[]
@@ -33,7 +32,6 @@ const defaultPoint = [
 ]
 
 const MapChart = ({
-  recipientObj,
   selectedUser,
   facebookAdData,
   analyticsWithCountryPathTotal,
@@ -160,7 +158,7 @@ const MapChart = ({
 
     loadMap()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipientObj, selectedUser])
+  }, [selectedUser])
 
   return (
     <>
