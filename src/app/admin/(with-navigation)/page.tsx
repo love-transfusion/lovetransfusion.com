@@ -1,6 +1,4 @@
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
-import Icon_left from '@/app/components/icons/Icon_left'
-import Icon_right from '@/app/components/icons/Icon_right'
 import UpdateButton from './UpdateDatabaseButton'
 import Link from 'next/link'
 import Engagements from './Engagements'
@@ -8,111 +6,156 @@ import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
 import Icon_edit from '@/app/components/icons/Icon_edit'
 import SearchInput from './SearchInput'
-import { supa_select_paginated_recipients } from '@/app/_actions/users_data_website/actions'
-import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
+// import { supa_select_users_data_website } from '@/app/_actions/users_data_website/actions'
+// import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
 import ResetUserInStore from './ResetUserInStore'
-import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+// import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
 import DeleteUser from './DeleteUser'
 import {
   AdWiseInsight,
   util_multiple_fetchAdWiseInsights,
 } from '@/app/utilities/facebook/util_facebookApi'
-import DeleteUsersDataWebsite from './DeleteUsersDataWebsite'
+// import DeleteUsersDataWebsite from './DeleteUsersDataWebsite'
 import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+// import { getNetworkCount } from '@/app/(logged-in-pages)/dashboard/[user_id]/getNetworkCounts'
+import { supa_select_users_data_website } from '@/app/_actions/users_data_website/actions'
+import { supa_admin_search_multiple_users } from '@/app/_actions/admin/actions'
+import { util_getFBPostID } from '@/app/utilities/facebook/util_getFBPostID'
+import { util_getFBPageAccessToken } from '@/app/utilities/facebook/util_getFBPageAccessToken'
+import { util_fetchFBAdShareCount } from '@/app/utilities/facebook/util_fetchFBAdShareCount'
+import { util_fetchAdComments } from '@/app/utilities/facebook/util_fetchAdComments'
+import { Json } from '@/types/database.types'
+import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
+import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
+import Pagination from '@/app/components/Pagination'
+import { facebookPageID } from '@/app/lib/facebookPageID'
 
-interface I_recipient_data {
-  id: string
-  page_status: string
-}
-
-interface I_orgRecipients {
-  error: string | null
-  recipients: I_recipient_data[] | null
+interface I_users_list_Types {
+  recipientObj: I_supa_users_data_website_row
+  users_data_facebook?: I_supa_users_data_facebook_row
+  isDraft: boolean
+  hasCreatedAccount: boolean
+  isPresentInLTOrg: boolean
+  user?: I_supa_users_row
 }
 
 export interface I_combineddataOfRecipient
   extends I_supa_users_data_website_row {
-  user: I_supa_users_row | null
+  recipient: I_supa_select_user_Response_Types | null
   userFBInsights: AdWiseInsight[] | undefined
 }
 
 export const maxDuration = 60
 
-const AdminDashboard = async () => {
-  const user = await getCurrentUser()
-  isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
+interface AdminDashboard_Types {
+  searchParams: Promise<{
+    page: string | undefined
+  }>
+}
 
-  const { data: comRecipients } = await supa_select_paginated_recipients()
+const AdminDashboard = async (props: AdminDashboard_Types) => {
+  const { page: stringPage } = await props.searchParams
+  const page = parseInt(stringPage ?? '1')
+  const recipient = await getCurrentUser()
+  isAdmin({ clRole: recipient?.role, clThrowIfUnauthorized: true })
 
-  const { recipients: orgRecipients }: I_orgRecipients =
-    await fetchDataFromLTOrg({
-      searchIds: comRecipients.map((item) => item.id),
-    })
-  const draftRecipients =
-    orgRecipients
-      ?.filter((item) => item.page_status === 'draft')
-      .map((item) => item.id) ?? []
+  const clLimit = 12
 
-  // const deletedRecipients =
+  // Level 1
+  const { data: comRecipients, count } = await supa_select_users_data_website({
+    clCurrentPage: page,
+    clLimit,
+  })
 
-  const orgIDs = orgRecipients?.map((item) => item.id) ?? []
-  const activeRecipients = orgIDs.filter((id) =>
-    comRecipients.some((item) => item.id === id)
+  // Level 2
+  const [{ recipients: orgRecipients }, { data: comUsers }] = await Promise.all(
+    [
+      supa_select_org_recipients({
+        searchIds: comRecipients.map((item) => item.id),
+      }),
+      supa_admin_search_multiple_users(
+        comRecipients
+          .map((item) => {
+            if (!item.user_id) return null
+            return item.user_id
+          })
+          .filter((id): id is string => id !== null)
+      ),
+    ]
   )
 
-  const IDs = comRecipients
-    .map((item) => item.user_id)
-    .filter((item): item is string => Boolean(item))
-
-  const { data: listOfusers } = await supa_admin_search_multiple_users(IDs)
-
-  const usersWithFbID =
-    listOfusers?.filter((user) => {
+  const usersWithFbID = (
+    comUsers.filter((user) => {
       const adIDs = user.fb_ad_IDs as string[]
-      if (adIDs.length) return true
+      if (adIDs && adIDs.length) return true
       return false
     }) ?? []
-
-  const fbInsights: AdWiseInsight[][] = []
-
-  for (const user of usersWithFbID) {
-    if (user.fb_ad_IDs) {
-      const unknown_adIDS = user?.fb_ad_IDs as unknown
-      const adIDS = unknown_adIDS as string[] | undefined
-      const { data: result } = await util_multiple_fetchAdWiseInsights(adIDS)
-      const newObj = result ?? []
-      fbInsights.push(newObj)
+  ).map((item) => {
+    return {
+      id: item.id,
+      fb_ad_IDs: item.fb_ad_IDs as string[],
     }
-  }
+  })
 
-  const combinedData: I_combineddataOfRecipient[] = comRecipients.map(
-    (item) => {
+  const FBInsights: I_supa_users_data_facebook_row[] = await Promise.all(
+    usersWithFbID.map(async (item) => {
+      const [{ data: postID }, { data: pageAccessToken }, { data: insights }] =
+        await Promise.all([
+          util_getFBPostID({
+            adId: item.fb_ad_IDs[0],
+          }),
+          util_getFBPageAccessToken({
+            pageId: facebookPageID,
+          }),
+          util_multiple_fetchAdWiseInsights(item.fb_ad_IDs),
+        ])
+
+      const [{ count: share_count }, { data: comments }] = await Promise.all([
+        postID && pageAccessToken
+          ? await util_fetchFBAdShareCount({ postID, pageAccessToken })
+          : { count: 0 },
+        postID && pageAccessToken
+          ? await util_fetchAdComments({ postID, pageAccessToken })
+          : { data: null },
+      ])
+
       return {
-        ...item,
-        user:
-          listOfusers?.find((userObj) => userObj.id === item.user_id) ?? null,
-        userFBInsights: (() => {
-          const unknown_selectedUser = listOfusers?.find(
-            (userObj) => userObj.id === item.user_id
-          )?.fb_ad_IDs as unknown
-          const selectedUser_adIDS = unknown_selectedUser as
-            | string[]
-            | undefined
-
-          if (selectedUser_adIDS && !!selectedUser_adIDS.length) {
-            return fbInsights.find((insights) =>
-              insights.every((p) => selectedUser_adIDS.includes(p.ad_id))
-            )
-          }
-        })(),
+        insights: insights as Json,
+        comments: comments as Json,
+        share_count,
+        updated_at: util_formatDateToUTCString(new Date()),
+        id: item.id,
       }
-    }
+    })
   )
+
+  const newListOfUsers: I_users_list_Types[] = comRecipients.map((com) => {
+    const users_data_facebook = FBInsights.find(
+      (item) => item.id === com.user_id
+    )
+    const isPresentInLTOrg = orgRecipients.some((item) => item.id === com.id)
+    const isDraft = orgRecipients.some(
+      (item) => item.id === com.id && item.page_status === 'draft'
+    )
+    const user = comUsers.find((item) => item.id === com.user_id)
+    return {
+      recipientObj: com,
+      users_data_facebook,
+      isDraft,
+      hasCreatedAccount: !!com.user_id,
+      isPresentInLTOrg,
+      user,
+    }
+  })
 
   return (
     <>
-      {/* <pre>{JSON.stringify(combinedData, null, 2)}</pre> */}
-      <div className={'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 '}>
+      <div
+        className={
+          'max-w-[1480px] mx-auto px-4 md:px-6 lg:px-10 xl:px-10 pb-10'
+        }
+      >
         <div
           className={
             'flex flex-col md:flex-row justify-between items-center gap-2 pt-10 md:pt-[68px] pb-5'
@@ -128,139 +171,152 @@ const AdminDashboard = async () => {
           <div className={'overflow-x-auto pb-4'}>
             <table className="table-auto w-full">
               <thead className="bg-[#2F8FDD] text-white">
-                <tr className="text-left text-lg leading-tight">
+                <tr className="text-left leading-tight">
                   <td className="px-3 min-w-[140px] py-2">Parent Name</td>
                   <td className="px-3 min-w-[140px] py-2">Email</td>
                   <td className="px-3 min-w-[140px] py-2">Recipient Name </td>
                   <td className="px-3 min-w-[140px] py-2">Relationship</td>
                   <td className="px-3 min-w-[140px] py-2">Date Submitted</td>
-                  <td className="px-3 min-w-[140px] py-2">Birthday</td>
+                  <td className="px-3 min-w-[100px] py-2">Birthday</td>
                   <td className="px-3 min-w-[140px] py-2">Engagements</td>
+                  <td className="px-3 min-w-[100px] py-2">Status</td>
                   <td className="px-3 min-w-[140px] py-2">Actions</td>
                 </tr>
               </thead>
               <tbody>
-                {combinedData
+                {newListOfUsers
                   .sort((a, b) => {
-                    const recA = a.recipient as unknown
-                    const recB = b.recipient as unknown
-                    const recipientA =
-                      recA as I_supaorg_recipient_hugs_counters_comments
-                    const recipientB =
-                      recB as I_supaorg_recipient_hugs_counters_comments
-                    const dateA = new Date(recipientA.created_at).getTime()
-                    const dateB = new Date(recipientB.created_at).getTime()
+                    const userA = a.recipientObj
+                      .recipient as I_supaorg_recipient_hugs_counters_comments
+                    const userB = b.recipientObj
+                      .recipient as I_supaorg_recipient_hugs_counters_comments
+                    const dateA = new Date(userA.created_at).getTime()
+                    const dateB = new Date(userB.created_at).getTime()
                     return dateB - dateA
                   })
-                  .map((comRecipient) => {
-                    const recipientData = comRecipient.recipient as unknown
-                    const recipient =
-                      recipientData as I_supaorg_recipient_hugs_counters_comments
-                    const totalFBReactions =
-                      comRecipient.userFBInsights &&
-                      comRecipient.userFBInsights.reduce(
-                        (sum, accu) => sum + accu.cl_total_reactions,
-                        0
-                      )
+                  .map((item) => {
+                    const recipientData = item.recipientObj
+                      .recipient as I_supaorg_recipient_hugs_counters_comments
                     return (
                       <tr
-                        key={recipient.id}
+                        key={item.recipientObj.recipient.id}
                         className="even:bg-[#F3F3F3] border-y border-neutral-200"
                       >
                         <td className="py-[6px] px-3">
-                          <p className={''}>{recipient.parent_name}</p>
+                          <p className={''}>{recipientData.parent_name}</p>
                         </td>
                         <td className="py-[6px] px-3">
-                          <p className={''}>{recipient.email}</p>
+                          <p className={''}>{recipientData.email}</p>
                         </td>
                         <td className="py-[6px] px-3">
                           <p className={'capitalize'}>
-                            {comRecipient.user?.recipient_name ??
-                              recipient.first_name}
+                            {recipientData.first_name}
                           </p>
                         </td>
                         <td className="py-[6px] px-3">
-                          <p className={''}>{recipient.relationship}</p>
+                          <p className={''}>{recipientData.relationship}</p>
                         </td>
                         <td className="py-[6px] px-3">
                           <p className={''}>
                             {new Date(
-                              recipient.created_at
+                              recipientData.created_at
                             ).toLocaleDateString()}
                           </p>
                         </td>
                         <td className="py-[6px] px-3">
                           <p className={''}>
-                            {comRecipient.user?.birthday
+                            {item.user?.birthday
                               ? new Date(
-                                  comRecipient.user?.birthday
+                                  item.user.birthday
                                 ).toLocaleDateString()
                               : '-'}
                           </p>
                         </td>
-                        <td className="py-[6px] px-3">
+                        <td className="py-[6px] px-2">
                           <Engagements
-                            totalFBReactions={totalFBReactions}
-                            recipient={recipient}
+                            users_data_facebook={item.users_data_facebook}
+                            recipient={item.recipientObj.recipient}
                           />
                         </td>
                         <td className="py-[6px] px-3">
-                          {!draftRecipients.includes(recipient.id) &&
-                          activeRecipients.includes(recipient.id) ? (
-                            <div className={'flex gap-2 justify-start'}>
-                              {comRecipient.user_id ? (
+                          <div>
+                            <p
+                              className={`text-sm py-[2px] px-2  border-2 shadow-md rounded-full w-fit min-w-[85px] text-center ${
+                                item.isDraft &&
+                                item.isPresentInLTOrg &&
+                                'text-neutral-500 border-neutral-300 bg-neutral-50'
+                              } ${
+                                !item.isDraft &&
+                                item.hasCreatedAccount &&
+                                item.isPresentInLTOrg &&
+                                'text-primary border-primary bg-primary-100'
+                              } ${
+                                !item.isDraft &&
+                                item.isPresentInLTOrg &&
+                                !item.hasCreatedAccount &&
+                                'text-green-500 border-green-300 bg-green-50'
+                              } ${
+                                !item.isPresentInLTOrg &&
+                                'text-red-500 border-red-300 bg-red-50'
+                              }`}
+                            >
+                              {item.isDraft && item.isPresentInLTOrg && 'draft'}
+                              {!item.isDraft &&
+                                item.hasCreatedAccount &&
+                                item.isPresentInLTOrg &&
+                                'live'}
+                              {!item.isDraft &&
+                                item.isPresentInLTOrg &&
+                                !item.hasCreatedAccount &&
+                                'published'}
+                              {!item.isPresentInLTOrg && 'deleted'}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="py-[6px] px-3">
+                          <div
+                            className={
+                              'grid grid-cols-3 gap-[2px] w-full max-w-[80px] items-center'
+                            }
+                          >
+                            <div>
+                              {item.hasCreatedAccount ? (
                                 <Link
-                                  href={`/dashboard/${comRecipient.user_id}`}
+                                  href={`/dashboard/${item.recipientObj.user_id}`}
                                 >
                                   <Icon_dashboard className="size-5" />
                                 </Link>
                               ) : (
-                                <div className={'flex size-5'} />
+                                <p className={'text-center text-neutral-300'}>
+                                  -
+                                </p>
                               )}
-                              <Link href={`/admin/${recipient.id}`}>
-                                {comRecipient.user_id ? (
+                            </div>
+                            <div>
+                              {item.hasCreatedAccount ? (
+                                <Link href={`/admin/${recipientData.id}`}>
                                   <Icon_edit className="size-5 text-primary" />
-                                ) : (
+                                </Link>
+                              ) : !item.isDraft ? (
+                                <Link href={`/admin/${recipientData.id}`}>
                                   <Icon_eyes className="size-5 text-primary" />
-                                )}
-                              </Link>
-                              {comRecipient.user_id && (
-                                <DeleteUser user_id={comRecipient.user_id} />
-                              )}
-                            </div>
-                          ) : (
-                            <div
-                              className={
-                                'flex gap-2 justify-start items-center'
-                              }
-                            >
-                              {draftRecipients.includes(recipient.id) && (
-                                <p
-                                  className={
-                                    'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
-                                  }
-                                >
-                                  draft
-                                </p>
-                              )}
-                              {!activeRecipients.includes(recipient.id) && (
-                                <p
-                                  className={
-                                    'text-sm py-[2px] px-2 text-red-500 border-red-500 bg-red-100 border-2 shadow-md rounded-full w-fit'
-                                  }
-                                >
-                                  deleted in .org
-                                </p>
-                              )}
-                              {comRecipient.user_id ? (
-                                <DeleteUser user_id={comRecipient.user_id} />
+                                </Link>
                               ) : (
-                                <DeleteUsersDataWebsite
-                                  user_id={recipient.id}
-                                />
+                                <p className={'text-center text-neutral-300'}>
+                                  -
+                                </p>
                               )}
                             </div>
-                          )}
+                            <div>
+                              {item.hasCreatedAccount ? (
+                                <DeleteUser recipientObj={item.recipientObj} />
+                              ) : (
+                                <p className={'text-center text-neutral-300'}>
+                                  -
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -268,20 +324,12 @@ const AdminDashboard = async () => {
               </tbody>
             </table>
           </div>
-          <div className={'flex gap-2 items-center my-3 justify-end px-6'}>
-            <Icon_left className="size-5" />
-            <div
-              className={'size-8 relative bg-[#2F8FDD] rounded-full text-white'}
-            >
-              <p
-                className={
-                  'absolute top-0 bottom-0 right-0 left-0 m-auto h-fit w-fit'
-                }
-              >
-                1
-              </p>
-            </div>
-            <Icon_right className="size-5" />
+          <div className="p-5">
+            <Pagination
+              clCount={count}
+              clLimit={clLimit}
+              clCurrentPage={page.toString()}
+            />
           </div>
         </div>
       </div>

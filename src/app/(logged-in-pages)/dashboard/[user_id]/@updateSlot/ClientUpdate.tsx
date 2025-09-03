@@ -10,7 +10,7 @@ interface ClientUpdate_Types {
 
 const ClientUpdate = ({ selectedUser }: ClientUpdate_Types) => {
   useToolTipFetchLazilyOrInsertTooltips({ clPath: '/dashboard' })
-  useUpdateUsersData(selectedUser.users_data_website[0].id, '')
+  useUpdateUsersData({ selectedUser })
   return <div></div>
 }
 

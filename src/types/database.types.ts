@@ -212,18 +212,21 @@ export type Database = {
         Row: {
           comments: Json | null
           id: string
+          insights: Json | null
           share_count: number
           updated_at: string
         }
         Insert: {
           comments?: Json | null
           id: string
+          insights?: Json | null
           share_count: number
           updated_at?: string
         }
         Update: {
           comments?: Json | null
           id?: string
+          insights?: Json | null
           share_count?: number
           updated_at?: string
         }

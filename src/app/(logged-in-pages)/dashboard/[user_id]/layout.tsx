@@ -3,19 +3,18 @@ import SlidingSupportersName from './SlidingSupportersName'
 import RecipientProfilePicture from './RecipientProfilePicture'
 import arrow from './images/arrow.png'
 import Image from 'next/image'
-import HugsMessagesShares from './HugsMessagesShares'
+import HugsMessagesShares, { I_fb_comments_Types } from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { filter_comments } from './actions'
 import MessagesSection from './MessagesSection'
 import { supa_select_user } from '@/app/_actions/users/actions'
-import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
 import ErrorMessage from './ErrorMessage'
 import MostRecentEngagements from './MostRecentEngagements'
 import MostRecentEngagementContainer from './MostRecentEngagementContainer'
 import { Metadata } from 'next'
-// import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
-// import { redirect } from 'next/navigation'
+import { I_Comments } from '@/types/Comments.types'
 
 type Params = Promise<{ user_id: string }>
 
@@ -57,9 +56,6 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     supa_select_user(user_id),
   ])
 
-  const unknown_adIDS = selectedUser?.fb_ad_IDs as unknown
-  const adIDS = unknown_adIDS as string[] | undefined
-
   if (!selectedUser) return
 
   const unknown_selectedRecipient = selectedUser.users_data_website[0]
@@ -67,24 +63,74 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const selectedRecipient =
     unknown_selectedRecipient as I_supaorg_recipient_hugs_counters_comments
 
-  const [{ data: facebookAdData, error: facebookError }, clMessages] =
-    await Promise.all([
-      util_multiple_fetchAdWiseInsights(adIDS),
-      filter_comments(
-        selectedRecipient.comments,
-        selectedUser.receipients_deleted_messages
-      ),
-    ])
+  const FBComments = selectedUser.users_data_facebook?.comments as
+    | I_fb_comments_Types[]
+    | undefined
 
-  const totalFacebookLikeHugCare = facebookAdData?.reduce(
-    (sum, item) => sum + item.cl_total_reactions,
-    0
+  const formattedFBComments: I_Comments[] =
+    FBComments?.map((item) => {
+      return {
+        type: 'facebook',
+        id: item.id,
+        name: item.from?.name ?? 'Someone Who Cares',
+        message: item.message ?? 'Empty',
+        created_at: item.created_time,
+      }
+    }) ?? []
+
+  const formattedWebsiteComments: I_Comments[] = selectedRecipient.comments.map(
+    (item) => {
+      return {
+        type: 'website',
+        id: item.id,
+        name: item.name ?? 'Someone Who Cares',
+        message: item.comment ?? 'Empty',
+        created_at: item.created_at,
+        profile_picture_website: item.public_profiles,
+      }
+    }
+  )
+
+  const formattedWebsiteHugs: I_Comments[] = selectedRecipient.hugs.map(
+    (item) => {
+      return {
+        type: 'website',
+        id: item.id,
+        name:
+          (item.public_profiles?.full_name &&
+            item.public_profiles?.full_name) ||
+          (item.public_profiles?.first_name &&
+            `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`) ||
+          'Someone Who Cares',
+        message: 'Empty',
+        created_at: item.created_at,
+        profile_picture_website: item.public_profiles,
+      }
+    }
+  )
+
+  const fbInsights = selectedUser.users_data_facebook?.insights
+    ? (selectedUser.users_data_facebook.insights as [] | AdWiseInsight[])
+    : []
+
+  const allComments = await filter_comments(
+    [...formattedWebsiteComments, ...formattedFBComments],
+    selectedUser.receipients_deleted_messages
+  )
+
+  const allEngagements = await filter_comments(
+    [
+      ...formattedFBComments,
+      ...formattedWebsiteComments,
+      ...formattedWebsiteHugs,
+    ],
+    selectedUser.receipients_deleted_messages
   )
 
   return (
     <div className="">
-      <ErrorMessage error={facebookError} />
-      <WelcomeMessage />
+      <ErrorMessage />
+      <WelcomeMessage selectedUser={selectedUser} />
       <SlidingSupportersName clRecipient={selectedRecipient} />
       {/* Profile and Map Section */}
       <div
@@ -119,9 +165,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
-              clRecipientOBj={selectedRecipient}
-              user_id={user_id}
+              selectedUser={selectedUser}
+              fbInsights={fbInsights}
+              users_data_facebook={selectedUser.users_data_facebook}
             />
             <Image
               src={arrow}
@@ -139,29 +185,30 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           {map}
           <div className={'hidden xl:block'}>
             <HugsMessagesShares
-              clRecipientObj={selectedRecipient}
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
-              user_id={user_id}
+              selectedUser={selectedUser}
+              users_data_facebook={selectedUser.users_data_facebook}
+              fbInsights={fbInsights}
             />
           </div>
         </div>
         <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
             <HugsMessagesShares
-              clRecipientObj={selectedRecipient}
-              totalFacebookLikeHugCare={totalFacebookLikeHugCare ?? 0}
-              user_id={user_id}
+              selectedUser={selectedUser}
+              users_data_facebook={selectedUser.users_data_facebook}
+              fbInsights={fbInsights}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>
-            <MostRecentEngagements clRecipientOBj={selectedRecipient} />
+            <MostRecentEngagements allEngagements={allEngagements} />
           </MostRecentEngagementContainer>
         </div>
       </div>
       {/* Messages Section */}
       <MessagesSection
-        clRecipientObj={{ ...selectedRecipient, comments: clMessages }}
         clUser_id={user_id}
+        clComments={allComments}
+        selectedUser={selectedUser}
       />
       {updateSlot}
     </div>

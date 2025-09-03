@@ -92,10 +92,25 @@ export const supa_admin_upsert_list_of_recipients = async (
   return error?.message
 }
 
-export const supa_admin_search_multiple_users = async (IDs: string[]) => {
+export const supa_admin_search_multiple_users = async (
+  IDs: string[]
+): Promise<{
+  data: I_supa_users_row[] | []
+  error: string | null
+}> => {
   const supabase = await createAdmin()
-  const { data, error } = await supabase.from('users').select('*').in('id', IDs)
-  return { data, error: error?.message ?? null }
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .in('id', IDs)
+    if (error) throw new Error(error.message)
+    return { data, error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { data: [], error: thisError }
+  }
 }
 
 export const supa_admin_reset_user_password = async (

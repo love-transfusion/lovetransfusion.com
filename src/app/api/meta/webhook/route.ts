@@ -12,10 +12,11 @@ export async function GET(req: NextRequest) {
   return new Response('Forbidden', { status: 403 })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    console.log('META_WEBHOOK_EVENT', JSON.stringify(body))
+    // const body = await req.json()
+    // console.log('META_WEBHOOK_EVENT', JSON.stringify(body))
     return new Response('OK', { status: 200 })
   } catch {
     return new Response('Bad Request', { status: 400 })

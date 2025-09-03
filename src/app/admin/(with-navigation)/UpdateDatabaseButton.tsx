@@ -3,7 +3,7 @@ import Button from '@/app/components/Button/Button'
 import React, { useState } from 'react'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
-import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
 import { supa_admin_upsert_list_of_recipients } from '@/app/_actions/admin/actions'
 
 type I_data =
@@ -18,11 +18,11 @@ const UpdateButton = () => {
 
   const handleClick = async () => {
     setisLoading(true)
-    const data: I_data = await fetchDataFromLTOrg({ fetch_all: true })
+    const data: I_data = await supa_select_org_recipients({ fetch_all: true })
 
     if (!data?.recipients) return
     const formattedRecipients = data.recipients.map((recipient) => {
-      return { recipient, id: recipient.id }
+      return { recipient, id: recipient.id, created_at: recipient.created_at }
     })
 
     const error = await supa_admin_upsert_list_of_recipients(

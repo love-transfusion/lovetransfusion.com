@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import './globals.css'
 import GlobalToast from './GlobalToast'
+import { RouteProgressProvider } from './components/Link/RouteProgressProvider'
 export const revalidate = 30
 
 const title = 'Make a Difference in a Hurting Child’s Life—Effortlessly'
@@ -57,7 +58,9 @@ export default function RootLayout({
       </head>
       <body className="font-acumin-variable">
         <GlobalToast />
-        <div>{children}</div>
+        <RouteProgressProvider>
+          <div>{children}</div>
+        </RouteProgressProvider>
       </body>
     </html>
   )

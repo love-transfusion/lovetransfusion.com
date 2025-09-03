@@ -8,8 +8,8 @@ import { supa_admin_search_recipient } from '@/app/_actions/admin/actions'
 import Link from 'next/link'
 import Icon_edit from '@/app/components/icons/Icon_edit'
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
-import Icon_refresh from '@/app/components/icons/Icon_refresh'
 import useMenu_Absolute from '@/app/hooks/useMenu_Absolute'
+import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
 
 const SearchInput = () => {
   const [searchResults, setsearchResults] = useState<
@@ -28,7 +28,8 @@ const SearchInput = () => {
     if (e.key !== 'Enter' || !searchKeyword) return
     setisSubmitting(true)
     const { data } = await supa_admin_search_recipient(searchKeyword)
-    setsearchResults(data)
+    const newData = data ?? []
+    setsearchResults(newData)
     setisSubmitting(false)
     if (!clIsOpen) {
       clToggleMenu()
@@ -55,7 +56,7 @@ const SearchInput = () => {
         />
         <Menu className="shadow-md">
           <div className="min-w-[280px] md:min-w-[340px] max-w-[300px] md:max-w-[360px] max-h-[460px] overflow-y-auto px-3">
-            {searchResults && searchResults?.length > 0 ? (
+            {searchResults && searchResults.length > 0 ? (
               searchResults?.map((item) => {
                 return (
                   <div
@@ -73,7 +74,7 @@ const SearchInput = () => {
                     <div className={'w-fit flex gap-1'}>
                       {item.user_id && (
                         <Link href={`/dashboard/${item.user_id}`}>
-                          <Icon_refresh className="size-5" />
+                          <Icon_dashboard className="size-5" />
                         </Link>
                       )}
                       <Link href={`/admin/${item.id}`}>

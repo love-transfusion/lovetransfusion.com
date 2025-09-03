@@ -17,6 +17,12 @@ const utilityStore = create(
         state.userInStore = dataObj || null
       })
     },
+    fbError: null,
+    setfbError(data) {
+      set((state) => {
+        state.fbError = data
+      })
+    },
   }))
 )
 

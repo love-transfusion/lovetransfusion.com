@@ -2,41 +2,13 @@ import React from 'react'
 import anonymous from './images/user.webp'
 import Image from 'next/image'
 import ltWebsiteIcon from './images/world-w.svg'
+import { I_Comments } from '@/types/Comments.types'
+import Icon_facebook2 from '@/app/components/icons/Icon_facebook2'
 interface I_MostRecentEngagements {
-  clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
+  allEngagements: I_Comments[]
 }
 
-const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
-  const comments = clRecipientOBj.comments.map(
-    (recipient: I_supaorg_comments) => {
-      const { location, id, public_profiles, created_at, name } = recipient
-      // const profilePicture = recipient.public_profiles.profile_picture
-      return {
-        location,
-        id,
-        public_profiles,
-        created_at,
-        name,
-      }
-    }
-  )
-  const hugs = clRecipientOBj.hugs.map((recipient) => {
-    // const public_profiles = recipient.public_profiles
-    const { location, id, created_at, public_profiles } = recipient
-    const name = recipient.public_profiles?.full_name
-    return {
-      location,
-      id,
-      public_profiles,
-      created_at,
-      name,
-    }
-  })
-  const combinedEngagements = [...comments, ...hugs].sort((a, b) => {
-    const dateA = new Date(a.created_at).getTime()
-    const dateB = new Date(b.created_at).getTime()
-    return dateB - dateA
-  })
+const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
   return (
     <div
       className={
@@ -69,51 +41,65 @@ const MostRecentEngagements = ({ clRecipientOBj }: I_MostRecentEngagements) => {
           <p className={'text-[10.11px] tracking-[1px]'}>SOURCE</p>
         </div>
         <div className={'divide-y divide-primary-200'}>
-          {combinedEngagements.map((item, index) => {
-            return (
-              <div
-                key={index}
-                className={
-                  'flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] first:bg-white first:scale-105 first:px-[23] first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px] first:font-semibold text-base'
-                }
-              >
-                <div className={'flex items-center gap-3'}>
-                  <Image
-                    src={
-                      item.public_profiles?.profile_picture?.fullPath
-                        ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.public_profiles?.profile_picture?.fullPath}`
-                        : anonymous
-                    }
-                    alt="Profile picture of engager"
-                    quality={100}
-                    width={37.8}
-                    height={37.8}
-                    className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
-                  />
-                  {index === 0 ? (
-                    <p className={'text-[#009933]'}>
-                      {item.public_profiles
-                        ? item.public_profiles?.full_name ||
-                          `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
-                        : 'Someone Who Caresss'}
-                    </p>
-                  ) : (
-                    <p className={'text-[#009933]'}>
-                      {item.public_profiles
-                        ? item.public_profiles?.full_name ||
-                          `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`
-                        : 'Someone Who Cares'}
-                    </p>
+          {allEngagements
+            .sort((a, b) => {
+              const dateA = new Date(a.created_at).getTime()
+              const dateB = new Date(b.created_at).getTime()
+              return dateB - dateA
+            })
+            .map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  className={
+                    'flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] first:bg-white first:scale-105 first:px-[23] first:text-base first:shadow-[0px_0px_15px_0px_#2FABDD40] first:border-t first:border-primary first:rounded-[4px] first:font-semibold text-base'
+                  }
+                >
+                  <div className={'flex items-center gap-3'}>
+                    {item.type === 'website' && (
+                      <Image
+                        src={
+                          item.profile_picture_website &&
+                          item.profile_picture_website.profile_picture?.fullPath
+                            ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture?.fullPath}`
+                            : anonymous
+                        }
+                        alt="Profile picture of engager"
+                        quality={100}
+                        width={37.8}
+                        height={37.8}
+                        className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
+                      />
+                    )}
+                    {item.type === 'facebook' && (
+                      <Image
+                        src={item.profile_picture ?? anonymous}
+                        alt="Profile picture of engager"
+                        quality={100}
+                        width={37.8}
+                        height={37.8}
+                        className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
+                      />
+                    )}
+                    {index === 0 ? (
+                      <p className={'text-[#009933]'}>{item.name}</p>
+                    ) : (
+                      <p className={'text-[#009933]'}>{item.name}</p>
+                    )}
+                  </div>
+                  {item.type === 'website' && (
+                    <Image
+                      src={ltWebsiteIcon}
+                      alt="LT Website Icon"
+                      quality={100}
+                    />
+                  )}
+                  {item.type === 'facebook' && (
+                    <Icon_facebook2 className="text-primary my-auto" />
                   )}
                 </div>
-                <Image
-                  src={ltWebsiteIcon}
-                  alt="LT Website Icon"
-                  quality={100}
-                />
-              </div>
-            )
-          })}
+              )
+            })}
         </div>
       </div>
     </div>

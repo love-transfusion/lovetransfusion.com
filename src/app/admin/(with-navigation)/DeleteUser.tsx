@@ -5,13 +5,18 @@ import Icon_trash from '@/app/components/icons/Icon_trash'
 import usePopup from '@/app/hooks/usePopup'
 import React, { useState } from 'react'
 
-const DeleteUser = ({ user_id }: { user_id: string }) => {
+const DeleteUser = ({
+  recipientObj,
+}: {
+  recipientObj: I_supa_users_data_website_row
+}) => {
   const { clIsOpen, clTogglePopup, Popup } = usePopup()
   const [isLoading, setisLoading] = useState<boolean>(false)
 
   const handleDelete = async () => {
     setisLoading(true)
-    await supa_admin_delete_auth_user(user_id)
+    if (!recipientObj.user_id) return
+    await supa_admin_delete_auth_user(recipientObj.user_id)
     clTogglePopup()
   }
   return (
@@ -38,7 +43,8 @@ const DeleteUser = ({ user_id }: { user_id: string }) => {
                 'font-acumin-variable-68 text-3xl font-bold mx-auto w-[290px] text-left'
               }
             >
-              Are you sure you want to delete this user?
+              Are you sure you want to delete{' '}
+              {`${recipientObj.recipient.first_name}'s`} account?
             </p>
             <ul className="list-disc pl-5 mt-3 text-[17px]">
               <li>{`The user's profile information`}</li>

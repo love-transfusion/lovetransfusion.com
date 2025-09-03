@@ -1,22 +1,30 @@
 'use client'
 import DividerText from '@/app/components/DividerText'
 import ShowOrHide from './ShowOrHide'
-import Messages, { I_Messages } from './Messages'
+import Messages from './Messages'
 import useToggle from '@/app/hooks/useToggle'
 import { useEffect, useState } from 'react'
+import { I_Comments } from '@/types/Comments.types'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+
+interface I_MessagesSection {
+  clComments: I_Comments[]
+  clUser_id: string
+  selectedUser: I_supa_select_user_Response_Types | null
+}
 
 const MessagesSection = ({
-  clRecipientObj,
+  selectedUser,
+  clComments,
   clUser_id,
-}: Omit<I_Messages, 'setcomments' | 'comments'>) => {
+}: I_MessagesSection) => {
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
-  const [comments, setcomments] = useState<I_supaorg_comments[]>(
-    clRecipientObj.comments
-  )
+  const [comments, setcomments] = useState<I_Comments[]>(clComments)
+
   useEffect(() => {
-    setcomments(clRecipientObj.comments)
-  }, [clRecipientObj.comments])
+    setcomments(clComments)
+  }, [clComments])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
@@ -50,7 +58,7 @@ const MessagesSection = ({
           </div>
           {showMessages && (
             <Messages
-              clRecipientObj={clRecipientObj}
+              selectedUser={selectedUser}
               clUser_id={clUser_id}
               setcomments={setcomments}
               comments={comments}

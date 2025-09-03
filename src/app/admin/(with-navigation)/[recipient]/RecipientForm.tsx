@@ -14,8 +14,12 @@ import utilityStore from '@/app/utilities/store/utilityStore'
 import { supa_admin_update_recipient_website } from './actions'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import { useForm } from 'react-hook-form'
-import { supa_update_users } from '@/app/_actions/users/actions'
+import {
+  supa_select_user,
+  supa_update_users,
+} from '@/app/_actions/users/actions'
 import FBAdIDs from './FBAdIDs'
+import { updateUserData } from '@/app/hooks/useUpdateUsersData'
 
 interface recipientFormTypes {
   facebookURL: string | null | undefined
@@ -57,13 +61,24 @@ const RecipientForm = ({
       }
     },
   })
-  const { settoast } = useStore(utilityStore)
+  const { settoast, setfbError } = useStore(utilityStore)
 
   const updateUser = async (data: recipientFormTypes, recipient_id: string) => {
     await supa_update_users({
       id: recipient_id,
       fb_ad_IDs: FBAdIDsArray || null,
     })
+  }
+
+  const updateThirdPartyUserData = async (userID: string) => {
+    // This should be executed after the two functions above
+    const [{ data: selectedUser }] = await Promise.all([
+      supa_select_user(userID),
+    ])
+
+    if (selectedUser) {
+      await updateUserData(selectedUser, setfbError)
+    }
   }
 
   const onSubmit = async (rawData: recipientFormTypes) => {
@@ -83,6 +98,8 @@ const RecipientForm = ({
           id: recipient,
         })
         await updateUser(rawData, data.user.id)
+        // This should be executed after the two functions above
+        await updateThirdPartyUserData(data.user.id)
 
         settoast({
           clDescription: 'Account successfully created.',
@@ -92,6 +109,9 @@ const RecipientForm = ({
     } else {
       // If recipient has an existing account perform update
       await updateUser(rawData, user.id)
+      // This should be executed after the two functions above
+      await updateThirdPartyUserData(user.id)
+
       settoast({
         clDescription: 'Successfully updated recipient',
         clStatus: 'success',
@@ -216,7 +236,7 @@ const RecipientForm = ({
               className={'text-lg mx-auto text-center font-acumin-variable-90'}
             >
               {isSubmitSuccessful || user?.id
-                ? 'Update Account'
+                ? `${isLoading ? 'Updating Account...' : 'Update Account'}`
                 : `${isLoading ? 'Creating Account...' : 'Create Account'}`}
             </p>
             <div className={'pl-[19px]'}>

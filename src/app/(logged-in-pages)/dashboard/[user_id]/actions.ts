@@ -1,6 +1,7 @@
 'use server'
 
 import { createServer } from '@/app/config/supabase/supabaseServer'
+import { I_Comments } from '@/types/Comments.types'
 
 export interface I_Recipient_Data {
   id: string
@@ -20,7 +21,7 @@ export const supa_insert_deleted_messages = async (
 }
 
 export const filter_comments = async (
-  comments: I_supaorg_comments[],
+  comments: I_Comments[],
   clDeletedMessages: I_supa_receipients_deleted_messages_row[]
 ) => {
   return comments.filter((comment) => {

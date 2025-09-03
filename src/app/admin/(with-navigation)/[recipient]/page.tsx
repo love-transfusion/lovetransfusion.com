@@ -2,7 +2,7 @@ import Icon_left from '@/app/components/icons/Icon_left'
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { fetchDataFromLTOrg } from '@/app/_actions/orgRecipients/actions'
+import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
 import {
   supa_select_all_fb_ad_ids,
   supa_select_user,
@@ -38,7 +38,7 @@ const RecipientPage = async (props: { params: Params }) => {
 
   const recipientData: {
     recipients: I_supaorg_recipient_hugs_counters_comments[]
-  } = await fetchDataFromLTOrg(recipient)
+  } = await supa_select_org_recipients(recipient)
 
   const recipientObject = recipientData.recipients[0]
 

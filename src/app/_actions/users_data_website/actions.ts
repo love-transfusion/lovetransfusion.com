@@ -1,7 +1,6 @@
 'use server'
 
 import { createServer } from '@/app/config/supabase/supabaseServer'
-import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
 import { PostgrestError } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 
@@ -32,19 +31,36 @@ export interface I_selected_recipient_response {
 //   return { data, error: error?.message ?? null }
 // }
 
-export const supa_select_paginated_recipients = async (optionsObject?: {
-  clFetchDateFrom?: Date
+export const supa_select_users_data_website = async (options: {
   clLimit?: number
-}) => {
-  const { clFetchDateFrom, clLimit } = optionsObject ?? {}
+  clCurrentPage: number
+}): Promise<{
+  data: I_supa_users_data_website_row[] | []
+  count: number
+  error: string | null
+}> => {
+  const { clLimit, clCurrentPage } = options
   const supabase = await createServer()
-  const { data, error } = await supabase
-    .from('users_data_website')
-    .select('*')
-    .lt('created_at', clFetchDateFrom ?? util_formatDateToUTCString(new Date()))
-    .limit(clLimit ?? 20)
+  const newLimit = clLimit ?? 16
+  const from = clCurrentPage * newLimit - newLimit
+  const to = clCurrentPage * newLimit - newLimit + (newLimit - 1)
 
-  return { data: data ?? [], error: error?.message ?? null }
+  try {
+    const { data, error, count } = await supabase
+      .from('users_data_website')
+      .select('*', { count: 'estimated' })
+      .order('created_at', { ascending: false })
+      .limit(clLimit ?? 50)
+      .limit(newLimit)
+      .range(from, to)
+
+    if (error) throw new Error(error.message)
+    return { data: data ?? [], count: count ?? 0, error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { data: [], count: 0, error: thisError }
+  }
 }
 
 export const supa_delete_users_data_website = async (user_id: string) => {

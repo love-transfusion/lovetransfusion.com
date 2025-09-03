@@ -37,12 +37,7 @@ export async function fetchCommentsForPost(options: {
 
   const params: Record<string, string> = {
     access_token: pageAccessToken,
-    fields: [
-      'id',
-      'message',
-      'created_time',
-      'from{name,id}',
-    ].join(','),
+    fields: ['id', 'message', 'created_time', 'from{name,id}'].join(','),
     limit: String(limit),
   }
   if (after) params.after = after
@@ -77,7 +72,6 @@ export async function fetchCommentsForPost(options: {
  */
 export async function util_fetchAdComments(options: {
   /**Only one of the recipients' ad IDs is needed. */
-  systemToken: string
   postID: string
   pageAccessToken: string
   limit?: number
@@ -86,12 +80,13 @@ export async function util_fetchAdComments(options: {
   until?: string | number
   order?: Order
 }) {
+  const newLimit = options.limit ?? 10000000
   try {
     // 3) Post comments (with Page token)
     return await fetchCommentsForPost({
       postId: options.postID,
       pageAccessToken: options.pageAccessToken,
-      limit: options.limit,
+      limit: newLimit,
       after: options.after,
       since: options.since,
       until: options.until,

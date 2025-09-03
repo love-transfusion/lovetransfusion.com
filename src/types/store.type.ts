@@ -22,6 +22,8 @@ export interface I_Store_Utility {
   settoast: (data: I_ToastObject | null) => void
   userInStore: I_user | null
   setuserInStore: (data: I_user | null) => void
+  fbError: string | null
+  setfbError: (data: string | null) => void
 }
 
 // Tooltips Store ----------------------

@@ -175,4 +175,7 @@ declare global {
       recipient_counters: I_supaOrg_recipient_counters_row | null
       comments: I_supaorg_comments[]
     }
+
+  // Org Enums
+  type I_supaorg_enumTypes_page_status = orgDB['public']['Enums']['page_status']
 }

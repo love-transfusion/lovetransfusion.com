@@ -4,32 +4,29 @@ import Image from 'next/image'
 import anonymousImg from './images/user.webp'
 import { supa_insert_deleted_messages } from './actions'
 import { utils_dateAndTime_getPastTime } from '@/app/utilities/date-and-time/getPastTime'
+import { I_Comments } from '@/types/Comments.types'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 
 export interface I_Messages {
-  clRecipientObj: I_supaorg_recipient_hugs_counters_comments
   clUser_id: string
-  setcomments: Dispatch<SetStateAction<I_supaorg_comments[]>>
-  comments: I_supaorg_comments[]
+  setcomments: Dispatch<SetStateAction<I_Comments[]>>
+  comments: I_Comments[]
+  selectedUser: I_supa_select_user_Response_Types | null
 }
 
 const Messages = ({
-  clRecipientObj,
   clUser_id,
   comments,
   setcomments,
+  selectedUser,
 }: I_Messages) => {
   const [lastVisible, setlastVisible] = useState<number>(6)
 
-  comments
-    .map((recipient: I_supaorg_comments) => {
-      const { id, public_profiles, created_at, name, comment } = recipient
-      return { id, public_profiles, created_at, name, comment }
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime()
-      const dateB = new Date(b.created_at).getTime()
-      return dateB - dateA
-    })
+  comments.sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime()
+    const dateB = new Date(b.created_at).getTime()
+    return dateB - dateA
+  })
 
   const handleLoadMore = () => {
     setlastVisible((prev) => prev + 10)
@@ -84,18 +81,35 @@ const Messages = ({
                             'min-w-[64px] min-h-[64px] md:min-w-[60px] md:min-h-[60px] border-[3px] border-[#288CCC] rounded-full overflow-hidden relative'
                           }
                         >
-                          <Image
-                            src={
-                              item.public_profiles &&
-                              item.public_profiles.profile_picture?.fullPath
-                                ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.public_profiles.profile_picture?.fullPath}`
-                                : anonymousImg
-                            }
-                            alt="Profile picture of adley"
-                            quality={100}
-                            fill
-                            className="object-cover"
-                          />
+                          {item.type === 'website' && (
+                            <Image
+                              src={
+                                item.profile_picture_website &&
+                                item.profile_picture_website.profile_picture
+                                  ?.fullPath
+                                  ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture?.fullPath}`
+                                  : anonymousImg
+                              }
+                              alt="Profile picture of adley"
+                              quality={100}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
+                          {(item.type === 'facebook' ||
+                            item.type === 'instagram') && (
+                            <Image
+                              src={
+                                item.profile_picture
+                                  ? item.profile_picture
+                                  : anonymousImg
+                              }
+                              alt="Profile picture of adley"
+                              quality={100}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
                         </div>
                         <div className={'text-center md:text-left'}>
                           <p
@@ -105,24 +119,27 @@ const Messages = ({
                           >
                             {item.name}
                           </p>
-                          <p className={'text-primary'}>{item.comment}</p>
+                          <p className={'text-primary'}>{item.message}</p>
                         </div>
                       </div>
                       <div className={''}>
-                        <p
-                          onClick={() =>
-                            handleDelete({
-                              id: item.id,
-                              recipient_id: clRecipientObj.id,
-                              user_id: clUser_id,
-                            })
-                          }
-                          className={
-                            'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
-                          }
-                        >
-                          hide message
-                        </p>
+                        {selectedUser?.users_data_website && (
+                          <p
+                            onClick={() =>
+                              handleDelete({
+                                id: item.id,
+                                recipient_id:
+                                  selectedUser.users_data_website[0].id,
+                                user_id: clUser_id,
+                              })
+                            }
+                            className={
+                              'uppercase bg-[#2F8EDD] text-white p-[2px] text-[10px] text-nowrap h-fit rounded-md px-2 py-[2px] cursor-pointer'
+                            }
+                          >
+                            hide message
+                          </p>
+                        )}
                         <p
                           className={
                             'text-center text-sm text-[#B3B3B3] mt-[3px]'

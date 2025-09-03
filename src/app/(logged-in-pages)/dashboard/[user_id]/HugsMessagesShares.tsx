@@ -5,34 +5,53 @@ import hugs from './images/hugs.png'
 import messages from './images/MESSAGES.png'
 import shares from './images/SHARES.png'
 import ripple from './images/ripple.png'
-import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
+import { getNetworkCount } from './getNetworkCounts'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+
+export interface I_fb_comments_Types {
+  id: string
+  message: string
+  created_time: string
+  from?: {
+    name: string
+    id: string
+  }
+}
 
 interface I_HugsMessagesShares {
-  clRecipientObj: I_supaorg_recipient_hugs_counters_comments
-  totalFacebookLikeHugCare: number
-  user_id: string
+  selectedUser: I_supa_select_user_Response_Types
+  users_data_facebook: I_supa_users_data_facebook_row | null
+  fbInsights: [] | AdWiseInsight[]
 }
 
 const HugsMessagesShares = ({
-  clRecipientObj,
-  totalFacebookLikeHugCare,
-  user_id,
+  selectedUser,
+  users_data_facebook,
+  fbInsights,
 }: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
     comments: totalComments,
     shares: totalShares,
     total,
-  } = useEngagementsFromWeb(clRecipientObj)
+  } = getNetworkCount.orgCounts(selectedUser.users_data_website[0].recipient)
+
   const { Tooltip: ToolTipTotal } = useTooltip({
     clTooltipTitle: 'Updates',
-    clUser_id: user_id,
+    clUser_id: selectedUser.id,
   })
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Engagements',
-    clUser_id: user_id,
+    clUser_id: selectedUser.id,
   })
+  const {
+    hugs: fbHugsCount,
+    comments: fbCommentsCount,
+    shares: fbSharesCount,
+    totalFacebookData,
+  } = getNetworkCount.fbCounts(fbInsights, users_data_facebook)
   return (
     <div
       className={
@@ -65,7 +84,7 @@ const HugsMessagesShares = ({
                 'rounded-lg text-white ring-[1px] ring-primary-300 text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
               }
             >
-              {total + totalFacebookLikeHugCare}
+              {total + totalFacebookData}
             </p>
           </div>
         </div>
@@ -84,7 +103,7 @@ const HugsMessagesShares = ({
                 'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
               }
             >
-              {totalHugs + totalFacebookLikeHugCare}
+              {totalHugs + fbHugsCount}
             </p>
           </div>
         </Tooltip>
@@ -104,7 +123,7 @@ const HugsMessagesShares = ({
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalComments}
+            {totalComments + fbCommentsCount}
           </p>
         </div>
       </div>
@@ -123,7 +142,7 @@ const HugsMessagesShares = ({
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalShares}
+            {totalShares + fbSharesCount}
           </p>
         </div>
       </div>

@@ -4,8 +4,13 @@ import Image from 'next/image'
 import modalLogo from './images/modal-logo.svg'
 import Icon_close from '@/app/components/icons/Icon_close'
 import { useEffect, useState } from 'react'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 
-const WelcomeMessage = () => {
+interface Welcome_Message_Types {
+  selectedUser: I_supa_select_user_Response_Types
+}
+
+const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
   const [isOpen, setisOpen] = useState<boolean>(false)
   const localName = 'dashboard-modal'
 
@@ -54,7 +59,8 @@ const WelcomeMessage = () => {
                     'font-acuminProSemibold text-2xl text-[#2f8edd] text-center pt-[86px] font-bold'
                   }
                 >
-                  Welcome to Your Love Transfusion Dashboard!
+                  Welcome to Your Love Transfusion Dashboard{' '}
+                  {selectedUser.first_name}!
                 </p>
                 <p className={'leading-[28px] mt-[22px]'}>
                   We have begun raising awareness about your story, and, as you

@@ -2,28 +2,36 @@
 import Image from 'next/image'
 import React from 'react'
 import ripple from './images/ripple.png'
-import useEngagementsFromWeb from '@/app/hooks/this-website-only/useEngagementsFromWeb'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
+import { getNetworkCount } from './getNetworkCounts'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 // import { useStore } from 'zustand'
 // import utilityStore from '@/app/utilities/store/utilityStore'
 
-interface I_TotalEngagements {
-  clRecipientOBj: I_supaorg_recipient_hugs_counters_comments
-  totalFacebookLikeHugCare: number
-  user_id: string
+export interface I_TotalEngagements {
+  selectedUser: I_supa_select_user_Response_Types
+  fbInsights: [] | AdWiseInsight[]
+  users_data_facebook: I_supa_users_data_facebook_row | null
 }
 
-const TotalEngagements = ({
-  clRecipientOBj,
-  totalFacebookLikeHugCare,
-  user_id,
+const TotalEngagements = ({ 
+  selectedUser,
+  fbInsights,
+  users_data_facebook,
 }: I_TotalEngagements) => {
-  // const { setuserInStore } = useStore(utilityStore)
-  const { total } = useEngagementsFromWeb(clRecipientOBj)
+  const { total: totalOrgRecipientData } = getNetworkCount.orgCounts(
+    selectedUser.users_data_website[0].recipient
+  )
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Updates',
-    clUser_id: user_id,
+    clUser_id: selectedUser.id,
   })
+
+  const { totalFacebookData } = getNetworkCount.fbCounts(
+    fbInsights,
+    users_data_facebook
+  )
 
   return (
     <div
@@ -51,7 +59,7 @@ const TotalEngagements = ({
               'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'
             }
           >
-            {total + totalFacebookLikeHugCare}
+            {totalOrgRecipientData + totalFacebookData}
           </p>
         </div>
       </Tooltip>
