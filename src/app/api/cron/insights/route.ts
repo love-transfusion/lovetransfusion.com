@@ -15,10 +15,15 @@ type InsightsRow = {
 }
 
 export async function GET(req: NextRequest) {
-  // Simple bearer auth so only the scheduler can call this
-  const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.FACEBOOK_SYNC_SECRET!}`) {
-    return new NextResponse('Unauthorized', { status: 401 })
+  const isVercelCron = req.headers.get('x-vercel-cron') === '1'
+
+  // allow if it's the Vercel scheduled call
+  if (!isVercelCron) {
+    // otherwise require our bearer secret for manual runs
+    const auth = req.headers.get('authorization')
+    if (auth !== `Bearer ${process.env.FACEBOOK_SYNC_SECRET!}`) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
   }
 
   const supabase = await createAdmin()
