@@ -14,16 +14,25 @@ type InsightsRow = {
   last_synced_at: string
 }
 
-export async function GET(req: NextRequest) {
-  const isVercelCron = req.headers.get('x-vercel-cron') === '1'
+function isAuthorizedCron(req: NextRequest) {
+  const auth = req.headers.get('authorization')
+  const ua = req.headers.get('user-agent') || ''
 
-  // allow if it's the Vercel scheduled call
-  if (!isVercelCron) {
-    // otherwise require our bearer secret for manual runs
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${process.env.FACEBOOK_SYNC_SECRET!}`) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
+  // 1) Official Vercel way (set CRON_SECRET in Vercel env)
+  if (auth === `Bearer ${process.env.CRON_SECRET}`) return true
+
+  // 2) Your manual secret (optional)
+  if (auth === `Bearer ${process.env.FACEBOOK_SYNC_SECRET}`) return true
+
+  // 3) Soft fallback: identify Vercel cron by UA if you prefer
+  if (ua.includes('vercel-cron/1.0')) return true
+
+  return false
+}
+
+export async function GET(req: NextRequest) {
+  if (!isAuthorizedCron(req)) {
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   const supabase = await createAdmin()
