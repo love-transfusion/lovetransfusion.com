@@ -9,18 +9,37 @@ import {
 
 function verifySignature(req: NextRequest, rawBody: string) {
   const secret = process.env.META_APP_SECRET!
-  if (!secret) return process.env.NODE_ENV !== 'production'
+  if (!secret) {
+    // In prod this will cause 401; log loudly so you notice.
+    console.error(
+      'WEBHOOK: APP_SECRET missing in env (env_FACEBOOK_META_APP_SECRET)'
+    )
+    return process.env.NODE_ENV !== 'production'
+  }
 
   const header = req.headers.get('x-hub-signature-256')
-  if (!header?.startsWith('sha256=')) return false
+  if (!header?.startsWith('sha256=')) {
+    console.error('WEBHOOK: missing/invalid x-hub-signature-256 header')
+    return false
+  }
 
-  const their = Buffer.from(header.slice(7), 'hex')
-  const ours = crypto
-    .createHmac('sha256', secret)
-    .update(rawBody, 'utf8')
-    .digest()
-  if (their.length !== ours.length) return false
-  return crypto.timingSafeEqual(their, ours)
+  try {
+    const their = Buffer.from(header.slice(7), 'hex')
+    const ours = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody, 'utf8')
+      .digest()
+    if (their.length !== ours.length) {
+      console.error('WEBHOOK: HMAC length mismatch')
+      return false
+    }
+    const ok = crypto.timingSafeEqual(their, ours)
+    if (!ok) console.error('WEBHOOK: timingSafeEqual failed (bad signature)')
+    return ok
+  } catch (e) {
+    console.error('WEBHOOK: signature verification threw', e)
+    return false
+  }
 }
 
 // GET = Verification
@@ -48,9 +67,13 @@ export async function POST(req: NextRequest) {
 
   try {
     if (!verifySignature(req, raw)) {
+      console.error('WEBHOOK: signature check failed', {
+        hasHeader: !!req.headers.get('x-hub-signature-256'),
+        envHasSecret: !!process.env.env_FACEBOOK_META_APP_SECRET,
+        nodeEnv: process.env.NODE_ENV,
+      })
       return new NextResponse('Invalid signature', { status: 401 })
     }
-
     const body = JSON.parse(raw)
 
     // ✅ Log the raw webhook event for auditing/debugging
