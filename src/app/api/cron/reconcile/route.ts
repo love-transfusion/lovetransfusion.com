@@ -9,16 +9,15 @@ type Admin = Awaited<ReturnType<typeof createAdmin>>
 
 export const runtime = 'nodejs'
 
-export async function GET(req: NextRequest) {
-  const isVercelCron = req.headers.get('x-vercel-cron') === '1'
+const isAuthorizedCron = (req: NextRequest) => {
+  const auth = req.headers.get('authorization')
+  if (auth === `Bearer ${process.env.CRON_SECRET}`) return true
+  return false
+}
 
-  // allow if it's the Vercel scheduled call
-  if (!isVercelCron) {
-    // otherwise require our bearer secret for manual runs
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${process.env.FACEBOOK_SYNC_SECRET!}`) {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
+export async function GET(req: NextRequest) {
+  if (!isAuthorizedCron(req)) {
+    return new NextResponse('Unauthorized', { status: 401 })
   }
 
   const supabase = await createAdmin()
