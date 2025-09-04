@@ -44,6 +44,22 @@ declare global {
     DB['public']['Tables']['users_data_facebook']['Update']
   type I_supa_users_data_facebook_row =
     DB['public']['Tables']['users_data_facebook']['Row']
+    
+  // facebook_comments table
+  type I_supa_facebook_comments_insert =
+    DB['public']['Tables']['facebook_comments']['Insert']
+  type I_supa_facebook_comments_update =
+    DB['public']['Tables']['facebook_comments']['Update']
+  type I_supa_facebook_comments_row =
+    DB['public']['Tables']['facebook_comments']['Row']
+
+  // facebook_posts table
+  type I_supa_facebook_posts_insert =
+    DB['public']['Tables']['facebook_posts']['Insert']
+  type I_supa_facebook_posts_update =
+    DB['public']['Tables']['facebook_posts']['Update']
+  type I_supa_facebook_posts_row =
+    DB['public']['Tables']['facebook_posts']['Row']
 
   // profile_pictures table
   type I_supa_profile_pictures_insert =

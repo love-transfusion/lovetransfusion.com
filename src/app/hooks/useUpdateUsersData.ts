@@ -12,7 +12,7 @@ import { util_multiple_fetchAdWiseInsights } from '../utilities/facebook/util_fa
 import { useStore } from 'zustand'
 import utilityStore from '../utilities/store/utilityStore'
 import { Json } from '@/types/database.types'
-import { facebookPageID } from '../lib/facebookPageID'
+import { env_FACEBOOK_PAGE_ID } from '../lib/facebook/constants'
 
 interface I_useUpdateUsersData_Types {
   selectedUser: I_supa_select_user_Response_Types
@@ -31,7 +31,7 @@ const getFBCommentsAndShareCount = async (
   ] = await Promise.all([
     util_getFBPostID({ adId: adIDs[0] }),
     util_getFBPageAccessToken({
-      pageId: facebookPageID,
+      pageId: env_FACEBOOK_PAGE_ID,
     }),
     util_multiple_fetchAdWiseInsights(adIDs),
   ])

@@ -14,6 +14,132 @@ export type Database = {
   }
   public: {
     Tables: {
+      facebook_comments: {
+        Row: {
+          comment_count: number | null
+          comment_id: string
+          created_time: string
+          from_id: string | null
+          from_name: string | null
+          from_picture_url: string | null
+          is_deleted: boolean | null
+          is_hidden: boolean | null
+          like_count: number | null
+          message: string | null
+          parent_id: string | null
+          permalink_url: string | null
+          post_id: string
+          raw: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          comment_count?: number | null
+          comment_id: string
+          created_time: string
+          from_id?: string | null
+          from_name?: string | null
+          from_picture_url?: string | null
+          is_deleted?: boolean | null
+          is_hidden?: boolean | null
+          like_count?: number | null
+          message?: string | null
+          parent_id?: string | null
+          permalink_url?: string | null
+          post_id: string
+          raw?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          comment_count?: number | null
+          comment_id?: string
+          created_time?: string
+          from_id?: string | null
+          from_name?: string | null
+          from_picture_url?: string | null
+          is_deleted?: boolean | null
+          is_hidden?: boolean | null
+          like_count?: number | null
+          message?: string | null
+          parent_id?: string | null
+          permalink_url?: string | null
+          post_id?: string
+          raw?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "facebook_posts"
+            referencedColumns: ["post_id"]
+          },
+        ]
+      }
+      facebook_pages: {
+        Row: {
+          created_at: string | null
+          page_id: string
+          page_name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          page_id: string
+          page_name?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          page_id?: string
+          page_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_pages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facebook_posts: {
+        Row: {
+          ad_id: string | null
+          created_at: string | null
+          last_synced_at: string | null
+          page_id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          ad_id?: string | null
+          created_at?: string | null
+          last_synced_at?: string | null
+          page_id: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          ad_id?: string | null
+          created_at?: string | null
+          last_synced_at?: string | null
+          page_id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_pictures: {
         Row: {
           blur_data_url: string | null

@@ -6,7 +6,7 @@ export async function util_getFBPageAccessToken(options: {
   pageId: string
   systemToken?: string
 }) {
-  const token = options.systemToken ?? process.env.FACEBOOK_SYSTEM_TOKEN!
+  const token = options.systemToken ?? process.env.env_FACEBOOK_SYSTEM_TOKEN!
 
   try {
     const { data } = await axios.get(

@@ -29,7 +29,7 @@ import { Json } from '@/types/database.types'
 import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
 import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
 import Pagination from '@/app/components/Pagination'
-import { facebookPageID } from '@/app/lib/facebookPageID'
+import { env_FACEBOOK_PAGE_ID } from '@/app/lib/facebook/constants'
 
 interface I_users_list_Types {
   recipientObj: I_supa_users_data_website_row
@@ -106,7 +106,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
             adId: item.fb_ad_IDs[0],
           }),
           util_getFBPageAccessToken({
-            pageId: facebookPageID,
+            pageId: env_FACEBOOK_PAGE_ID,
           }),
           util_multiple_fetchAdWiseInsights(item.fb_ad_IDs),
         ])
