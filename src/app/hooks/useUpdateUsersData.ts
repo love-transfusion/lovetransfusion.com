@@ -8,7 +8,7 @@ import { util_getFBPageAccessToken } from '../utilities/facebook/util_getFBPageA
 import { supa_upsert_users_data_facebook } from '../_actions/users_data_facebook/actions'
 import { util_fetchFBAdShareCount } from '../utilities/facebook/util_fetchFBAdShareCount'
 import { supa_admin_upsert_list_of_recipients } from '../_actions/admin/actions'
-import { util_multiple_fetchAdWiseInsights } from '../utilities/facebook/util_facebookApi'
+import { util_multiple_fetchAdWiseInsights } from '../utilities/facebook/util_fb_insights'
 import { useStore } from 'zustand'
 import utilityStore from '../utilities/store/utilityStore'
 import { Json } from '@/types/database.types'

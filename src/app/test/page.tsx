@@ -1,15 +1,15 @@
 import React from 'react'
 import { seedPostFromAd } from '../_actions/facebook_posts/actions/seedPostFromAd'
 import { env_FACEBOOK_PAGE_ID } from '../lib/facebook/constants'
-import { createAdmin } from '../config/supabase/supabaseAdmin'
+import { createServer } from '../config/supabase/supabaseServer'
 
 const TestPage = async () => {
   await seedPostFromAd(
-    '120225320012640267',
+    '120225319914750267',
     env_FACEBOOK_PAGE_ID,
-    'b03c0074-e175-47f7-b523-772755338ddd'
+    'cebb19de-a9c3-4142-81fb-624316fc6b59'
   )
-  const supabase = await createAdmin()
+  const supabase = await createServer()
   const { data } = await supabase
     .from('users')
     .select('*, facebook_posts(*, facebook_comments(*))')

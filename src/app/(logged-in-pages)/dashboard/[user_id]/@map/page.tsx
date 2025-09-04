@@ -3,7 +3,7 @@ import MapChart from './MapChart'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import MapTooltip from './MapTooltip'
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
-import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_facebookApi'
+import { util_multiple_fetchAdWiseInsights } from '@/app/utilities/facebook/util_fb_insights'
 import getAnalyticsCountryPathTotal from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 
 type Params = Promise<{ user_id: string }>

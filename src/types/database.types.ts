@@ -140,6 +140,24 @@ export type Database = {
           },
         ]
       }
+      facebook_webhook_logs: {
+        Row: {
+          created_at: string | null
+          event: Json
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event: Json
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          event?: Json
+          id?: string
+        }
+        Relationships: []
+      }
       profile_pictures: {
         Row: {
           blur_data_url: string | null

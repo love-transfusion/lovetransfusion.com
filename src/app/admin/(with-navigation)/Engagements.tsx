@@ -1,6 +1,6 @@
 'use client'
 import { getNetworkCount } from '@/app/(logged-in-pages)/dashboard/[user_id]/getNetworkCounts'
-import { AdInsight } from '@/app/utilities/facebook/util_facebookApi'
+import { AdInsight } from '@/app/utilities/facebook/util_fb_insights'
 import React from 'react'
 
 interface I_Engagements_Types {

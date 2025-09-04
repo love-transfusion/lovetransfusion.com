@@ -9,7 +9,7 @@ import {
 } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
 import { I_CountryPathTotalFormat } from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import MapControls from './MapControls'
 
 interface Props {

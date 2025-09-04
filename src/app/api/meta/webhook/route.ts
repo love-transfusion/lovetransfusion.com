@@ -53,6 +53,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = JSON.parse(raw)
+
+    // ✅ Log the raw webhook event for auditing/debugging
+    await supabase.from('facebook_webhook_logs').insert({
+      event: body,
+    })
+
     if (body?.object !== 'page')
       return new NextResponse('Ignored', { status: 200 })
 

@@ -6,7 +6,7 @@ import messages from './images/MESSAGES.png'
 import shares from './images/SHARES.png'
 import ripple from './images/ripple.png'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_facebookApi'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { getNetworkCount } from './getNetworkCounts'
 import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 

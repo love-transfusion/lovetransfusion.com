@@ -14,7 +14,7 @@ import DeleteUser from './DeleteUser'
 import {
   AdWiseInsight,
   util_multiple_fetchAdWiseInsights,
-} from '@/app/utilities/facebook/util_facebookApi'
+} from '@/app/utilities/facebook/util_fb_insights'
 // import DeleteUsersDataWebsite from './DeleteUsersDataWebsite'
 import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
 import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
