@@ -2,7 +2,7 @@
 import {
   env_FACEBOOK_GRAPH_VERSION,
   env_FACEBOOK_SYSTEM_TOKEN,
-} from '@/app/lib/facebook/constants'
+} from '@/app/lib/_env_constants/constants.client'
 import axios from 'axios'
 
 export async function util_fb_postID(opts: {

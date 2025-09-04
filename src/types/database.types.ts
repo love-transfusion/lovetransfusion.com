@@ -76,6 +76,38 @@ export type Database = {
           },
         ]
       }
+      facebook_insights: {
+        Row: {
+          ad_id: string
+          created_at: string
+          insights: Json
+          last_synced_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          created_at?: string
+          insights?: Json
+          last_synced_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          created_at?: string
+          insights?: Json
+          last_synced_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_insights_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facebook_pages: {
         Row: {
           created_at: string | null

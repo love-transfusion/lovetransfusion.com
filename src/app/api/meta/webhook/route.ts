@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import {
   env_FACEBOOK_META_APP_SECRET,
   env_FACEBOOK_META_VERIFY_TOKEN,
-} from '@/app/lib/facebook/constants'
+} from '@/app/lib/_env_constants/constants.client'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import {
   markCommentDeleted,

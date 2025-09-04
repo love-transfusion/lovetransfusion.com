@@ -9,12 +9,12 @@ import WelcomeMessage from './WelcomeMessage'
 import { filter_comments } from './actions'
 import MessagesSection from './MessagesSection'
 import { supa_select_user } from '@/app/_actions/users/actions'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import ErrorMessage from './ErrorMessage'
 import MostRecentEngagements from './MostRecentEngagements'
 import MostRecentEngagementContainer from './MostRecentEngagementContainer'
 import { Metadata } from 'next'
 import { I_Comments } from '@/types/Comments.types'
+import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 
 type Params = Promise<{ user_id: string }>
 

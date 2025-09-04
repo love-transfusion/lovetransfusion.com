@@ -12,7 +12,7 @@ import { util_multiple_fetchAdWiseInsights } from '../utilities/facebook/util_fb
 import { useStore } from 'zustand'
 import utilityStore from '../utilities/store/utilityStore'
 import { Json } from '@/types/database.types'
-import { env_FACEBOOK_PAGE_ID } from '../lib/facebook/constants'
+import { env_FACEBOOK_PAGE_ID } from '../lib/_env_constants/constants.client'
 
 interface I_useUpdateUsersData_Types {
   selectedUser: I_supa_select_user_Response_Types
@@ -35,6 +35,7 @@ const getFBCommentsAndShareCount = async (
     }),
     util_multiple_fetchAdWiseInsights(adIDs),
   ])
+  console.log({ insightsError, postIDError, pageAccessTokenError })
   if (insightsError || postIDError || pageAccessTokenError)
     setfbError(insightsError || postIDError || pageAccessTokenError)
 
@@ -93,6 +94,7 @@ const useUpdateUsersData = ({ selectedUser }: I_useUpdateUsersData_Types) => {
 
     // wrap the setter so child funcs can't update after unmount
     const safeSetFbError = (msg: string | null) => {
+      console.log({ msg })
       if (isActive) setfbError(msg)
     }
 

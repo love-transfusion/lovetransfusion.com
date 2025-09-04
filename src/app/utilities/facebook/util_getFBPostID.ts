@@ -1,12 +1,13 @@
 'use server'
 
+import { env_FACEBOOK_SYSTEM_TOKEN } from '@/app/lib/_env_constants/constants.server'
 import axios from 'axios'
 
 export async function util_getFBPostID(options: {
   adId: string
   systemToken?: string
 }) {
-  const token = options.systemToken ?? process.env.env_FACEBOOK_SYSTEM_TOKEN!
+  const token = options.systemToken ?? env_FACEBOOK_SYSTEM_TOKEN
 
   try {
     const { data } = await axios.get(

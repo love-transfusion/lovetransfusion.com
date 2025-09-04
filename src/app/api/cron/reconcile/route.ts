@@ -6,7 +6,7 @@ import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
 import {
   env_FACEBOOK_IDENTITY_ENABLED,
   env_FACEBOOK_SYNC_SECRET,
-} from '@/app/lib/facebook/constants'
+} from '@/app/lib/_env_constants/constants.client'
 import pLimit from 'p-limit'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>

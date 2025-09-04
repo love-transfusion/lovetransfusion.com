@@ -2,7 +2,7 @@
 import {
   env_FACEBOOK_GRAPH_VERSION,
   env_FACEBOOK_IDENTITY_ENABLED,
-} from '@/app/lib/facebook/constants'
+} from '@/app/lib/_env_constants/constants.client'
 import axios from 'axios'
 
 export type Order = 'chronological' | 'reverse_chronological'

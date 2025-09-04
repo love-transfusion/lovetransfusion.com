@@ -1,6 +1,6 @@
 import React from 'react'
 import { seedPostFromAd } from '../_actions/facebook_posts/actions/seedPostFromAd'
-import { env_FACEBOOK_PAGE_ID } from '../lib/facebook/constants'
+import { env_FACEBOOK_PAGE_ID } from '../lib/_env_constants/constants.client'
 import { createServer } from '../config/supabase/supabaseServer'
 
 const TestPage = async () => {
