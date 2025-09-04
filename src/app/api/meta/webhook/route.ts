@@ -34,7 +34,10 @@ function verifySignature(req: NextRequest, rawBody: string) {
       return false
     }
     const ok = crypto.timingSafeEqual(their, ours)
-    if (!ok) console.error('WEBHOOK: timingSafeEqual failed (bad signature)')
+    if (!ok)
+      console.error(
+        `WEBHOOK: timingSafeEqual failed (bad signature), header is: ${header}, their is: ${their}, ours: ${ours} secret is: ${secret}`
+      )
     return ok
   } catch (e) {
     console.error('WEBHOOK: signature verification threw', e)
