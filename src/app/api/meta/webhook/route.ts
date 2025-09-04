@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import {
-  env_FACEBOOK_META_APP_SECRET,
-  env_FACEBOOK_META_VERIFY_TOKEN,
-} from '@/app/lib/_env_constants/constants.client'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import {
   markCommentDeleted,
@@ -12,7 +8,7 @@ import {
 } from '@/app/utilities/facebook/new/helpers/webhookWrites'
 
 function verifySignature(req: NextRequest, rawBody: string) {
-  const secret = env_FACEBOOK_META_APP_SECRET
+  const secret = process.env.META_APP_SECRET!
   if (!secret) return process.env.NODE_ENV !== 'production'
 
   const header = req.headers.get('x-hub-signature-256')
@@ -34,7 +30,10 @@ export async function GET(req: NextRequest) {
   const token = url.searchParams.get('hub.verify_token')
   const challenge = url.searchParams.get('hub.challenge')
 
-  if (mode === 'subscribe' && token === env_FACEBOOK_META_VERIFY_TOKEN) {
+  if (
+    mode === 'subscribe' &&
+    token === process.env.META_WEBHOOK_VERIFY_TOKEN!
+  ) {
     return new NextResponse(challenge ?? '', { status: 200 })
   }
   return new NextResponse('Forbidden', { status: 403 })

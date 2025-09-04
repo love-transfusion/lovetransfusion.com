@@ -1,12 +1,11 @@
 import React from 'react'
 import { seedPostFromAd } from '../_actions/facebook_posts/actions/seedPostFromAd'
-import { env_FACEBOOK_PAGE_ID } from '../lib/_env_constants/constants.client'
 import { createServer } from '../config/supabase/supabaseServer'
 
 const TestPage = async () => {
   await seedPostFromAd(
     '120225319914750267',
-    env_FACEBOOK_PAGE_ID,
+    process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
     'cebb19de-a9c3-4142-81fb-624316fc6b59'
   )
   const supabase = await createServer()

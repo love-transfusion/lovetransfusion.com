@@ -1,8 +1,4 @@
 'use server'
-import {
-  env_FACEBOOK_GRAPH_VERSION,
-  env_FACEBOOK_IDENTITY_ENABLED,
-} from '@/app/lib/_env_constants/constants.client'
 import axios from 'axios'
 
 export type Order = 'chronological' | 'reverse_chronological'
@@ -28,6 +24,8 @@ export async function util_fb_comments(options: {
   order?: Order
   identityEnabled?: boolean
 }) {
+  const NEXT_PUBLIC_IDENTITY_ENABLED =
+    (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
   const {
     postId,
     pageAccessToken,
@@ -36,7 +34,7 @@ export async function util_fb_comments(options: {
     since,
     until,
     order = 'chronological',
-    identityEnabled = env_FACEBOOK_IDENTITY_ENABLED, // default from env
+    identityEnabled = NEXT_PUBLIC_IDENTITY_ENABLED, // default from env
   } = options
 
   const fields = [
@@ -58,7 +56,7 @@ export async function util_fb_comments(options: {
   }
 
   const { data } = await axios.get(
-    `https://graph.facebook.com/${env_FACEBOOK_GRAPH_VERSION}/${postId}/comments`,
+    `https://graph.facebook.com/${process.env.NEXT_PUBLIC_GRAPH_VERSION!}/${postId}/comments`,
     { params }
   )
 

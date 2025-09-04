@@ -3,10 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
-import {
-  env_FACEBOOK_IDENTITY_ENABLED,
-  env_FACEBOOK_SYNC_SECRET,
-} from '@/app/lib/_env_constants/constants.client'
 import pLimit from 'p-limit'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
@@ -20,7 +16,7 @@ export async function GET(req: NextRequest) {
   if (!isVercelCron) {
     // otherwise require our bearer secret for manual runs
     const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${env_FACEBOOK_SYNC_SECRET}`) {
+    if (auth !== `Bearer ${process.env.FACEBOOK_SYNC_SECRET!}`) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
   }
@@ -60,12 +56,15 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
 
   let after: string | undefined
 
+  const NEXT_PUBLIC_IDENTITY_ENABLED =
+    (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
+
   do {
     const { data, paging, error } = await util_fb_comments({
       postId: post.post_id,
       pageAccessToken: pageToken,
       order: 'chronological',
-      identityEnabled: env_FACEBOOK_IDENTITY_ENABLED, // pre-BAUPA
+      identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED, // pre-BAUPA
       ...(since ? { since } : {}),
       ...(after ? { after } : {}),
     })

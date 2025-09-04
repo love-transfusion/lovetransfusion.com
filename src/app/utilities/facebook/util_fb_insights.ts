@@ -1,5 +1,4 @@
 'use server'
-import { env_FACEBOOK_SYSTEM_TOKEN } from '@/app/lib/_env_constants/constants.server'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import fuzzysort from 'fuzzysort'
@@ -480,7 +479,7 @@ export const util_fetchAdWiseInsights = async ({
 }> => {
   const apiVersion = 'v22.0'
   const datePreset = 'maximum'
-  const token = env_FACEBOOK_SYSTEM_TOKEN
+  const token = process.env.FACEBOOK_SYSTEM_TOKEN!
   try {
     const formattedAccountId = accountId ? formatAccountId(accountId) : ad_id
     // 1. Fetch geo breakdown (country,region) - fetch all pages

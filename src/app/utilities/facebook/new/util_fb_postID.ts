@@ -1,18 +1,14 @@
 'use server'
-import {
-  env_FACEBOOK_GRAPH_VERSION,
-  env_FACEBOOK_SYSTEM_TOKEN,
-} from '@/app/lib/_env_constants/constants.client'
 import axios from 'axios'
 
 export async function util_fb_postID(opts: {
   adId: string
   systemToken?: string
 }) {
-  const token = env_FACEBOOK_SYSTEM_TOKEN
+  const token = process.env.FACEBOOK_SYSTEM_TOKEN!
   try {
     const { data } = await axios.get(
-      `https://graph.facebook.com/${env_FACEBOOK_GRAPH_VERSION}/${opts.adId}`,
+      `https://graph.facebook.com/${process.env.NEXT_PUBLIC_GRAPH_VERSION!}/${opts.adId}`,
       {
         params: {
           access_token: token,
