@@ -11,6 +11,8 @@ import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_pr
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 
 export const runtime = 'nodejs'
+// ✅ ADDED: allow longer execution time (adjust if your plan supports more)
+export const maxDuration = 60
 
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
@@ -25,10 +27,14 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createAdmin()
 
-  // 1) Load all tracked posts
+  // ✅ CHANGED: Load a small batch of oldest/unsynced posts
+  const BATCH = Number(process.env.CRON_BATCH_SIZE ?? 5)
   const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
     .select('*')
+    .order('last_synced_at', { ascending: true, nullsFirst: true })
+    .limit(BATCH)
+
   if (postsErr)
     return NextResponse.json(
       { ok: false, error: postsErr.message },
@@ -135,7 +141,18 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
   const NEXT_PUBLIC_IDENTITY_ENABLED =
     (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
 
+  // ✅ ADDED: time budget inside a single post reconcile
+  const deadline = Date.now() + 12_000 // ~12s budget inside a 60s function
+
   do {
+    if (Date.now() > deadline) {
+      console.warn('CRON reconcile: time budget reached, will resume next run', {
+        post_id: post.post_id,
+        page_id: post.page_id,
+      })
+      break
+    }
+
     const { data, paging, error } = await util_fb_comments({
       postId: post.post_id,
       pageAccessToken: pageToken,
