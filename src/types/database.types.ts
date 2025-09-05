@@ -144,7 +144,7 @@ export type Database = {
           last_synced_at: string | null
           page_id: string
           post_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           ad_id?: string | null
@@ -152,7 +152,7 @@ export type Database = {
           last_synced_at?: string | null
           page_id: string
           post_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           ad_id?: string | null
@@ -160,7 +160,7 @@ export type Database = {
           last_synced_at?: string | null
           page_id?: string
           post_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
