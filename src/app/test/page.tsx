@@ -1,6 +1,6 @@
 import React from 'react'
-import { seedPostFromAd } from '../_actions/facebook_posts/actions/seedPostFromAd'
 import { createServer } from '../config/supabase/supabaseServer'
+import { seedPostFromAd } from '../utilities/facebook/new/helpers/seedPostFromAd'
 
 const TestPage = async () => {
   await seedPostFromAd(

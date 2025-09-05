@@ -7,13 +7,24 @@ import {
   markCommentHidden,
 } from '@/app/utilities/facebook/new/helpers/webhookWrites'
 
+// ---- helpers you own elsewhere ----
+async function resolveOwnerUserIdForPost(
+  supabase: Awaited<ReturnType<typeof createAdmin>>,
+  postId: string
+): Promise<string | null> {
+  const { data: existing } = await supabase
+    .from('facebook_posts')
+    .select('user_id') // ← use your actual column
+    .eq('post_id', postId)
+    .maybeSingle()
+
+  return existing?.user_id ?? null
+}
+
 function verifySignature(req: NextRequest, rawBody: string) {
   const secret = process.env.META_APP_SECRET!
   if (!secret) {
-    // In prod this will cause 401; log loudly so you notice.
-    console.error(
-      'WEBHOOK: APP_SECRET missing in env (env_FACEBOOK_META_APP_SECRET)'
-    )
+    console.error('WEBHOOK: APP_SECRET missing in env (META_APP_SECRET)')
     return process.env.NODE_ENV !== 'production'
   }
 
@@ -36,7 +47,7 @@ function verifySignature(req: NextRequest, rawBody: string) {
     const ok = crypto.timingSafeEqual(their, ours)
     if (!ok)
       console.error(
-        `WEBHOOK: timingSafeEqual failed (bad signature), header is: ${header}, their is: ${their}, ours: ${ours} secret is: ${secret}`
+        `WEBHOOK: timingSafeEqual failed (bad signature), header is: ${header}`
       )
     return ok
   } catch (e) {
@@ -62,8 +73,6 @@ export async function GET(req: NextRequest) {
 }
 
 // POST = Events
-// ... keep your imports, verifySignature, GET the same
-
 export async function POST(req: NextRequest) {
   const raw = await req.text()
   const supabase = await createAdmin()
@@ -72,17 +81,15 @@ export async function POST(req: NextRequest) {
     if (!verifySignature(req, raw)) {
       console.error('WEBHOOK: signature check failed', {
         hasHeader: !!req.headers.get('x-hub-signature-256'),
-        envHasSecret: !!process.env.env_FACEBOOK_META_APP_SECRET,
+        envHasSecret: !!process.env.META_APP_SECRET, // ← correct var
         nodeEnv: process.env.NODE_ENV,
       })
       return new NextResponse('Invalid signature', { status: 401 })
     }
     const body = JSON.parse(raw)
 
-    // ✅ Log the raw webhook event for auditing/debugging
-    await supabase.from('facebook_webhook_logs').insert({
-      event: body,
-    })
+    // Audit log
+    await supabase.from('facebook_webhook_logs').insert({ event: body })
 
     if (body?.object !== 'page')
       return new NextResponse('Ignored', { status: 200 })
@@ -118,10 +125,10 @@ export async function POST(req: NextRequest) {
       )
     )
 
-    // page -> user mapping
+    // page -> connected_by_user_id mapping (for RLS/audit if needed)
     const { data: pageRows, error: pageErr } = await supabase
       .from('facebook_pages')
-      .select('page_id, user_id')
+      .select('page_id, connected_by_user_id') // fixed columns
       .in('page_id', pageIds)
 
     if (pageErr) {
@@ -129,16 +136,15 @@ export async function POST(req: NextRequest) {
       return new NextResponse('DB mapping error', { status: 500 })
     }
 
-    const pageToUser = new Map<string, string>()
-    for (const r of pageRows ?? []) pageToUser.set(r.page_id, r.user_id)
+    const pageToConnector = new Map<string, string>()
+    for (const r of pageRows ?? [])
+      pageToConnector.set(r.page_id, r.connected_by_user_id)
 
-    // Collect adds/edits, immediately apply remove/hide
+    // Collect adds/edits; apply remove/hide immediately
     for (const entry of entries) {
-      const user_id = pageToUser.get(entry.id) ?? null
-      if (!user_id) {
-        console.warn(
-          `webhook: no user mapping for page_id=${entry.id}, skipping`
-        )
+      const page_id: string = entry.id
+      if (!pageToConnector.has(page_id)) {
+        console.warn(`webhook: no page row for page_id=${page_id}, skipping`)
         continue
       }
 
@@ -165,17 +171,24 @@ export async function POST(req: NextRequest) {
           raw: v ?? {},
         }
 
-        // Upsert the post only once per post_id within this request
+        // Ensure the post exists/updated once per request
         if (!touchedPosts.has(base.post_id)) {
+          const ownerUserId = await resolveOwnerUserIdForPost(
+            supabase,
+            base.post_id
+          )
+
           await supabase.from('facebook_posts').upsert(
             {
               post_id: base.post_id,
-              page_id: entry.id,
-              user_id,
+              page_id, // entry.id
+              ad_id: null, // or inferred if you have it
+              user_id: ownerUserId, // ← stays your current column name
               last_synced_at: new Date().toISOString(),
-            },
+            } as any,
             { onConflict: 'post_id' }
           )
+
           touchedPosts.add(base.post_id)
         }
 
@@ -188,7 +201,6 @@ export async function POST(req: NextRequest) {
           })
           continue
         }
-
         if (v.verb === 'hide') {
           await markCommentHidden(supabase, {
             comment_id: base.comment_id,
@@ -198,7 +210,7 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        // add/edited → batch for one upsert
+        // add/edited → batch
         batchedRows.push({
           ...base,
           is_hidden: false,
@@ -208,7 +220,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Do one (or a few) bulk upserts for all adds/edits
+    // Bulk upsert comments
     if (batchedRows.length > 0) {
       const CHUNK = 500
       for (let i = 0; i < batchedRows.length; i += CHUNK) {
@@ -216,11 +228,7 @@ export async function POST(req: NextRequest) {
         const { error: upErr } = await supabase
           .from('facebook_comments')
           .upsert(chunk as any, { onConflict: 'comment_id' } as any)
-
-        if (upErr) {
-          console.error('batch upsert error:', upErr.message)
-          // you can choose to continue or fail here; continuing is often nicer for webhooks
-        }
+        if (upErr) console.error('batch upsert error:', upErr.message)
       }
     }
 

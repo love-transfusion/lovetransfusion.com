@@ -110,27 +110,27 @@ export type Database = {
       }
       facebook_pages: {
         Row: {
+          connected_by_user_id: string
           created_at: string | null
           page_id: string
           page_name: string | null
-          user_id: string
         }
         Insert: {
+          connected_by_user_id: string
           created_at?: string | null
           page_id: string
           page_name?: string | null
-          user_id: string
         }
         Update: {
+          connected_by_user_id?: string
           created_at?: string | null
           page_id?: string
           page_name?: string | null
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "facebook_pages_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "facebook_pages_connected_by_user_id_fkey"
+            columns: ["connected_by_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -163,6 +163,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "facebook_posts_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "facebook_pages"
+            referencedColumns: ["page_id"]
+          },
           {
             foreignKeyName: "facebook_posts_user_id_fkey"
             columns: ["user_id"]
