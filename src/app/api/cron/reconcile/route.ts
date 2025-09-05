@@ -4,6 +4,7 @@ import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
 import pLimit from 'p-limit'
+import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 
@@ -70,23 +71,55 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
     if (error) break
 
     if (data?.length) {
-      const rows: I_supa_facebook_comments_insert[] = data.map((c) => ({
-        comment_id: c.id,
-        post_id: post.post_id,
-        parent_id: c.parent?.id ?? null,
-        message: c.message ?? null,
-        from_id: c.from?.id ?? null,
-        from_name: c.from?.name ?? null,
-        from_picture_url: (c as any)?.from?.picture?.data?.url ?? null,
-        created_time: c.created_time, // already ISO
-        like_count: c.like_count ?? null,
-        comment_count: c.comment_count ?? null,
-        permalink_url: c.permalink_url ?? null,
-        is_hidden: false,
-        is_deleted: false,
-        raw: c as any,
-        updated_at: new Date().toISOString(),
-      }))
+      // ✅ ADDED: fetch avatars for commenters in this batch using PAGE TOKEN
+      let avatarMap: Record<
+        string,
+        { url: string | null; isSilhouette: boolean | null }
+      > = {}
+      try {
+        const fromIds = Array.from(
+          new Set(data.map((c) => c.from?.id).filter((x): x is string => !!x))
+        )
+        if (fromIds.length) {
+          avatarMap = await util_fb_profile_picture({
+            clIDs: fromIds,
+            clAccessToken: pageToken, // <-- Page Access Token
+          })
+        }
+      } catch (e: any) {
+        console.error('CRON reconcile: avatar enrichment failed', {
+          post_id: post.post_id,
+          page_id: post.page_id,
+          message: e?.message,
+        })
+      }
+
+      const rows: I_supa_facebook_comments_insert[] = data.map((c) => {
+        const apiPic = (c as any)?.from?.picture?.data?.url ?? null // if util_fb_comments included picture
+        const fallbackPic =
+          c.from?.id && avatarMap[c.from.id]?.url
+            ? avatarMap[c.from.id]!.url
+            : null
+
+        return {
+          comment_id: c.id,
+          post_id: post.post_id,
+          parent_id: c.parent?.id ?? null,
+          message: c.message ?? null,
+          from_id: c.from?.id ?? null,
+          from_name: c.from?.name ?? null,
+          // ✅ ADDED: prefer API picture if present, otherwise use fetched avatar
+          from_picture_url: apiPic ?? fallbackPic,
+          created_time: c.created_time, // already ISO
+          like_count: c.like_count ?? null,
+          comment_count: c.comment_count ?? null,
+          permalink_url: c.permalink_url ?? null,
+          is_hidden: false,
+          is_deleted: false,
+          raw: c as any,
+          updated_at: new Date().toISOString(),
+        }
+      })
 
       // Bulk upsert in chunks
       const chunkSize = 500

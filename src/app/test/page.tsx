@@ -1,19 +1,25 @@
 import React from 'react'
-import { createServer } from '../config/supabase/supabaseServer'
-import { seedPostFromAd } from '../utilities/facebook/new/helpers/seedPostFromAd'
+import { util_fb_postID } from '../utilities/facebook/new/util_fb_postID'
+import { util_fb_profile_picture } from '../utilities/facebook/new/util_fb_profile_picture'
+import { util_fb_pageToken } from '../utilities/facebook/new/util_fb_pageToken'
 
 const TestPage = async () => {
-  await seedPostFromAd(
-    '120225319914750267',
-    process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-    'cebb19de-a9c3-4142-81fb-624316fc6b59'
+  const { data: postID } = await util_fb_postID({ adId: '120230772034920267' })
+
+  const { data: pageAccessToken } = await util_fb_pageToken({
+    pageId: '107794902571685',
+  })
+  const profile = await util_fb_profile_picture({
+    clIDs: ['9879847132046047'],
+    clAccessToken: pageAccessToken!,
+    clImageDimensions: 64,
+  })
+  return (
+    <>
+      <pre>{JSON.stringify(postID, null, 2)}</pre>
+      <pre>{JSON.stringify(profile, null, 2)}</pre>
+    </>
   )
-  const supabase = await createServer()
-  const { data } = await supabase
-    .from('users')
-    .select('*, facebook_posts(*, facebook_comments(*))')
-  console.log({ data })
-  return <pre>{JSON.stringify(data, null, 2)}</pre>
 }
 
 export default TestPage

@@ -7,6 +7,10 @@ import {
   markCommentHidden,
 } from '@/app/utilities/facebook/new/helpers/webhookWrites'
 
+// ✅ ADDED: use your profile-picture util
+import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
+import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
+
 // Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'
 
@@ -161,6 +165,10 @@ export async function POST(req: NextRequest) {
       updated_at: string
     }> = []
 
+    // ✅ ADDED (local maps for avatar enrichment by page)
+    const pageToFromIds = new Map<string, Set<string>>() // page_id -> set(from_id)
+    const commentToPage = new Map<string, string>() // comment_id -> page_id
+
     const entries = Array.isArray(body?.entry) ? body.entry : []
     const pageIds: string[] = Array.from(
       new Set(
@@ -231,7 +239,7 @@ export async function POST(req: NextRequest) {
           message: (v.message as string) ?? null,
           from_id: v.from?.id ?? null,
           from_name: v.from?.name ?? null,
-          from_picture_url: null as string | null,
+          from_picture_url: null as string | null, // will be enriched below
           created_time: v.created_time
             ? new Date(v.created_time * 1000).toISOString()
             : new Date().toISOString(),
@@ -240,6 +248,14 @@ export async function POST(req: NextRequest) {
           permalink_url: (v.permalink_url as string) ?? null,
           raw: v ?? {},
         }
+
+        // Track from_ids by page for later avatar enrichment
+        if (base.from_id) {
+          if (!pageToFromIds.has(page_id)) pageToFromIds.set(page_id, new Set())
+          pageToFromIds.get(page_id)!.add(base.from_id)
+        }
+        // Map this comment to its page
+        commentToPage.set(base.comment_id, page_id)
 
         // Ensure the post exists/updated once per request
         if (!touchedPosts.has(base.post_id) && !failedPosts.has(base.post_id)) {
@@ -334,6 +350,69 @@ export async function POST(req: NextRequest) {
       touchedPosts: touchedPosts.size,
       failedPosts: failedPosts.size,
     })
+
+    // ✅ ADDED: Avatar enrichment using PAGE ACCESS TOKENS (before bulk upsert)
+    if (batchedRows.length > 0 && pageToFromIds.size > 0) {
+      try {
+        console.time('AVATAR_ENRICHMENT')
+        let totalFilled = 0
+        for (const [page_id, fromSet] of pageToFromIds.entries()) {
+          const fromIds = Array.from(fromSet)
+          if (!fromIds.length) continue
+
+          // Get a PAGE ACCESS TOKEN for this page
+          const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN!
+          let pageAccessToken: string | null = null
+          try {
+            const { data } = await util_fb_pageToken({
+              pageId: page_id,
+              systemToken,
+            })
+            pageAccessToken = data
+          } catch (e: any) {
+            console.error('WEBHOOK[POST]: util_fb_pageToken failed', {
+              page_id,
+              message: e?.message,
+            })
+            continue
+          }
+          if (!pageAccessToken) {
+            console.warn('WEBHOOK[POST]: no page access token resolved', {
+              page_id,
+            })
+            continue
+          }
+
+          // Fetch avatars for this page’s commenters
+          const avatars = await util_fb_profile_picture({
+            clIDs: fromIds,
+            clAccessToken: pageAccessToken,
+            clImageDimensions: 128, // adjust if you want larger
+          })
+
+          // Apply to rows that belong to this page
+          for (const row of batchedRows) {
+            if (!row.from_id) continue
+            const rowPage = commentToPage.get(row.comment_id)
+            if (rowPage !== page_id) continue
+            const hit = avatars[row.from_id]
+            if (hit?.url) {
+              row.from_picture_url = hit.url
+              totalFilled++
+            }
+          }
+        }
+        console.timeEnd('AVATAR_ENRICHMENT')
+        console.info('WEBHOOK[POST]: avatar enrichment done', {
+          pagesProcessed: pageToFromIds.size,
+          totalFilled,
+        })
+      } catch (e: any) {
+        console.error('WEBHOOK[POST]: avatar enrichment failed', {
+          message: e?.message,
+        })
+      }
+    }
 
     // Bulk upsert comments
     if (batchedRows.length > 0) {
