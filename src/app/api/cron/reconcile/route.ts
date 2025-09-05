@@ -116,7 +116,16 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
   const { data: pageToken, error: tokErr } = await util_fb_pageToken({
     pageId: post.page_id,
   })
-  if (!pageToken || tokErr) return false
+
+  if (!pageToken || tokErr) {
+    console.error('CRON reconcile: page token retrieval failed', {
+      post_id: post.post_id,
+      page_id: post.page_id,
+      hasToken: !!pageToken,
+      tokErr: tokErr?.message ?? tokErr,
+    })
+    return false
+  }
 
   // Use since = last_synced_at to avoid re-pulling everything every hour
   const since = post.last_synced_at ?? undefined
@@ -201,6 +210,12 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         const avatarPic = fromId ? avatarMap[fromId]?.url ?? null : null
         const fallbackPic = authorFallback[c.id]?.picture_url ?? null
 
+        const rawCreated = c.created_time as any
+        const createdISO =
+          typeof rawCreated === 'number'
+            ? new Date(rawCreated * 1000).toISOString() // unix seconds → ISO
+            : new Date(rawCreated).toISOString() // string/date → ISO
+
         return {
           comment_id: c.id,
           post_id: post.post_id,
@@ -209,7 +224,7 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
           from_id: fromId,
           from_name: fromName,
           from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
-          created_time: c.created_time, // already ISO
+          created_time: createdISO, // already ISO
           like_count: c.like_count ?? null,
           comment_count: c.comment_count ?? null,
           permalink_url: c.permalink_url ?? null,
@@ -227,7 +242,21 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         const { error: upErr } = await supabase
           .from('facebook_comments')
           .upsert(chunk as any, { onConflict: 'comment_id' } as any)
-        if (upErr) return false
+        if (upErr) {
+          console.error('CRON reconcile: comments upsert error', {
+            post_id: post.post_id,
+            page_id: post.page_id,
+            message: upErr.message,
+            code: (upErr as any).code,
+            details: (upErr as any).details,
+            hint: (upErr as any).hint,
+            sample_comment_id: chunk[0]?.comment_id,
+            sample_created_time: chunk[0]?.created_time,
+            sample_created_type: typeof chunk[0]?.created_time,
+            batchSize: chunk.length,
+          })
+          return false
+        }
       }
     }
 
@@ -239,7 +268,17 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
     .from('facebook_posts')
     .update({ last_synced_at: new Date().toISOString() })
     .eq('post_id', post.post_id)
-  if (updErr) return false
+  if (updErr) {
+    console.error('CRON reconcile: last_synced_at update failed', {
+      post_id: post.post_id,
+      page_id: post.page_id,
+      message: updErr.message,
+      code: (updErr as any).code,
+      details: (updErr as any).details,
+      hint: (updErr as any).hint,
+    })
+    return false
+  }
 
   return true
 }
