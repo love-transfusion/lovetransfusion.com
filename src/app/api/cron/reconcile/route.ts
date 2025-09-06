@@ -5,19 +5,23 @@ import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToke
 import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
 import pLimit from 'p-limit'
 
-// ✅ ADDED: avatar util
+// Avatar util (kept from your version)
 import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 
 export const runtime = 'nodejs'
-// ✅ ADDED: allow longer execution time (adjust if your plan supports more)
-export const maxDuration = 60
+// ↑ Pro plan: allow long-running cron invocations
+export const maxDuration = 300
+
+// ---- Tunables via env (all optional) ----
+const BATCH_SIZE = 10 // posts per run
+const CONCURRENCY = 5 // parallel posts
+const PER_POST_BUDGET_MS = 20000 // ~20s/post
 
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
-  if (auth === `Bearer ${process.env.CRON_SECRET}`) return true
-  return false
+  return auth === `Bearer ${process.env.CRON_SECRET}`
 }
 
 export async function GET(req: NextRequest) {
@@ -27,32 +31,51 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createAdmin()
 
-  // ✅ CHANGED: Load a small batch of oldest/unsynced posts
-  const BATCH = Number(process.env.CRON_BATCH_SIZE ?? 5)
+  // 1) Pick a small, fair batch: oldest/unsynced/nulls first.
+  //    Prefer posts that are idle/deferred/error. (Running is skipped.)
   const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
     .select('*')
+    .in('sync_status', ['idle', 'deferred', 'error'] as any)
     .order('last_synced_at', { ascending: true, nullsFirst: true })
-    .limit(BATCH)
+    .limit(BATCH_SIZE)
 
-  if (postsErr)
+  if (postsErr) {
     return NextResponse.json(
       { ok: false, error: postsErr.message },
       { status: 500 }
     )
+  }
 
-  const limit = pLimit(5) // tune: 3–10
+  const limit = pLimit(CONCURRENCY)
 
+  // 2) Mark selected posts as running (best-effort; prevents overlap if you ever scale out)
+  if (posts?.length) {
+    const ids = posts.map((p) => p.post_id)
+    await supabase
+      .from('facebook_posts')
+      .update({ sync_status: 'running', last_error: null })
+      .in('post_id', ids)
+  }
+
+  // 3) Process each selected post with a per-post time budget
   const results = await Promise.allSettled(
-    (posts ?? []).map((p) => limit(() => reconcilePost(supabase, p)))
+    (posts ?? []).map((p) =>
+      limit(() => reconcilePost(supabase, p as I_supa_facebook_posts_row))
+    )
   )
+
+  // Count successes
   const synced = results.filter(
-    (r) => r.status === 'fulfilled' && r.value
+    (r) => r.status === 'fulfilled' && r.value === true
   ).length
-  return NextResponse.json({ ok: true, total: posts?.length ?? 0, synced })
+
+  return NextResponse.json({ ok: true, picked: posts?.length ?? 0, synced })
 }
 
-// ✅ ADDED: fallback fetch for authors by comment IDs (when c.from is missing)
+// ---------- helpers ----------
+
+// Fallback author fetch by comment IDs (when c.from is missing)
 async function fetchCommentAuthorsByIds(
   commentIds: string[],
   pageAccessToken: string,
@@ -87,6 +110,7 @@ async function fetchCommentAuthorsByIds(
       `from{id,name,picture.height(${size}).width(${size}){url,is_silhouette}}`
     )
     url.searchParams.set('access_token', pageAccessToken)
+
     const res = await fetch(url.toString())
     if (!res.ok) {
       console.error('CRON reconcile: author batch fetch failed', {
@@ -118,53 +142,54 @@ async function fetchCommentAuthorsByIds(
 }
 
 async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
-  // 2) Get a fresh Page Access Token
+  const startedAt = Date.now()
+  const deadline = startedAt + PER_POST_BUDGET_MS
+
+  // 0) Resolve page token
   const { data: pageToken, error: tokErr } = await util_fb_pageToken({
     pageId: post.page_id,
   })
-
   if (!pageToken || tokErr) {
-    console.error('CRON reconcile: page token retrieval failed', {
-      post_id: post.post_id,
-      page_id: post.page_id,
-      hasToken: !!pageToken,
-      tokErr: tokErr?.message ?? tokErr,
-    })
+    await markPostError(
+      supabase,
+      post.post_id,
+      `page token retrieval failed: ${tokErr?.message ?? 'no token'}`
+    )
     return false
   }
 
-  // Use since = last_synced_at to avoid re-pulling everything every hour
+  // 1) Use resume cursor if present; else use since=last_synced_at to avoid full re-pulls
   const since = post.last_synced_at ?? undefined
-
-  let after: string | undefined
+  let after: string | undefined = post.next_cursor ?? undefined
+  let finished = false
 
   const NEXT_PUBLIC_IDENTITY_ENABLED =
     (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
 
-  // ✅ ADDED: time budget inside a single post reconcile
-  const deadline = Date.now() + 12_000 // ~12s budget inside a 60s function
-
   do {
+    // time budget guard
     if (Date.now() > deadline) {
-      console.warn('CRON reconcile: time budget reached, will resume next run', {
-        post_id: post.post_id,
-        page_id: post.page_id,
-      })
-      break
+      await deferPost(supabase, post.post_id, after)
+      return false // not finished; will resume next run
     }
 
     const { data, paging, error } = await util_fb_comments({
       postId: post.post_id,
       pageAccessToken: pageToken,
       order: 'chronological',
-      identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED, // pre-BAUPA
+      identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
       ...(since ? { since } : {}),
       ...(after ? { after } : {}),
     })
-    if (error) break
 
+    if (error) {
+      await markPostError(supabase, post.post_id, `util_fb_comments error`)
+      return false
+    }
+
+    // Enrich & upsert this page of comments
     if (data?.length) {
-      // ✅ 1) Avatar enrichment for comments that DO have from.id
+      // 1) Avatars for comments that already have from.id
       let avatarMap: Record<
         string,
         { url: string | null; isSilhouette: boolean | null }
@@ -176,8 +201,8 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         if (fromIds.length) {
           avatarMap = await util_fb_profile_picture({
             clIDs: fromIds,
-            clAccessToken: pageToken, // Page Access Token
-            clImageDimensions: 128, // bump to 256 if you want
+            clAccessToken: pageToken,
+            clImageDimensions: 128, // bump to 256 if you prefer
           })
         }
       } catch (e: any) {
@@ -188,7 +213,7 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         })
       }
 
-      // ✅ 2) Fallback author fetch for comments with MISSING c.from
+      // 2) Fallback author fetch for comments missing c.from
       let authorFallback: Record<
         string,
         {
@@ -215,14 +240,9 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
       }
 
       const rows: I_supa_facebook_comments_insert[] = data.map((c) => {
-        // Prefer values directly from util_fb_comments if they exist
         const fromId = c.from?.id ?? authorFallback[c.id]?.from_id ?? null
         const fromName = c.from?.name ?? authorFallback[c.id]?.from_name ?? null
 
-        // Picture priority:
-        // 1) picture contained in util_fb_comments (if that util includes it)
-        // 2) avatarMap (when fromId exists)
-        // 3) authorFallback picture (when c.from was missing)
         const apiPic = (c as any)?.from?.picture?.data?.url ?? null
         const avatarPic = fromId ? avatarMap[fromId]?.url ?? null : null
         const fallbackPic = authorFallback[c.id]?.picture_url ?? null
@@ -230,8 +250,8 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         const rawCreated = c.created_time as any
         const createdISO =
           typeof rawCreated === 'number'
-            ? new Date(rawCreated * 1000).toISOString() // unix seconds → ISO
-            : new Date(rawCreated).toISOString() // string/date → ISO
+            ? new Date(rawCreated * 1000).toISOString()
+            : new Date(rawCreated).toISOString()
 
         return {
           comment_id: c.id,
@@ -241,7 +261,7 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
           from_id: fromId,
           from_name: fromName,
           from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
-          created_time: createdISO, // already ISO
+          created_time: createdISO,
           like_count: c.like_count ?? null,
           comment_count: c.comment_count ?? null,
           permalink_url: c.permalink_url ?? null,
@@ -252,50 +272,100 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         }
       })
 
-      // Bulk upsert in chunks
+      // Upsert in chunks
       const chunkSize = 500
       for (let i = 0; i < rows.length; i += chunkSize) {
         const chunk = rows.slice(i, i + chunkSize)
         const { error: upErr } = await supabase
           .from('facebook_comments')
           .upsert(chunk as any, { onConflict: 'comment_id' } as any)
+
         if (upErr) {
-          console.error('CRON reconcile: comments upsert error', {
-            post_id: post.post_id,
-            page_id: post.page_id,
-            message: upErr.message,
-            code: (upErr as any).code,
-            details: (upErr as any).details,
-            hint: (upErr as any).hint,
-            sample_comment_id: chunk[0]?.comment_id,
-            sample_created_time: chunk[0]?.created_time,
-            sample_created_type: typeof chunk[0]?.created_time,
-            batchSize: chunk.length,
-          })
+          await markPostError(
+            supabase,
+            post.post_id,
+            `comments upsert error: ${upErr.message}`
+          )
           return false
         }
       }
     }
 
+    // 3) Update resume cursor after each page (so we never redo work)
     after = paging?.cursors?.after
-  } while (after)
+    await supabase
+      .from('facebook_posts')
+      .update({ next_cursor: after ?? null }) // null when finished
+      .eq('post_id', post.post_id)
 
-  // 3) Bump last_synced_at even if no new data (we still tried)
+    // loop until no 'after'
+    finished = !after
+  } while (!finished)
+
+  // 4) Finished this post: clear cursor, set idle, reset retry counter, bump last_synced_at
   const { error: updErr } = await supabase
     .from('facebook_posts')
-    .update({ last_synced_at: new Date().toISOString() })
-    .eq('post_id', post.post_id)
-  if (updErr) {
-    console.error('CRON reconcile: last_synced_at update failed', {
-      post_id: post.post_id,
-      page_id: post.page_id,
-      message: updErr.message,
-      code: (updErr as any).code,
-      details: (updErr as any).details,
-      hint: (updErr as any).hint,
+    .update({
+      next_cursor: null,
+      sync_status: 'idle',
+      retry_count: 0,
+      last_error: null,
+      last_synced_at: new Date().toISOString(),
     })
+    .eq('post_id', post.post_id)
+
+  if (updErr) {
+    await markPostError(
+      supabase,
+      post.post_id,
+      `last_synced_at update failed: ${updErr.message}`
+    )
     return false
   }
 
   return true
+}
+
+// Mark a post as deferred (time budget hit) and persist the cursor (if any)
+async function deferPost(
+  supabase: Admin,
+  post_id: string,
+  next_cursor?: string
+) {
+  await supabase
+    .from('facebook_posts')
+    .update({
+      sync_status: 'deferred',
+      next_cursor: next_cursor ?? null,
+      last_error: null,
+    })
+    .eq('post_id', post_id)
+}
+
+// Mark a post as error, increment retry_count and capture last_error
+async function markPostError(
+  supabase: Admin,
+  post_id: string,
+  message: string
+) {
+  await supabase
+    .from('facebook_posts')
+    .update({
+      sync_status: 'error',
+      retry_count: (await getCurrentRetry(supabase, post_id)) + 1,
+      last_error: message.slice(0, 1000),
+    })
+    .eq('post_id', post_id)
+}
+
+async function getCurrentRetry(
+  supabase: Admin,
+  post_id: string
+): Promise<number> {
+  const { data } = await supabase
+    .from('facebook_posts')
+    .select('retry_count')
+    .eq('post_id', post_id)
+    .maybeSingle()
+  return data?.retry_count ?? 0
 }

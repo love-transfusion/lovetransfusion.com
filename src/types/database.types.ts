@@ -141,25 +141,37 @@ export type Database = {
         Row: {
           ad_id: string | null
           created_at: string | null
+          last_error: string | null
           last_synced_at: string | null
+          next_cursor: string | null
           page_id: string
           post_id: string
+          retry_count: number
+          sync_status: Database["public"]["Enums"]["posts_sync_status"]
           user_id: string | null
         }
         Insert: {
           ad_id?: string | null
           created_at?: string | null
+          last_error?: string | null
           last_synced_at?: string | null
+          next_cursor?: string | null
           page_id: string
           post_id: string
+          retry_count?: number
+          sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
         }
         Update: {
           ad_id?: string | null
           created_at?: string | null
+          last_error?: string | null
           last_synced_at?: string | null
+          next_cursor?: string | null
           page_id?: string
           post_id?: string
+          retry_count?: number
+          sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
         }
         Relationships: [
@@ -469,6 +481,7 @@ export type Database = {
       }
     }
     Enums: {
+      posts_sync_status: "idle" | "running" | "deferred" | "error"
       role: "admin" | "basic" | "manager"
     }
     CompositeTypes: {
@@ -597,6 +610,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      posts_sync_status: ["idle", "running", "deferred", "error"],
       role: ["admin", "basic", "manager"],
     },
   },
