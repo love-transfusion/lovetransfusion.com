@@ -156,6 +156,7 @@ export async function POST(req: NextRequest) {
       from_name: string | null
       from_picture_url: string | null
       created_time: string
+      created_at: string
       like_count: number | null
       comment_count: number | null
       permalink_url: string | null
@@ -232,6 +233,16 @@ export async function POST(req: NextRequest) {
         const v = ch.value
         if (v.item !== 'comment') continue
 
+        const createdISO = v.created_time
+          ? new Date(v.created_time * 1000).toISOString()
+          : new Date().toISOString()
+
+        // For edits, Facebook webhook gives the event time at entry.time (unix seconds).
+        const eventISO =
+          typeof entry?.time === 'number'
+            ? new Date(entry.time * 1000).toISOString()
+            : createdISO
+
         const base = {
           comment_id: v.comment_id as string,
           post_id: v.post_id as string,
@@ -240,9 +251,7 @@ export async function POST(req: NextRequest) {
           from_id: v.from?.id ?? null,
           from_name: v.from?.name ?? null,
           from_picture_url: null as string | null, // will be enriched below
-          created_time: v.created_time
-            ? new Date(v.created_time * 1000).toISOString()
-            : new Date().toISOString(),
+          created_time: createdISO,
           like_count: (v.like_count as number) ?? null,
           comment_count: (v.comment_count as number) ?? null,
           permalink_url: (v.permalink_url as string) ?? null,
@@ -335,7 +344,8 @@ export async function POST(req: NextRequest) {
           ...base,
           is_hidden: false,
           is_deleted: false,
-          updated_at: new Date().toISOString(),
+          created_at: createdISO,
+          updated_at: v.verb === 'edited' ? eventISO : createdISO,
         })
       }
     }
