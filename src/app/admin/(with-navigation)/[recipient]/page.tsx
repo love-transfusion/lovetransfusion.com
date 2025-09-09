@@ -2,13 +2,13 @@ import Icon_left from '@/app/components/icons/Icon_left'
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { supa_select_org_recipients } from '@/app/_actions/orgRecipients/actions'
 import {
   supa_select_all_fb_ad_ids,
   supa_select_user,
 } from '@/app/_actions/users/actions'
-import { supa_admin_select_recipient_data } from '@/app/_actions/admin/actions'
 import RecipientForm from './RecipientForm'
+import { supa_select_recipients } from '@/app/_actions/recipients/actions'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 type Params = Promise<{ recipient: UUID }>
 
@@ -25,22 +25,25 @@ export interface Editor_Type {
 
 const RecipientPage = async (props: { params: Params }) => {
   const { recipient } = await props.params
-  const { data: foundRecipient } = await supa_admin_select_recipient_data(
-    recipient
-  )
+  // const { data: foundRecipient } = await supa_admin_select_recipient_data(
+  //   recipient
+  // )
 
-  const { data: user }: { data: I_supa_users_with_profpic_dataweb | null } =
-    foundRecipient?.user_id
-      ? await supa_select_user(foundRecipient?.user_id)
-      : { data: null }
+  // const { data: user }: { data: I_supa_users_with_profpic_dataweb | null } =
+  //   foundRecipient?.user_id
+  //     ? await supa_select_user(foundRecipient?.user_id)
+  //     : { data: null }
+
+  const { data: user } = await supa_select_user(recipient)
 
   const { data: existingAdIDs } = await supa_select_all_fb_ad_ids()
 
-  const recipientData: {
-    recipients: I_supaorg_recipient_hugs_counters_comments[]
-  } = await supa_select_org_recipients(recipient)
+  const { data: recipientData } = await supa_select_recipients(recipient)
 
-  const recipientObject = recipientData.recipients[0]
+  if (!recipientData) return
+
+  const unknown_recipientObject = recipientData.recipient as unknown
+  const recipientObject = unknown_recipientObject as I_supaorg_recipient
 
   const unknown_sec1 = recipientObject.sec_one_paragraph_2 as unknown
   const sec_one_paragraph_2 = unknown_sec1 as Editor_Type
@@ -69,7 +72,7 @@ const RecipientPage = async (props: { params: Params }) => {
             }
           >
             <Image
-              src={`${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObject.profile_picture.fullPath}`}
+              src={`${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObject.recipients_profile_pictures.bucket_name}/${recipientObject.recipients_profile_pictures.storage_path}`}
               alt={`Benny's Profile Picture`}
               fill
               quality={100}
@@ -131,9 +134,7 @@ const RecipientPage = async (props: { params: Params }) => {
             }
           >{`Description of the Recipient's situation:`}</p>
           <div
-            className={
-              'recipient-content pr-0 md:pr-[50px] text-lg'
-            }
+            className={'recipient-content pr-0 md:pr-[50px] text-lg'}
             dangerouslySetInnerHTML={{
               __html: sec_one_paragraph_2.HtmlContent,
             }}

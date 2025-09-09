@@ -8,7 +8,7 @@ import ripple from './images/ripple.png'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { getNetworkCount } from './getNetworkCounts'
-import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 export interface I_fb_comments_Types {
   id: string
@@ -21,14 +21,14 @@ export interface I_fb_comments_Types {
 }
 
 interface I_HugsMessagesShares {
-  selectedUser: I_supa_select_user_Response_Types
-  users_data_facebook: I_supa_users_data_facebook_row | null
+  recipient: I_supaorg_recipient
+  fbComments: I_supa_facebook_comments_row[]
   fbInsights: [] | AdWiseInsight[]
 }
 
 const HugsMessagesShares = ({
-  selectedUser,
-  users_data_facebook,
+  recipient,
+  fbComments,
   fbInsights,
 }: I_HugsMessagesShares) => {
   const {
@@ -36,22 +36,22 @@ const HugsMessagesShares = ({
     comments: totalComments,
     shares: totalShares,
     total,
-  } = getNetworkCount.orgCounts(selectedUser.users_data_website[0].recipient)
+  } = getNetworkCount.orgCounts(recipient)
 
   const { Tooltip: ToolTipTotal } = useTooltip({
     clTooltipTitle: 'Updates',
-    clUser_id: selectedUser.id,
+    clUser_id: recipient.id,
   })
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Engagements',
-    clUser_id: selectedUser.id,
+    clUser_id: recipient.id,
   })
   const {
     hugs: fbHugsCount,
     comments: fbCommentsCount,
     shares: fbSharesCount,
     totalFacebookData,
-  } = getNetworkCount.fbCounts(fbInsights, users_data_facebook)
+  } = getNetworkCount.fbCounts(fbInsights, fbComments, 0)
   return (
     <div
       className={

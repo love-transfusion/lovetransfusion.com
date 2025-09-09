@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/insights",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/recipients",
+      "schedule": "*/2 * * * *"
     }
   ]
 }

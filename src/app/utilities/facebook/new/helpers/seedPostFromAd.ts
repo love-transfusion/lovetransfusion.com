@@ -8,7 +8,6 @@ export async function seedPostFromAd(
   pageId: string,
   user_Id: string
 ) {
-  console.log({ adId, pageId })
   const supabase = await createAdmin()
   const { data: postId, error } = await util_fb_postID({ adId })
   if (!postId) return { ok: false, error: error ?? 'Could not resolve postId' }
@@ -24,8 +23,6 @@ export async function seedPostFromAd(
     } as any,
     { onConflict: 'post_id' } as any
   )
-
-  console.log({ upErr })
 
   return { ok: !upErr, postId, error: upErr?.message }
 }

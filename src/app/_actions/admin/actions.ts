@@ -23,6 +23,7 @@ export const supa_admin_search_recipient = async (clSearchKeyword: string) => {
 }
 
 interface I_signupData {
+  id: string
   parent_name: string
   email: string
   recipient_name: string
@@ -31,6 +32,7 @@ interface I_signupData {
 
 export const supa_admin_create_account = async (rawData: I_signupData) => {
   const {
+    id,
     email,
     parent_name,
     recipient_name,
@@ -40,6 +42,7 @@ export const supa_admin_create_account = async (rawData: I_signupData) => {
   const password = uuid().slice(0, 6)
   const recipient_id = stringRecipientId as UUID
   const { data, error } = await supabase.auth.admin.createUser({
+    id,
     email,
     password,
     email_confirm: true,

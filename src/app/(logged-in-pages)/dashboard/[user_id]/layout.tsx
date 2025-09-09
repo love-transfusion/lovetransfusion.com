@@ -3,7 +3,7 @@ import SlidingSupportersName from './SlidingSupportersName'
 import RecipientProfilePicture from './RecipientProfilePicture'
 import arrow from './images/arrow.png'
 import Image from 'next/image'
-import HugsMessagesShares, { I_fb_comments_Types } from './HugsMessagesShares'
+import HugsMessagesShares from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
 import { filter_comments } from './actions'
@@ -14,6 +14,7 @@ import MostRecentEngagements from './MostRecentEngagements'
 import MostRecentEngagementContainer from './MostRecentEngagementContainer'
 import { Metadata } from 'next'
 import { I_Comments } from '@/types/Comments.types'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 
 type Params = Promise<{ user_id: string }>
@@ -58,71 +59,67 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
 
   if (!selectedUser) return
 
-  const unknown_selectedRecipient = selectedUser.users_data_website[0]
+  const unknown_selectedRecipient = (selectedUser.recipients ?? [])[0]
     .recipient as unknown
-  const selectedRecipient =
-    unknown_selectedRecipient as I_supaorg_recipient_hugs_counters_comments
+  const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
-  const FBComments = selectedUser.users_data_facebook?.comments as
-    | I_fb_comments_Types[]
-    | undefined
+  const FBComments = selectedUser.facebook_posts[0].facebook_comments
 
   const formattedFBComments: I_Comments[] =
     FBComments?.map((item) => {
       return {
         type: 'facebook',
-        id: item.id,
-        name: item.from?.name ?? 'Someone Who Cares',
+        id: item.comment_id,
+        name: item.from_name ?? 'Someone Who Cares',
         message: item.message ?? 'Empty',
         created_at: item.created_time,
       }
     }) ?? []
 
-  const formattedWebsiteComments: I_Comments[] = selectedRecipient.comments.map(
-    (item) => {
-      return {
-        type: 'website',
-        id: item.id,
-        name: item.name ?? 'Someone Who Cares',
-        message: item.comment ?? 'Empty',
-        created_at: item.created_at,
-        profile_picture_website: item.public_profiles,
-      }
+  const formattedWebsiteComments: I_Comments[] | null = (
+    selectedRecipient ?? []
+  ).comments.map((item) => {
+    return {
+      type: 'website',
+      id: item.id,
+      name: item.name ?? 'Someone Who Cares',
+      message: item.comment ?? 'Empty',
+      created_at: item.created_at,
+      profile_picture_website: item.public_profiles,
     }
-  )
+  })
 
-  const formattedWebsiteHugs: I_Comments[] = selectedRecipient.hugs.map(
-    (item) => {
-      return {
-        type: 'website',
-        id: item.id,
-        name:
-          (item.public_profiles?.full_name &&
-            item.public_profiles?.full_name) ||
-          (item.public_profiles?.first_name &&
-            `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`) ||
-          'Someone Who Cares',
-        message: 'Empty',
-        created_at: item.created_at,
-        profile_picture_website: item.public_profiles,
-      }
+  const formattedWebsiteHugs: I_Comments[] | null = (
+    selectedRecipient ?? []
+  ).hugs.map((item) => {
+    return {
+      type: 'website',
+      id: item.id,
+      name:
+        (item.public_profiles?.full_name && item.public_profiles?.full_name) ||
+        (item.public_profiles?.first_name &&
+          `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`) ||
+        'Someone Who Cares',
+      message: 'Empty',
+      created_at: item.created_at,
+      profile_picture_website: item.public_profiles,
     }
-  )
+  })
 
-  const fbInsights = selectedUser.users_data_facebook?.insights
-    ? (selectedUser.users_data_facebook.insights as [] | AdWiseInsight[])
-    : []
+  const unknown_fbInsights = selectedUser.facebook_insights[0]
+    .insights as unknown
+  const fbInsights = unknown_fbInsights as AdWiseInsight[]
 
   const allComments = await filter_comments(
-    [...formattedWebsiteComments, ...formattedFBComments],
+    [...(formattedWebsiteComments ?? []), ...formattedFBComments],
     selectedUser.receipients_deleted_messages
   )
 
   const allEngagements = await filter_comments(
     [
       ...formattedFBComments,
-      ...formattedWebsiteComments,
-      ...formattedWebsiteHugs,
+      ...(formattedWebsiteComments ?? []),
+      ...(formattedWebsiteHugs ?? []),
     ],
     selectedUser.receipients_deleted_messages
   )
@@ -165,9 +162,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
-              selectedUser={selectedUser}
+              recipient={selectedRecipient}
               fbInsights={fbInsights}
-              users_data_facebook={selectedUser.users_data_facebook}
+              fbComments={FBComments}
             />
             <Image
               src={arrow}
@@ -185,18 +182,18 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           {map}
           <div className={'hidden xl:block'}>
             <HugsMessagesShares
-              selectedUser={selectedUser}
-              users_data_facebook={selectedUser.users_data_facebook}
+              recipient={selectedRecipient}
               fbInsights={fbInsights}
+              fbComments={FBComments}
             />
           </div>
         </div>
         <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
             <HugsMessagesShares
-              selectedUser={selectedUser}
-              users_data_facebook={selectedUser.users_data_facebook}
+              recipient={selectedRecipient}
               fbInsights={fbInsights}
+              fbComments={FBComments}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>

@@ -13,7 +13,7 @@ import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import MapControls from './MapControls'
 
 interface Props {
-  selectedUser: I_supa_users_with_profpic_dataweb | null
+  user_id: string
   facebookAdData: [] | AdWiseInsight[]
   analyticsWithCountryPathTotal: I_CountryPathTotalFormat[]
 }
@@ -32,7 +32,7 @@ const defaultPoint = [
 ]
 
 const MapChart = ({
-  selectedUser,
+  user_id,
   facebookAdData,
   analyticsWithCountryPathTotal,
 }: Props) => {
@@ -158,7 +158,7 @@ const MapChart = ({
 
     loadMap()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUser])
+  }, [])
 
   return (
     <>
@@ -174,9 +174,7 @@ const MapChart = ({
             style={{ width: '100%' }}
           />
           {/* Floating Controls */}
-          {selectedUser?.id && (
-            <MapControls chartRef={chartRef} user_id={selectedUser.id} />
-          )}
+          {user_id && <MapControls chartRef={chartRef} user_id={user_id} />}
         </div>
       )}
     </>

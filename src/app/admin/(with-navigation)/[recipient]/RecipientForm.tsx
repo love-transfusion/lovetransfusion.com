@@ -11,15 +11,16 @@ import Button from '@/app/components/Button/Button'
 import { useStore } from 'zustand'
 import { supa_admin_create_account } from '@/app/_actions/admin/actions'
 import utilityStore from '@/app/utilities/store/utilityStore'
-import { supa_admin_update_recipient_website } from './actions'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import { useForm } from 'react-hook-form'
 import {
-  supa_select_user,
+  I_supa_select_user_Response_Types,
   supa_update_users,
 } from '@/app/_actions/users/actions'
 import FBAdIDs from './FBAdIDs'
-import { updateUserData } from '@/app/hooks/useUpdateUsersData'
+import { supa_update_recipients } from '@/app/_actions/recipients/actions'
+import { supa_update_facebook_posts } from '@/app/_actions/facebook_posts/actions'
+import { util_fb_postID } from '@/app/utilities/facebook/new/util_fb_postID'
 
 interface recipientFormTypes {
   facebookURL: string | null | undefined
@@ -32,14 +33,13 @@ interface recipientFormTypes {
 interface RecipientForm {
   recipientObject: I_supaorg_recipient_hugs_counters_comments
   recipient: UUID
-  user: I_supa_users_with_profpic_dataweb | null
+  user: I_supa_select_user_Response_Types | null
   existingAdIDs: string[] | null
 }
 
 const RecipientForm = ({
   user,
   recipientObject,
-  recipient,
   existingAdIDs,
 }: RecipientForm) => {
   const [isFBAdIDActive, setisFBAdIDActive] = useState<boolean>(false)
@@ -61,30 +61,36 @@ const RecipientForm = ({
       }
     },
   })
-  const { settoast, setfbError } = useStore(utilityStore)
+  const { settoast } = useStore(utilityStore)
 
-  const updateUser = async (data: recipientFormTypes, recipient_id: string) => {
-    await supa_update_users({
-      id: recipient_id,
-      fb_ad_IDs: FBAdIDsArray || null,
-    })
-  }
-
-  const updateThirdPartyUserData = async (userID: string) => {
-    // This should be executed after the two functions above
-    const [{ data: selectedUser }] = await Promise.all([
-      supa_select_user(userID),
+  const updateUser = async (recipient_id: string) => {
+    const [{ data: post_id }] = await Promise.all([
+      util_fb_postID({ adId: FBAdIDsArray[0] }),
+      supa_update_users({
+        id: recipient_id,
+        fb_ad_IDs: FBAdIDsArray || null,
+      }),
+      supa_update_recipients({
+        id: recipientObject.id,
+        user_id: recipient_id,
+      }),
     ])
 
-    if (selectedUser) {
-      await updateUserData(selectedUser, setfbError)
+    if (post_id) {
+      await supa_update_facebook_posts({
+        post_id,
+        page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+        user_id: recipient_id,
+        last_synced_at: null,
+      })
     }
   }
 
-  const onSubmit = async (rawData: recipientFormTypes) => {
+  const onSubmit = async () => {
     if (!user) {
       // Create an account for the recipient
       const { data, error } = await supa_admin_create_account({
+        id: recipientObject.id,
         email: recipientObject.email,
         parent_name: recipientObject.parent_name!,
         recipient_name: recipientObject.first_name!,
@@ -92,26 +98,14 @@ const RecipientForm = ({
       })
 
       if (!error && data && data.user?.id) {
-        // Update user's website data
-        await supa_admin_update_recipient_website({
-          user_id: data.user.id,
-          id: recipient,
-        })
-        await updateUser(rawData, data.user.id)
-        // This should be executed after the two functions above
-        await updateThirdPartyUserData(data.user.id)
-
+        await updateUser(data.user.id)
         settoast({
           clDescription: 'Account successfully created.',
           clStatus: 'success',
         })
       }
     } else {
-      // If recipient has an existing account perform update
-      await updateUser(rawData, user.id)
-      // This should be executed after the two functions above
-      await updateThirdPartyUserData(user.id)
-
+      await updateUser(user.id)
       settoast({
         clDescription: 'Successfully updated recipient',
         clStatus: 'success',

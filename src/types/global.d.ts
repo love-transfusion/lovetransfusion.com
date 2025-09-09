@@ -44,7 +44,7 @@ declare global {
     DB['public']['Tables']['users_data_facebook']['Update']
   type I_supa_users_data_facebook_row =
     DB['public']['Tables']['users_data_facebook']['Row']
-    
+
   // facebook_comments table
   type I_supa_facebook_comments_insert =
     DB['public']['Tables']['facebook_comments']['Insert']
@@ -52,6 +52,14 @@ declare global {
     DB['public']['Tables']['facebook_comments']['Update']
   type I_supa_facebook_comments_row =
     DB['public']['Tables']['facebook_comments']['Row']
+
+  // facebook_insights table
+  type I_supa_facebook_insights_insert =
+    DB['public']['Tables']['facebook_insights']['Insert']
+  type I_supa_facebook_insights_update =
+    DB['public']['Tables']['facebook_insights']['Update']
+  type I_supa_facebook_insights_row =
+    DB['public']['Tables']['facebook_insights']['Row']
 
   // facebook_posts table
   type I_supa_facebook_posts_insert =
@@ -76,6 +84,11 @@ declare global {
     DB['public']['Tables']['fb_adwise_insights']['Update']
   type I_supa_fb_adwise_insights_row_unextended =
     DB['public']['Tables']['fb_adwise_insights']['Row']
+
+  // recipients table
+  type I_supa_recipients_insert = DB['public']['Tables']['recipients']['Insert']
+  type I_supa_recipients_update = DB['public']['Tables']['recipients']['Update']
+  type I_supa_recipients_row = DB['public']['Tables']['recipients']['Row']
 
   // tooltips table
   type I_supa_tooltips_insert = DB['public']['Tables']['tooltips']['Insert']
@@ -156,6 +169,14 @@ declare global {
   type I_supaOrg_comments_update =
     orgDB['public']['Tables']['comments']['Update']
   type I_supaOrg_comments_row = orgDB['public']['Tables']['comments']['Row']
+
+  // recipients_profile_pictures table
+  type I_supaOrg_recipients_profile_pictures_insert =
+    orgDB['public']['Tables']['recipients_profile_pictures']['Insert']
+  type I_supaOrg_recipients_profile_pictures_update =
+    orgDB['public']['Tables']['recipients_profile_pictures']['Update']
+  type I_supaOrg_recipients_profile_pictures_row =
+    orgDB['public']['Tables']['recipients_profile_pictures']['Row']
 
   interface I_supaorg_hug extends I_unextended_supaorg_hug {
     location: I_orgLocation | null

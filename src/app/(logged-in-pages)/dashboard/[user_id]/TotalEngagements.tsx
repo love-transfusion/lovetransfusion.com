@@ -5,32 +5,31 @@ import ripple from './images/ripple.png'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
 import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { getNetworkCount } from './getNetworkCounts'
-import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 // import { useStore } from 'zustand'
 // import utilityStore from '@/app/utilities/store/utilityStore'
 
 export interface I_TotalEngagements {
-  selectedUser: I_supa_select_user_Response_Types
+  recipient: I_supaorg_recipient
   fbInsights: [] | AdWiseInsight[]
-  users_data_facebook: I_supa_users_data_facebook_row | null
+  fbComments: I_supa_facebook_comments_row[]
 }
 
-const TotalEngagements = ({ 
-  selectedUser,
+const TotalEngagements = ({
+  recipient,
   fbInsights,
-  users_data_facebook,
+  fbComments,
 }: I_TotalEngagements) => {
-  const { total: totalOrgRecipientData } = getNetworkCount.orgCounts(
-    selectedUser.users_data_website[0].recipient
-  )
+  const { total: totalOrgRecipientData } = getNetworkCount.orgCounts(recipient)
   const { Tooltip } = useTooltip({
     clTooltipTitle: 'Updates',
-    clUser_id: selectedUser.id,
+    clUser_id: recipient.id,
   })
 
   const { totalFacebookData } = getNetworkCount.fbCounts(
     fbInsights,
-    users_data_facebook
+    fbComments,
+    0
   )
 
   return (
