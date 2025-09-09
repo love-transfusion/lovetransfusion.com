@@ -19,6 +19,7 @@ type GARow = {
   // If you decide to store composite key (user_id, path), add: path?: string | null
 }
 
+
 export async function GET(req: NextRequest) {
   if (!isAuthorizedCron(req)) {
     return new NextResponse('Unauthorized', { status: 401 })
@@ -37,17 +38,17 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     )
   }
+  
+  const filteredusers =
+    oldUsers?.filter((item) => !!item.recipients.length) ?? []
 
-  const users = (oldUsers ?? [])
+  const users = filteredusers
     .map((user) => {
-      const unknown_recipient = !!user.recipients.length
-        ? (user.recipients[0].recipient as unknown)
-        : undefined
+      const unknown_recipient = user.recipients[0].recipient as unknown
       const recipient = unknown_recipient as I_supaorg_recipient | undefined
       const path_url = recipient?.path_url
       return { path_url, id: user.id }
     })
-    .filter((item) => item.path_url)
 
   // Build tasks (skip users without a path if you only want page-level stats)
   const tasks = (users ?? [])
