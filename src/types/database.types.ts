@@ -209,6 +209,32 @@ export type Database = {
         }
         Relationships: []
       }
+      google_analytics: {
+        Row: {
+          analytics: Json
+          last_synced_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics?: Json
+          last_synced_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics?: Json
+          last_synced_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_pictures: {
         Row: {
           blur_data_url: string | null
