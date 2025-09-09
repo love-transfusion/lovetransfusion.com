@@ -82,10 +82,12 @@ const getAnalyticsCountryPathTotal = async ({
     isHug: true,
     locArray: clRecipient.hugs,
   })
+  console.log({ hugs: hugs.length })
   const comments = filterOrgLocationsAccordingToType({
     isComments: true,
     locArray: clRecipient.comments,
   })
+  console.log({ comments: comments.length })
   return [...analytics, ...hugs, ...comments]
 }
 

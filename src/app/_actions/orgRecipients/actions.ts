@@ -1,6 +1,7 @@
 'use server'
 
-import { extended_supaorg_recipient } from "@/types/global"
+import { extended_supaorg_recipient } from '@/types/global'
+import axios from 'axios'
 
 /** Global search:(STRING) of either firstname | parent_name | recipient id | email */
 interface I_getDataFromLTOrg {
@@ -44,4 +45,33 @@ export const supa_select_org_recipients = async (
     .then((response) => response.json()) // Convert response to JSON
     .then((data) => data) // Log the response
     .catch((error) => console.error('Error:', error))
+}
+
+export const supa_select_orgRecipients = async (
+  search?: string
+): Promise<{
+  data: I_supaorg_recipient[] | null
+  error: string | null
+}> => {
+  try {
+    const {
+      data: { data, error },
+    } = await axios.post(
+      'https://lovetransfusion-org-ts.vercel.app/api/recipients',
+      { search },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'secret-key': process.env.LT_ORG_ROUTE_SECRET_KEY!,
+        },
+      }
+    )
+    if (error) throw new Error(error.message)
+    const newData = data as I_supaorg_recipient[]
+    return { data: newData, error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { data: null, error: thisError }
+  }
 }
