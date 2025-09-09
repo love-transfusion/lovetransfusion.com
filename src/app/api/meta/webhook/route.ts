@@ -155,15 +155,14 @@ export async function POST(req: NextRequest) {
       from_id: string | null
       from_name: string | null
       from_picture_url: string | null
-      created_time: string
-      created_at: string
+      created_time: string // keep this
       like_count: number | null
       comment_count: number | null
       permalink_url: string | null
       is_hidden: boolean
       is_deleted: boolean
       raw: any
-      updated_at: string
+      updated_at: string // keep this
     }> = []
 
     // ✅ ADDED (local maps for avatar enrichment by page)
@@ -344,7 +343,6 @@ export async function POST(req: NextRequest) {
           ...base,
           is_hidden: false,
           is_deleted: false,
-          created_at: createdISO,
           updated_at: v.verb === 'edited' ? eventISO : createdISO,
         })
       }
