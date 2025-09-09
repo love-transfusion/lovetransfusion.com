@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import pLimit from 'p-limit'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { ga_selectGoogleAnalyticsData } from '@/app/utilities/analytics/googleAnalytics'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 export const runtime = 'nodejs'
 
@@ -37,12 +38,16 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const users = oldUsers.map((user) => {
-    const unknown_recipient = user.recipients[0].recipient as unknown
-    const recipient = unknown_recipient as I_supaOrg_recipients_row
-    const path_url = recipient.path_url
-    return { path_url, id: user.id }
-  })
+  const users = (oldUsers ?? [])
+    .map((user) => {
+      const unknown_recipient = !!user.recipients.length
+        ? (user.recipients[0].recipient as unknown)
+        : undefined
+      const recipient = unknown_recipient as I_supaorg_recipient | undefined
+      const path_url = recipient?.path_url
+      return { path_url, id: user.id }
+    })
+    .filter((item) => item.path_url)
 
   // Build tasks (skip users without a path if you only want page-level stats)
   const tasks = (users ?? [])

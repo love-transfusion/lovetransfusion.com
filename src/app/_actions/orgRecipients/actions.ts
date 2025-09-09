@@ -1,5 +1,7 @@
 'use server'
 
+import { extended_supaorg_recipient } from "@/types/global"
+
 /** Global search:(STRING) of either firstname | parent_name | recipient id | email */
 interface I_getDataFromLTOrg {
   /** Get data based on date */
@@ -16,6 +18,14 @@ interface I_getDataFromLTOrg {
  *    recipients[]
  * }
  */
+
+export type I_supaorg_recipient = extended_supaorg_recipient & {
+  hugs: I_supaorg_hug[]
+  recipient_counters: I_supaOrg_recipient_counters_row | null
+  comments: I_supaorg_comments[]
+  recipients_profile_pictures: I_supaOrg_recipients_profile_pictures_row
+}
+
 export const supa_select_org_recipients = async (
   body: I_getDataFromLTOrg | string
 ): Promise<{ recipients: I_supaorg_recipient_hugs_counters_comments[] }> => {
