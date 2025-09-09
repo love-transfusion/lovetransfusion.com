@@ -77,6 +77,12 @@ declare global {
   type I_supa_fb_adwise_insights_row_unextended =
     DB['public']['Tables']['fb_adwise_insights']['Row']
 
+  // recipients table
+  type I_supa_recipients_insert = DB['public']['Tables']['recipients']['Insert']
+  type I_supa_recipients_update = DB['public']['Tables']['recipients']['Update']
+  type I_supa_recipients_row =
+    DB['public']['Tables']['recipients']['Row']
+
   // tooltips table
   type I_supa_tooltips_insert = DB['public']['Tables']['tooltips']['Insert']
   type I_supa_tooltips_update = DB['public']['Tables']['tooltips']['Update']
