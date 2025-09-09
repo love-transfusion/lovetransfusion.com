@@ -82,6 +82,7 @@ export type Database = {
           created_at: string
           insights: Json
           last_synced_at: string
+          shares: number
           user_id: string
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           created_at?: string
           insights?: Json
           last_synced_at?: string
+          shares?: number
           user_id: string
         }
         Update: {
@@ -96,6 +98,7 @@ export type Database = {
           created_at?: string
           insights?: Json
           last_synced_at?: string
+          shares?: number
           user_id?: string
         }
         Relationships: [
@@ -208,6 +211,32 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      google_analytics: {
+        Row: {
+          analytics: Json
+          last_synced_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics?: Json
+          last_synced_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics?: Json
+          last_synced_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_pictures: {
         Row: {
