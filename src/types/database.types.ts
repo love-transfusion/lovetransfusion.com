@@ -30,7 +30,7 @@ export type Database = {
           permalink_url: string | null
           post_id: string
           raw: Json | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           comment_count?: number | null
@@ -47,7 +47,7 @@ export type Database = {
           permalink_url?: string | null
           post_id: string
           raw?: Json | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           comment_count?: number | null
@@ -64,7 +64,7 @@ export type Database = {
           permalink_url?: string | null
           post_id?: string
           raw?: Json | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {

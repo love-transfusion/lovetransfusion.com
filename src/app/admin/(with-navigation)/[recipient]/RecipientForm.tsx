@@ -96,6 +96,13 @@ const RecipientForm = ({
         recipient_name: recipientObject.first_name!,
         recipient_id: recipientObject.id,
       })
+      
+      if (error) {
+        settoast({
+          clDescription: error,
+          clStatus: 'error',
+        })
+      }
 
       if (!error && data && data.user?.id) {
         await updateUser(data.user.id)

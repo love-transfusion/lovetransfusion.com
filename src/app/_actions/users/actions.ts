@@ -61,7 +61,8 @@ export interface I_supa_select_user_Response_Types extends I_supa_users_row {
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients: I_supa_recipients_row[] | null
   facebook_posts: I_supa_facebook_posts_with_comments[]
-  facebook_insights: I_supa_facebook_insights_row[]
+  facebook_insights?: I_supa_facebook_insights_row[]
+  google_analytics: I_supa_google_analytics_row | null
 }
 
 export const supa_select_user = async (
@@ -76,7 +77,7 @@ export const supa_select_user = async (
   const { data, error } = await supabase
     .from('users')
     .select(
-      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*))'
+      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*)), google_analytics(*)'
     )
     .eq('id', user_id)
     .single()
@@ -121,7 +122,7 @@ export const supa_select_users_all = async (
     let query = supabase
       .from('users')
       .select(
-        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*))'
+        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*)), google_analytics(*)'
       )
 
     if (options.mode === 'search' && options.searchIDs) {

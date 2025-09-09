@@ -106,15 +106,16 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     }
   })
 
-  const unknown_fbInsights = selectedUser.facebook_insights[0]
-    .insights as unknown
+  const unknown_fbInsights = !!selectedUser.facebook_insights?.length
+    ? (selectedUser.facebook_insights[0].insights as unknown)
+    : []
+
   const fbInsights = unknown_fbInsights as AdWiseInsight[]
 
   const allComments = await filter_comments(
     [...(formattedWebsiteComments ?? []), ...formattedFBComments],
     selectedUser.receipients_deleted_messages
   )
-
   const allEngagements = await filter_comments(
     [
       ...formattedFBComments,

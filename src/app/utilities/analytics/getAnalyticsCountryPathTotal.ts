@@ -20,7 +20,8 @@ const getAnalyticsCountryPathTotal = async ({
   clRecipient,
 }: I_getAnalyticsCountryPathTotal) => {
   const analytics: I_CountryPathTotalFormat[] =
-    (clGoogleAnalytics.rows &&
+    (clGoogleAnalytics &&
+      clGoogleAnalytics.rows &&
       clGoogleAnalytics.rows.map((row) => {
         const cl_city =
           (row.dimensionValues && row.dimensionValues[1].value) ?? ''
@@ -82,10 +83,12 @@ const getAnalyticsCountryPathTotal = async ({
     isHug: true,
     locArray: clRecipient.hugs,
   })
+  console.log({ hugs: hugs.length })
   const comments = filterOrgLocationsAccordingToType({
     isComments: true,
     locArray: clRecipient.comments,
   })
+  console.log({ comments: comments.length })
   return [...analytics, ...hugs, ...comments]
 }
 

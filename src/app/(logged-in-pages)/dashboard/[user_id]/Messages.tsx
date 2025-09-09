@@ -3,7 +3,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react'
 import Image from 'next/image'
 import anonymousImg from './images/user.webp'
 import { supa_insert_deleted_messages } from './actions'
-import { utils_dateAndTime_getPastTime } from '@/app/utilities/date-and-time/getPastTime'
+import { util_formatTimePast } from '@/app/utilities/date-and-time/util_formatTimePast'
 import { I_Comments } from '@/types/Comments.types'
 import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 
@@ -122,14 +122,13 @@ const Messages = ({
                           <p className={'text-primary'}>{item.message}</p>
                         </div>
                       </div>
-                      <div className={''}>
-                        {selectedUser?.users_data_website && (
+                      <div className={'min-w-[90px] text-right'}>
+                        {selectedUser && (
                           <p
                             onClick={() =>
                               handleDelete({
                                 id: item.id,
-                                recipient_id:
-                                  selectedUser.users_data_website[0].id,
+                                recipient_id: selectedUser.id,
                                 user_id: clUser_id,
                               })
                             }
@@ -145,7 +144,7 @@ const Messages = ({
                             'text-center text-sm text-[#B3B3B3] mt-[3px]'
                           }
                         >
-                          {utils_dateAndTime_getPastTime(
+                          {util_formatTimePast(
                             new Date(item.created_at)
                           )}
                         </p>
