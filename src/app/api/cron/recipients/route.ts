@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   console.log('Fetching comRecipients...')
   const { data: comRecipients, error: selectError } =
-    await supa_select_recipients_all()
+    await supa_select_recipients_all(undefined, process.env.CRON_SECRET!)
 
   if (selectError) {
     console.error('Error selecting comRecipients:', selectError)
