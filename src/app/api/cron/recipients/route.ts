@@ -68,7 +68,8 @@ export async function GET(req: NextRequest) {
   )
 
   const { error: upsertError } = await supa_upsert_recipients(
-    formattedRecipients
+    formattedRecipients,
+    process.env.CRON_SECRET!
   )
 
   if (upsertError) {
