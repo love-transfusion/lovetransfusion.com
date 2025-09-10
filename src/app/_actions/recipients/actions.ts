@@ -9,12 +9,9 @@ export const supa_upsert_recipients = async (
   recipients: I_supa_recipients_insert[],
   CRON?: string
 ) => {
-  if (!CRON) {
-    const user = await getCurrentUser()
-    const isadmin = isAdmin({ clRole: user?.role })
-    if (!isadmin) return { data: null, error: 'You are not authorized.' }
-  }
-  if (CRON !== process.env.CRON_SECRET)
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role })
+  if (CRON !== process.env.CRON_SECRET && !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
@@ -41,13 +38,9 @@ export const supa_select_recipients_all = async (
     | undefined,
   CRON?: string
 ) => {
-  if (!CRON) {
-    const user = await getCurrentUser()
-    const isadmin = isAdmin({ clRole: user?.role })
-    if (!isadmin)
-      return { data: null, count: 0, error: 'You are not authorized.' }
-  }
-  if (CRON !== process.env.CRON_SECRET)
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role })
+  if (CRON !== process.env.CRON_SECRET && !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
