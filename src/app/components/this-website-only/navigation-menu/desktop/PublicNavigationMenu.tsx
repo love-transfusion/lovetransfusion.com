@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import MobilePublicNavigation from '../MobilePublicNavigation'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 interface I_PublicNavigationMenu {
   clUser: I_User | null | undefined
@@ -15,6 +16,11 @@ const PublicNavigationMenu = ({
   clUser,
   clIsAdmin,
 }: I_PublicNavigationMenu) => {
+  const unknown_recipient =
+    clUser &&
+    !!clUser.recipients.length &&
+    (clUser.recipients[0].recipient as unknown)
+  const recipient = unknown_recipient as I_supaorg_recipient | undefined
   return (
     <div
       className={
@@ -76,8 +82,7 @@ const PublicNavigationMenu = ({
                     clUser
                       ? clIsAdmin
                         ? 'Admin'
-                        : clUser.users_data_website.length > 0 &&
-                          clUser.users_data_website[0].recipient.first_name
+                        : !!clUser.recipients.length && recipient?.first_name
                       : 'Login'
                   }`}
                 </p>

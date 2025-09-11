@@ -10,10 +10,11 @@ import Icon_edit from '@/app/components/icons/Icon_edit'
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
 import useMenu_Absolute from '@/app/hooks/useMenu_Absolute'
 import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 const SearchInput = () => {
   const [searchResults, setsearchResults] = useState<
-    I_supa_users_data_website_row[] | null
+    I_supa_recipients_row[] | null
   >(null)
   const [isSubmitting, setisSubmitting] = useState<boolean>(false)
   const [searchKeyword, setsearchKeyword] = useState<string>('')
@@ -58,6 +59,8 @@ const SearchInput = () => {
           <div className="min-w-[280px] md:min-w-[340px] max-w-[300px] md:max-w-[360px] max-h-[460px] overflow-y-auto px-3">
             {searchResults && searchResults.length > 0 ? (
               searchResults?.map((item) => {
+                const unknown_recipient = item.recipient as unknown
+                const recipient = unknown_recipient as I_supaorg_recipient
                 return (
                   <div
                     key={item.id}
@@ -65,12 +68,8 @@ const SearchInput = () => {
                       'grid grid-cols-[1fr_1fr_60px] gap-5 items-center'
                     }
                   >
-                    <p className={'line-clamp-1'}>
-                      {item.recipient?.parent_name}
-                    </p>
-                    <p className={'line-clamp-1'}>
-                      {item.recipient?.first_name}
-                    </p>
+                    <p className={'line-clamp-1'}>{recipient.parent_name}</p>
+                    <p className={'line-clamp-1'}>{recipient.first_name}</p>
                     <div className={'w-fit flex gap-1'}>
                       {item.user_id && (
                         <Link href={`/dashboard/${item.user_id}`}>

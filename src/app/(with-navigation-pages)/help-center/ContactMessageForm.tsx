@@ -5,9 +5,7 @@ import Input from '@/app/components/inputs/basic-input/Input'
 import TextArea from '@/app/components/inputs/textarea/TextArea'
 import { ac_lists } from '@/app/lib/(activecampaign)/library/ac_lists'
 import { resendEmail_MessageConfirmation } from '@/app/lib/resend_email_templates/resendEmail_MessageConfirmation'
-import {
-  ac_custom_create_contact,
-} from '@/app/utilities/activeCampaignFunctions'
+import { ac_custom_create_contact } from '@/app/utilities/activeCampaignFunctions'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import { util_getFirstAndLastName } from '@/app/utilities/util_getFirstNameAndLastName'
 import React from 'react'

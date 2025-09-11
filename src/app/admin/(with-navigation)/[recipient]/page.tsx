@@ -25,14 +25,6 @@ export interface Editor_Type {
 
 const RecipientPage = async (props: { params: Params }) => {
   const { recipient } = await props.params
-  // const { data: foundRecipient } = await supa_admin_select_recipient_data(
-  //   recipient
-  // )
-
-  // const { data: user }: { data: I_supa_users_with_profpic_dataweb | null } =
-  //   foundRecipient?.user_id
-  //     ? await supa_select_user(foundRecipient?.user_id)
-  //     : { data: null }
 
   const { data: user } = await supa_select_user(recipient)
 

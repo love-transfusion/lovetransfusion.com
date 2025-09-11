@@ -129,7 +129,7 @@ declare global {
 
   interface I_User extends User, I_supa_users_row {
     role: I_supa_enumTypes_role
-    users_data_website: I_supa_users_data_website_row[]
+    recipients: I_supa_recipients_row[]
     profile_pictures: I_supa_profile_pictures_row_unextended | null
   }
 

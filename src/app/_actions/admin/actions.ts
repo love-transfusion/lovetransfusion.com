@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid'
 export const supa_admin_search_recipient = async (clSearchKeyword: string) => {
   const supabase = await createAdmin()
   const { data, error } = await supabase
-    .from('users_data_website')
+    .from('recipients')
     .select()
     .or(
       `recipient->>first_name.ilike.${
@@ -18,6 +18,7 @@ export const supa_admin_search_recipient = async (clSearchKeyword: string) => {
         clSearchKeyword ?? ''
       },recipient->>email.ilike.${clSearchKeyword ?? ''}`
     )
+
   return { data, error: error?.message ?? null }
 }
 
@@ -51,17 +52,6 @@ export const supa_admin_create_account = async (rawData: I_signupData) => {
     resendEmail_AccountCredentials({ email, password, parent_name })
   }
   revalidatePath('/admin')
-  return { data, error: error?.message ?? null }
-}
-
-export const supa_admin_select_recipient_data = async (uuid: UUID) => {
-  const supabase = await createAdmin()
-
-  const { data, error } = await supabase
-    .from('users_data_website')
-    .select('*')
-    .eq('id', uuid)
-    .single()
   return { data, error: error?.message ?? null }
 }
 

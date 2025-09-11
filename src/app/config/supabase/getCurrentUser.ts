@@ -14,7 +14,7 @@ export const getCurrentUser = async (): Promise<I_User | null | undefined> => {
     // Return default
     const { data, error: userError } = await supabase
       .from('users')
-      .select('*, users_data_website(*), profile_pictures(*)')
+      .select('*, recipients(*), profile_pictures(*)')
       .eq('id', user.id)
     return { data, error: userError?.message ?? null }
   }

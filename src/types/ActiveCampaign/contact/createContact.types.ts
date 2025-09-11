@@ -69,5 +69,5 @@ export interface I_ac_CreateContactResponse {
   fieldValues: I_ac_DetailedFieldValue[]
   contact: I_ac_DetailedContact
   message: string
-  errors: I_ac_errors_create_contact
+  errors: I_ac_errors_create_contact[]
 }

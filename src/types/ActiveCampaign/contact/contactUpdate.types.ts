@@ -1,37 +1,39 @@
-export interface ActiveCampaignFieldValue {
-  field: string // ID of the custom field as a string
-  value: string // Value associated with that field
+export interface ACContactFieldValue {
+  field: string // field ID as string
+  value: string // value for the field
 }
 
-export interface ActiveCampaignContact {
+export interface ACContactMinimal {
   email?: string
   firstName?: string
   lastName?: string
-  fieldValues?: ActiveCampaignFieldValue[]
+  fieldValues?: ACContactFieldValue[]
+  phone?: string
 }
 
-export interface I_ac_ActiveCampaignContactPayload {
-  clID: number
-  clContact: ActiveCampaignContact
+export interface I_AC_Update_Contact_MinimalRequest {
+  contact: ACContactMinimal
 }
 
-export interface ActiveCampaignFieldValueLink {
+/* ------------------------- Field Values ------------------------- */
+export interface ACFieldValueLinks {
   owner: string
   field: string
 }
 
-export interface ActiveCampaignFieldValueResponse {
+export interface ACFieldValue {
   contact: string
   field: string
-  value: string
+  value: string | null
   cdate: string
   udate: string
-  links: ActiveCampaignFieldValueLink
+  links: ACFieldValueLinks
   id: string
   owner: string
 }
 
-export interface ActiveCampaignContactLinks {
+/* ------------------------- Contact ------------------------- */
+export interface ACContactLinks {
   bounceLogs: string
   contactAutomations: string
   contactData: string
@@ -50,7 +52,7 @@ export interface ActiveCampaignContactLinks {
   scoreValues: string
 }
 
-export interface ActiveCampaignContactResponse {
+export interface ACContactFull {
   cdate: string
   email: string
   phone: string
@@ -73,30 +75,31 @@ export interface ActiveCampaignContactResponse {
   deleted: string
   anonymized: string
   adate: string | null
-  udate: string
+  udate: string | null
   edate: string | null
   deleted_at: string | null
   created_utc_timestamp: string
   updated_utc_timestamp: string
-  links: ActiveCampaignContactLinks
+  links: ACContactLinks
   id: string
   organization: string | null
 }
 
-export interface ActiveCampaignErrorSource {
+export interface ACErrorSource {
   pointer: string
 }
 
-export interface ActiveCampaignErrorItem {
-  status: number
-  title: string
-  detail: string
-  source: ActiveCampaignErrorSource
+export interface ACErrorResponse {
+  status: number // HTTP status code (e.g., 422)
+  title: string // Short error title
+  detail: string // Human-readable explanation
+  source: ACErrorSource // Object describing the error source
 }
 
-export interface ac_ActiveCampaignContactResponse {
-  fieldValues: ActiveCampaignFieldValueResponse[]
-  contact: ActiveCampaignContact
+/* ------------------------- Root Response ------------------------- */
+export interface I_AC_Update_ContactWithFieldValuesResponse {
+  fieldValues: ACFieldValue[]
+  contact: ACContactFull
   message: string
-  errors: ActiveCampaignErrorItem[]
+  errors?: ACErrorResponse[]
 }
