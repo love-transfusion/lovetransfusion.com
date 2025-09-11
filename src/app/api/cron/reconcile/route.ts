@@ -5,8 +5,6 @@ import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
 import pLimit from 'p-limit'
-
-// Avatar util (kept from your version)
 import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
@@ -21,6 +19,16 @@ const PER_POST_BUDGET_MS = 20000
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
   return auth === `Bearer ${process.env.CRON_SECRET}`
+}
+
+// --- small helpers for safe logging
+const trim = (v: unknown, max = 500) => {
+  try {
+    const s = typeof v === 'string' ? v : JSON.stringify(v)
+    return s.length > max ? s.slice(0, max) + '…' : s
+  } catch {
+    return String(v)
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -184,13 +192,16 @@ async function fetchCommentAuthorsByIds(
     const json = (await res.json()) as Array<{ code: number; body: string }>
     let ok = 0
     let err = 0
+    const samples: Array<{ id: string; body: any }> = [] // >>> DIAG
     json.forEach((item, idx) => {
-      if (item.code !== 200) {
-        err++
-        return
-      }
       try {
         const body = JSON.parse(item.body)
+        if (samples.length < 3)
+          samples.push({ id: chunk[idx], body: body?.from ?? body }) // >>> DIAG
+        if (item.code !== 200) {
+          err++
+          return
+        }
         const f = body?.from
         out[chunk[idx]] = {
           from_id: f?.id ?? null,
@@ -203,6 +214,12 @@ async function fetchCommentAuthorsByIds(
       }
     })
     console.info(span('BATCH_RESULT'), { index: i / chunkSize, ok, err })
+    if (samples.length) {
+      console.info(
+        span('BATCH_SAMPLE_BODIES'),
+        samples.map((s) => ({ id: s.id, body: trim(s.body, 400) }))
+      ) // >>> DIAG
+    }
   }
 
   console.info(span('END'), { resolved: Object.keys(out).length })
@@ -275,7 +292,7 @@ async function reconcilePost(
       return false
     }
 
-    // ── NEW LOG BLOCK #1: What did Graph actually return?
+    // >>> DIAG: Dump raw sample from Graph (includes raw from)
     if (data && data.length) {
       const withFrom = data.filter((c) => !!c.from)
       const withFromId = data.filter((c) => !!c.from?.id)
@@ -284,9 +301,13 @@ async function reconcilePost(
       const preview = data.slice(0, 5).map((c) => ({
         id: c.id,
         parent: c.parent?.id ?? null,
-        from_id: c.from?.id ?? null,
-        from_name: c.from?.name ?? null,
-        has_pic: !!c.from?.picture?.data?.url,
+        from: c.from
+          ? {
+              id: c.from.id ?? null,
+              name: c.from.name ?? null,
+              has_pic: !!c.from?.picture?.data?.url,
+            }
+          : null,
         msg_len: c.message?.length ?? 0,
         created_time: c.created_time,
       }))
@@ -300,6 +321,14 @@ async function reconcilePost(
         },
         preview,
       })
+
+      // >>> DIAG: emit a guidance hint if names nearly all missing
+      if (withFromName.length < Math.ceil(data.length * 0.1)) {
+        console.warn(postSpan('DIAG_SUMMARY'), {
+          hint: 'Graph returned almost no commenter identities. This typically happens when Page Public Metadata Access is not granted OR commenters hide identity for the Page. See also code 10 seen in avatar batch.',
+          identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
+        })
+      }
     } else {
       console.info(postSpan('FETCH_OK'), {
         count: data?.length ?? 0,
@@ -307,10 +336,8 @@ async function reconcilePost(
         next_after: paging?.cursors?.after ?? null,
       })
     }
-    // ── END NEW LOG BLOCK #1
 
     if (data?.length) {
-      // Avatars for comments that already have from.id
       let avatarMap: Record<
         string,
         { url: string | null; isSilhouette: boolean | null }
@@ -333,10 +360,14 @@ async function reconcilePost(
           })
         }
       } catch (e: any) {
-        console.error(postSpan('AVATAR_FAIL'), { message: e?.message })
+        console.error('avatar batch fetch failed', {
+          status: e?.response?.status,
+          text: trim(e?.response?.data ?? e?.message, 700),
+        })
+        console.info(postSpan('AVATAR_ENRICH'), 'skipped due to error')
       }
 
-      // Fallback author fetch for comments missing id OR name
+      // Fallback author fetch
       let authorFallback: Record<
         string,
         {
@@ -358,7 +389,6 @@ async function reconcilePost(
             runId,
             post.post_id
           )
-          // extra insight
           const resolvedNames = Object.values(authorFallback).filter(
             (v) => !!v.from_name
           ).length
@@ -404,7 +434,6 @@ async function reconcilePost(
         }
       })
 
-      // ── NEW LOG BLOCK #2: What will we upsert?
       const previewRows = rows.slice(0, 5).map((r) => ({
         comment_id: r.comment_id,
         from_id: r.from_id,
@@ -417,9 +446,8 @@ async function reconcilePost(
         withFromName: rowsWithName,
         preview: previewRows,
       })
-      // ── END NEW LOG BLOCK #2
 
-      // Upsert in chunks
+      // Upsert
       const chunkSize = 500
       console.time(postSpan('UPSERT'))
       for (let i = 0; i < rows.length; i += chunkSize) {
