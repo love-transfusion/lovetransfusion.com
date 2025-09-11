@@ -23,6 +23,7 @@ export type Database = {
           from_name: string | null
           from_picture_url: string | null
           is_deleted: boolean | null
+          is_edited: boolean
           is_hidden: boolean | null
           like_count: number | null
           message: string | null
@@ -30,7 +31,7 @@ export type Database = {
           permalink_url: string | null
           post_id: string
           raw: Json | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           comment_count?: number | null
@@ -40,6 +41,7 @@ export type Database = {
           from_name?: string | null
           from_picture_url?: string | null
           is_deleted?: boolean | null
+          is_edited?: boolean
           is_hidden?: boolean | null
           like_count?: number | null
           message?: string | null
@@ -47,7 +49,7 @@ export type Database = {
           permalink_url?: string | null
           post_id: string
           raw?: Json | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           comment_count?: number | null
@@ -57,6 +59,7 @@ export type Database = {
           from_name?: string | null
           from_picture_url?: string | null
           is_deleted?: boolean | null
+          is_edited?: boolean
           is_hidden?: boolean | null
           like_count?: number | null
           message?: string | null
@@ -64,7 +67,7 @@ export type Database = {
           permalink_url?: string | null
           post_id?: string
           raw?: Json | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {

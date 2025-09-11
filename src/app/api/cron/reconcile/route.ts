@@ -213,7 +213,7 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         })
       }
 
-      // 2) Fallback author fetch for comments missing c.from
+      // 2) Fallback author fetch for comments missing c.from **id OR name**
       let authorFallback: Record<
         string,
         {
@@ -223,10 +223,13 @@ async function reconcilePost(supabase: Admin, post: I_supa_facebook_posts_row) {
         }
       > = {}
       try {
-        const missingFromIds = data.filter((c) => !c.from?.id).map((c) => c.id)
-        if (missingFromIds.length) {
+        const needsAuthor = data
+          .filter((c) => !(c.from?.id && c.from?.name)) // ← either field missing
+          .map((c) => c.id)
+
+        if (needsAuthor.length) {
           authorFallback = await fetchCommentAuthorsByIds(
-            missingFromIds,
+            needsAuthor,
             pageToken,
             128
           )

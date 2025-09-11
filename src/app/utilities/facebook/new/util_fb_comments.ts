@@ -1,5 +1,5 @@
 'use server'
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 
 export type Order = 'chronological' | 'reverse_chronological'
 
@@ -11,7 +11,11 @@ export type FBComment_V2 = {
   like_count?: number
   comment_count?: number
   parent?: { id: string }
-  from?: { name: string; id: string; picture?: { data?: { url?: string } } }
+  from?: {
+    id: string
+    name: string
+    picture?: { data?: { url?: string; is_silhouette?: boolean } }
+  }
 }
 
 export async function util_fb_comments(options: {
@@ -22,10 +26,9 @@ export async function util_fb_comments(options: {
   since?: string | number
   until?: string | number
   order?: Order
+  // keep the option for compatibility, but it no longer gates 'from{...}'
   identityEnabled?: boolean
 }) {
-  const NEXT_PUBLIC_IDENTITY_ENABLED =
-    (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
   const {
     postId,
     pageAccessToken,
@@ -34,15 +37,19 @@ export async function util_fb_comments(options: {
     since,
     until,
     order = 'chronological',
-    identityEnabled = NEXT_PUBLIC_IDENTITY_ENABLED, // default from env
   } = options
 
+  // Always request author + parent + counts + a decent avatar size
   const fields = [
     'id',
     'message',
     'created_time',
     'permalink_url',
-    ...(identityEnabled ? ['from{id,name,picture{url}}'] : []),
+    'like_count',
+    'comment_count',
+    'parent{id}',
+    // request picture with explicit dimensions for consistent URLs
+    'from{id,name,picture.height(128).width(128){url,is_silhouette}}',
   ].join(',')
 
   const params: Record<string, string> = {
@@ -55,23 +62,41 @@ export async function util_fb_comments(options: {
     ...(until ? { until: String(until) } : {}),
   }
 
-  const { data } = await axios.get(
-    `https://graph.facebook.com/${process.env.NEXT_PUBLIC_GRAPH_VERSION!}/${postId}/comments`,
-    { params }
-  )
+  try {
+    const { data } = await axios.get(
+      `https://graph.facebook.com/${process.env
+        .NEXT_PUBLIC_GRAPH_VERSION!}/${postId}/comments`,
+      { params }
+    )
 
-  if (data?.error?.message) {
-    return {
-      data: null as FBComment_V2[] | null,
-      paging: undefined,
-      error: data.error.message as string,
+    // Graph-level error (200 with error payload)
+    if (data?.error?.message) {
+      return {
+        data: null as FBComment_V2[] | null,
+        paging: undefined,
+        error: data.error.message as string,
+      }
     }
-  }
-  return {
-    data: (data?.data ?? []) as FBComment_V2[],
-    paging: data?.paging as
-      | { cursors?: { after?: string; before?: string }; next?: string }
-      | undefined,
-    error: null as string | null,
+
+    return {
+      data: (data?.data ?? []) as FBComment_V2[],
+      paging: data?.paging as
+        | { cursors?: { after?: string; before?: string }; next?: string }
+        | undefined,
+      error: null as string | null,
+    }
+  } catch (err: unknown) {
+    if (isAxiosError(err)) {
+      const msg =
+        err.response?.data?.error?.message ??
+        err.response?.statusText ??
+        err.message
+      return { data: null, paging: undefined, error: msg }
+    }
+    return {
+      data: null,
+      paging: undefined,
+      error: (err as Error)?.message ?? 'Unknown error',
+    }
   }
 }

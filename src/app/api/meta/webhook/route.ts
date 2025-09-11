@@ -155,12 +155,13 @@ export async function POST(req: NextRequest) {
       from_id: string | null
       from_name: string | null
       from_picture_url: string | null
-      created_time: string // keep this
+      created_time?: string // keep this
       like_count: number | null
       comment_count: number | null
       permalink_url: string | null
       is_hidden: boolean
       is_deleted: boolean
+      is_edited: boolean
       raw: any
       updated_at: string // keep this
     }> = []
@@ -336,15 +337,26 @@ export async function POST(req: NextRequest) {
 
         // add/edited → batch
         // (Meta sends 'edited' explicitly; otherwise treat as add/new)
-        if (v.verb === 'edited') edits++
+        const isEdited = v.verb === 'edited' // NEW
+        if (isEdited) edits++
         else adds++
 
-        batchedRows.push({
+        const rowWithCreated = {
           ...base,
+          created_time: createdISO,
           is_hidden: false,
           is_deleted: false,
-          updated_at: v.verb === 'edited' ? eventISO : createdISO,
-        })
+          is_edited: isEdited,
+          updated_at: isEdited ? eventISO : createdISO,
+        }
+
+        if (isEdited) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { created_time, ...rowWithoutCreated } = rowWithCreated
+          batchedRows.push(rowWithoutCreated)
+        } else {
+          batchedRows.push(rowWithCreated)
+        }
       }
     }
     console.timeEnd('PROCESS_ENTRIES')
