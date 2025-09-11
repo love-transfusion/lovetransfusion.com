@@ -51,18 +51,13 @@ export const supa_update_users = async (data: I_supa_users_update) => {
   }
 }
 
-interface I_supa_facebook_posts_with_comments
-  extends I_supa_facebook_posts_row {
-  facebook_comments: I_supa_facebook_comments_row[]
-}
-
 export interface I_supa_select_user_Response_Types extends I_supa_users_row {
   profile_pictures: I_supa_profile_pictures_row_unextended | null
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
-  recipients: I_supa_recipients_row[] | null
-  facebook_posts: I_supa_facebook_posts_with_comments[]
+  recipients?: I_supa_recipients_row[] | null
+  facebook_posts?: I_supa_facebook_posts_row[]
   facebook_insights?: I_supa_facebook_insights_row[]
-  google_analytics: I_supa_google_analytics_row | null
+  google_analytics?: I_supa_google_analytics_row | null
 }
 
 export const supa_select_user = async (
@@ -77,7 +72,7 @@ export const supa_select_user = async (
   const { data, error } = await supabase
     .from('users')
     .select(
-      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*)), google_analytics(*)'
+      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)'
     )
     .eq('id', user_id)
     .single()
@@ -122,7 +117,7 @@ export const supa_select_users_all = async (
     let query = supabase
       .from('users')
       .select(
-        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(*)), google_analytics(*)'
+        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(count)), google_analytics(*)'
       )
 
     if (options.mode === 'search' && options.searchIDs) {

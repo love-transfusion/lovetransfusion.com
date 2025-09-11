@@ -1,5 +1,4 @@
 import Icon_eyes from '@/app/components/icons/Icon_eyes'
-import Link from 'next/link'
 import { getCurrentUser } from '@/app/config/supabase/getCurrentUser'
 import { isAdmin } from '@/app/lib/adminCheck'
 import Icon_edit from '@/app/components/icons/Icon_edit'
@@ -13,6 +12,10 @@ import {
 } from '@/app/_actions/users/actions'
 import Pagination from '@/app/components/Pagination'
 import { supa_select_recipients_all } from '@/app/_actions/recipients/actions'
+import LinkCustom from '@/app/components/Link/LinkCustom'
+import Engagements from './Engagements'
+import { AdInsight } from '@/app/utilities/facebook/util_fb_insights'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 export interface I_combineddataOfRecipient {
   recipientRow: I_supa_recipients_row
@@ -111,6 +114,29 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                     .map((item) => {
                       const recipientData = item.recipientRow
                         .recipient as I_supaOrg_recipients_row
+
+                      const unknown_FBInsightsCount =
+                        item.user?.facebook_insights &&
+                        (item.user?.facebook_insights[0].insights as unknown)
+                      const FBInsights = unknown_FBInsightsCount as
+                        | AdInsight[]
+                        | undefined
+                      const unknown_recipient = item.recipientRow
+                        .recipient as unknown
+                      const recipient = unknown_recipient as I_supaorg_recipient
+
+                      const share_count =
+                        item.user?.facebook_insights &&
+                        item.user.facebook_insights[0].shares
+
+                      const facebook_post =
+                        item.user?.facebook_posts &&
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (item.user?.facebook_posts[0] as any)
+
+                      const facebook_comments_count =
+                        facebook_post?.facebook_comments &&
+                        facebook_post.facebook_comments[0]?.count
                       return (
                         <tr
                           key={recipientData.id}
@@ -147,10 +173,12 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                             </p>
                           </td>
                           <td className="py-[6px] px-2">
-                            {/* <Engagements
-                              users_data_facebook={item.users_data_facebook}
-                              recipient={item.recipientObj.recipient}
-                            /> */}
+                            <Engagements
+                              fbInsights={FBInsights ?? []}
+                              recipient={recipient}
+                              comments_count={facebook_comments_count ?? 0}
+                              share_count={share_count ?? 0}
+                            />
                           </td>
                           <td className="py-[6px] px-3">
                             <div>
@@ -197,9 +225,11 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                             >
                               <div>
                                 {item.hasCreatedAccount ? (
-                                  <Link href={`/dashboard/${recipientData.id}`}>
+                                  <LinkCustom
+                                    href={`/dashboard/${recipientData.id}`}
+                                  >
                                     <Icon_dashboard className="size-5" />
-                                  </Link>
+                                  </LinkCustom>
                                 ) : (
                                   <p className={'text-center text-neutral-300'}>
                                     -
@@ -208,14 +238,18 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                               </div>
                               <div>
                                 {item.user ? (
-                                  <Link href={`/admin/${recipientData.id}`}>
+                                  <LinkCustom
+                                    href={`/admin/${recipientData.id}`}
+                                  >
                                     <Icon_edit className="size-5 text-primary" />
-                                  </Link>
+                                  </LinkCustom>
                                 ) : recipientData.page_status ===
                                   'published' ? (
-                                  <Link href={`/admin/${recipientData.id}`}>
+                                  <LinkCustom
+                                    href={`/admin/${recipientData.id}`}
+                                  >
                                     <Icon_eyes className="size-5 text-primary" />
-                                  </Link>
+                                  </LinkCustom>
                                 ) : (
                                   <p className={'text-center text-neutral-300'}>
                                     -

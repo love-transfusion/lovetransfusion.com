@@ -1,5 +1,7 @@
 'use server'
 
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
+
 export interface I_CountryPathTotalFormat {
   cl_region: string
   cl_country: string
@@ -11,8 +13,8 @@ export interface I_CountryPathTotalFormat {
 }
 
 type I_getAnalyticsCountryPathTotal = {
-  clGoogleAnalytics: I_AnalyticsData
-  clRecipient: I_supaorg_recipient_hugs_counters_comments
+  clGoogleAnalytics: I_AnalyticsData | undefined
+  clRecipient: I_supaorg_recipient
 }
 
 const getAnalyticsCountryPathTotal = async ({
@@ -83,12 +85,12 @@ const getAnalyticsCountryPathTotal = async ({
     isHug: true,
     locArray: clRecipient.hugs,
   })
-  console.log({ hugs: hugs.length })
+
   const comments = filterOrgLocationsAccordingToType({
     isComments: true,
     locArray: clRecipient.comments,
   })
-  console.log({ comments: comments.length })
+
   return [...analytics, ...hugs, ...comments]
 }
 

@@ -12,7 +12,7 @@ const UpdateSlot = async (props: { params: Params }) => {
   ])
 
   if (!selectedUser) return
-  return <ClientUpdate selectedUser={selectedUser} />
+  return <ClientUpdate />
 }
 
 export default UpdateSlot

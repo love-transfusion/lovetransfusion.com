@@ -6,8 +6,8 @@ import dashboard from './images/dashboard-new.svg'
 import profile from './images/profile.svg'
 import privacy from './images/privacy.svg'
 import Image from 'next/image'
-import Link from 'next/link'
 import Icon_cog from '../components/icons/Icon_cog'
+import LinkCustom from '../components/Link/LinkCustom'
 
 interface I_SubMenu {
   clIsAdmin: boolean
@@ -21,7 +21,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
         MAIN MENU
       </p>
       {clIsAdmin && (
-        <Link href={`/admin`}>
+        <LinkCustom href={`/admin`}>
           <div
             className={
               'flex gap-[13px] items-center text-xl font-acumin-variable-95 font-light'
@@ -30,9 +30,9 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             <Icon_cog className="size-[36px] -ml-1" strokeWidth={0.8} />
             <p className={'ml-1 -mt-[1px]'}>Manage Recipients</p>
           </div>
-        </Link>
+        </LinkCustom>
       )}
-      <Link
+      <LinkCustom
         className={`${!userInStore?.id && 'pointer-events-none'}`}
         href={`/dashboard/${userInStore?.id}`}
         scroll={true}
@@ -50,8 +50,8 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
           />
           <p className={'-mt-[1px]'}>Dashboard</p>
         </div>
-      </Link>
-      <Link
+      </LinkCustom>
+      <LinkCustom
         className={`${!userInStore?.id && 'pointer-events-none'}`}
         href={`/profile/${userInStore?.id}`}
       >
@@ -68,8 +68,8 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
           />
           <p className={'-mt-[1px]'}>Profile</p>
         </div>
-      </Link>
-      <Link href={'/privacy-policy'}>
+      </LinkCustom>
+      <LinkCustom href={'/privacy-policy'}>
         <div
           className={
             'flex gap-[18px] items-center text-xl font-acumin-variable-95 font-light -mt-[2px]'
@@ -83,7 +83,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
           />
           <p className={'-mt-[1px]'}>Privacy</p>
         </div>
-      </Link>
+      </LinkCustom>
     </div>
   )
 }

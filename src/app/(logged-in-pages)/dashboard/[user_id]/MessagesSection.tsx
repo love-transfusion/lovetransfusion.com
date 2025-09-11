@@ -11,12 +11,18 @@ interface I_MessagesSection {
   clComments: I_Comments[]
   clUser_id: string
   selectedUser: I_supa_select_user_Response_Types | null
+  clCurrentPage: string
+  clCount: number
+  clLimit: number
 }
 
 const MessagesSection = ({
   selectedUser,
   clComments,
   clUser_id,
+  clCount,
+  clCurrentPage,
+  clLimit,
 }: I_MessagesSection) => {
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
@@ -62,11 +68,14 @@ const MessagesSection = ({
               clUser_id={clUser_id}
               setcomments={setcomments}
               comments={comments}
+              clCount={clCount}
+              clCurrentPage={clCurrentPage}
+              clLimit={clLimit}
             />
           )}
         </div>
       )}
-      {comments.length > 0 && (
+      {!!comments.length && (
         <div className={'block md:hidden xl:block'}>
           <ShowOrHide clToggle={setshowMessages} clisToggled={showMessages} />
           {showMessages && (

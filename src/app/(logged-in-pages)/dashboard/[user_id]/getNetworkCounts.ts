@@ -4,14 +4,14 @@ import { I_TotalEngagements } from './TotalEngagements'
 
 const getFBDataCounts = (
   fbInsights: I_TotalEngagements['fbInsights'],
-  facebook_comments: I_supa_facebook_comments_row[],
+  facebook_comments_length: number,
   facebook_share_count: number
 ) => {
   const totalFacebookLikeHugCare = fbInsights?.reduce(
     (sum, item) => sum + item.cl_total_reactions,
     0
   )
-  const totalFBComments = facebook_comments.length ?? 0
+  const totalFBComments = facebook_comments_length
   const totalFBShares = facebook_share_count ?? 0
   const totalFacebookData =
     totalFBComments + totalFBShares + totalFacebookLikeHugCare

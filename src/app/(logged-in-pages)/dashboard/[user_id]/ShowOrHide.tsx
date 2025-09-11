@@ -17,7 +17,7 @@ const ShowOrHide = ({
   return (
     <div
       className={twMerge(
-        'flex text-primary items-center text-lg gap-[17px] justify-center',
+        'flex text-primary items-center text-lg gap-[17px] justify-center xl:min-w-[260px] 2xl:min-w-[330px]',
         clContainerClassName
       )}
     >

@@ -15,8 +15,8 @@ type LoadingBarProps = {
 export default function LoadingBar({
   show = true,
   heightClassName = 'h-[4px]',
-  bgClassName = 'bg-green-50',
-  barClassName = 'bg-green-400',
+  bgClassName = 'bg-primary-200',
+  barClassName = 'bg-primary-500',
   zIndexClassName = 'z-[9999]',
 }: LoadingBarProps) {
   return (

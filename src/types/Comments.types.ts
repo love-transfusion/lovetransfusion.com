@@ -4,7 +4,7 @@ export interface I_Comments_Facebook {
   id: string
   message: string
   created_at: string
-  profile_picture?: string
+  profile_picture?: string | null
 }
 
 export interface I_Comments_Instagram {
@@ -13,7 +13,7 @@ export interface I_Comments_Instagram {
   id: string
   message: string
   created_at: string
-  profile_picture?: string
+  profile_picture?: string | null
 }
 
 export interface I_Comments_Website {

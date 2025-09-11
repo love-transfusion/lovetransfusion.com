@@ -72,13 +72,14 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
                       />
                     )}
                     {item.type === 'facebook' && (
-                      <Image
-                        src={item.profile_picture ?? anonymous}
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={
+                          item.profile_picture ??
+                          `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
+                        }
                         alt="Profile picture of engager"
-                        quality={100}
-                        width={37.8}
-                        height={37.8}
-                        className="border-[3px] border-[#288CCC] rounded-full min-w-[37.7px] min-h-[37.7px]"
+                        className="border-[3px] border-[#288CCC] rounded-full w-[37.7px] h-[37.7px]"
                       />
                     )}
                     {index === 0 ? (

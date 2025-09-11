@@ -22,14 +22,14 @@ export interface I_fb_comments_Types {
 
 interface I_HugsMessagesShares {
   recipient: I_supaorg_recipient
-  fbComments: I_supa_facebook_comments_row[]
   fbInsights: [] | AdWiseInsight[]
+  commentsCount: number
 }
 
 const HugsMessagesShares = ({
   recipient,
-  fbComments,
   fbInsights,
+  commentsCount,
 }: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
@@ -51,7 +51,7 @@ const HugsMessagesShares = ({
     comments: fbCommentsCount,
     shares: fbSharesCount,
     totalFacebookData,
-  } = getNetworkCount.fbCounts(fbInsights, fbComments, 0)
+  } = getNetworkCount.fbCounts(fbInsights, commentsCount, 0)
   return (
     <div
       className={

@@ -26,7 +26,7 @@ const MapSlot = async ({ params }: { params: Params }) => {
   const FBInsights = unknown_fbInsights as AdWiseInsight[]
 
   const unknown_analytics = selectedUser.google_analytics?.analytics as unknown
-  const analytics = unknown_analytics as I_AnalyticsData
+  const analytics = unknown_analytics as I_AnalyticsData | undefined
 
   const analyticsWithCountryPathTotal = await getAnalyticsCountryPathTotal({
     clGoogleAnalytics: analytics,

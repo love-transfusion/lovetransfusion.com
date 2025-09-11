@@ -6,8 +6,7 @@ import Image from 'next/image'
 import HugsMessagesShares from './HugsMessagesShares'
 import TotalEngagements from './TotalEngagements'
 import WelcomeMessage from './WelcomeMessage'
-import { filter_comments } from './actions'
-import MessagesSection from './MessagesSection'
+import { filter_deleted_comments } from './actions'
 import { supa_select_user } from '@/app/_actions/users/actions'
 import ErrorMessage from './ErrorMessage'
 import MostRecentEngagements from './MostRecentEngagements'
@@ -16,13 +15,13 @@ import { Metadata } from 'next'
 import { I_Comments } from '@/types/Comments.types'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
+import { supa_select_facebook_comments } from '@/app/_actions/facebook_comments/actions'
 
-type Params = Promise<{ user_id: string }>
-
-interface I_userDashboardLayout extends Params {
+interface I_userDashboardLayout {
   map: React.ReactNode
   updateSlot: React.ReactNode
-  params: Params
+  messageSection: React.ReactNode
+  params: Promise<{ user_id: string }>
 }
 
 export const maxDuration = 60
@@ -51,7 +50,7 @@ export const metadata: Metadata = {
 
 const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { user_id } = await props.params
-  const { updateSlot, map } = props
+  const { updateSlot, map, messageSection } = props
 
   const [{ data: selectedUser }] = await Promise.all([
     supa_select_user(user_id),
@@ -59,20 +58,32 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
 
   if (!selectedUser) return
 
+  const { data: FBComments, count: commentsCount } =
+    await supa_select_facebook_comments({
+      clCurrentPage: 1,
+      clLimit: 10,
+      post_id:
+        selectedUser.facebook_posts && selectedUser.facebook_posts[0].post_id,
+    })
+
   const unknown_selectedRecipient = (selectedUser.recipients ?? [])[0]
     .recipient as unknown
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
-  const FBComments = selectedUser.facebook_posts[0].facebook_comments
+  console.log({ FBComments })
 
   const formattedFBComments: I_Comments[] =
-    FBComments?.map((item) => {
+    FBComments?.filter((item) => {
+      console.log({ isDeleted: item.is_deleted })
+      return !item.is_deleted
+    })?.map((item) => {
       return {
         type: 'facebook',
         id: item.comment_id,
         name: item.from_name ?? 'Someone Who Cares',
         message: item.message ?? 'Empty',
         created_at: item.created_time,
+        profile_picture: item.from_picture_url,
       }
     }) ?? []
 
@@ -112,11 +123,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
 
   const fbInsights = unknown_fbInsights as AdWiseInsight[]
 
-  const allComments = await filter_comments(
-    [...(formattedWebsiteComments ?? []), ...formattedFBComments],
-    selectedUser.receipients_deleted_messages
-  )
-  const allEngagements = await filter_comments(
+  const allEngagements = await filter_deleted_comments(
     [
       ...formattedFBComments,
       ...(formattedWebsiteComments ?? []),
@@ -165,7 +172,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <TotalEngagements
               recipient={selectedRecipient}
               fbInsights={fbInsights}
-              fbComments={FBComments}
+              commentsCount={commentsCount}
             />
             <Image
               src={arrow}
@@ -185,7 +192,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <HugsMessagesShares
               recipient={selectedRecipient}
               fbInsights={fbInsights}
-              fbComments={FBComments}
+              commentsCount={commentsCount}
             />
           </div>
         </div>
@@ -194,7 +201,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             <HugsMessagesShares
               recipient={selectedRecipient}
               fbInsights={fbInsights}
-              fbComments={FBComments}
+              commentsCount={commentsCount}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>
@@ -203,11 +210,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         </div>
       </div>
       {/* Messages Section */}
-      <MessagesSection
-        clUser_id={user_id}
-        clComments={allComments}
-        selectedUser={selectedUser}
-      />
+      {messageSection}
       {updateSlot}
     </div>
   )

@@ -20,7 +20,7 @@ export const supa_insert_deleted_messages = async (
   return { data: result, error: error?.message ?? null }
 }
 
-export const filter_comments = async (
+export const filter_deleted_comments = async (
   comments: I_Comments[],
   clDeletedMessages: I_supa_receipients_deleted_messages_row[]
 ) => {
