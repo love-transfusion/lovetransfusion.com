@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     .map((user) => {
       const unknown_recipient = user.recipients[0].recipient as unknown
       const recipient = unknown_recipient as I_supaorg_recipient | undefined
-      const path_url = recipient?.path_url
+      const path_url = `/${recipient?.path_url}`
       return { path_url, id: user.id }
     })
 

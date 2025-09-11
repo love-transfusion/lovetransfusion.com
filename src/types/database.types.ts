@@ -23,6 +23,7 @@ export type Database = {
           from_name: string | null
           from_picture_url: string | null
           is_deleted: boolean | null
+          is_edited: boolean
           is_hidden: boolean | null
           like_count: number | null
           message: string | null
@@ -40,6 +41,7 @@ export type Database = {
           from_name?: string | null
           from_picture_url?: string | null
           is_deleted?: boolean | null
+          is_edited?: boolean
           is_hidden?: boolean | null
           like_count?: number | null
           message?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           from_name?: string | null
           from_picture_url?: string | null
           is_deleted?: boolean | null
+          is_edited?: boolean
           is_hidden?: boolean | null
           like_count?: number | null
           message?: string | null
