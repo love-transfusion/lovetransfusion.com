@@ -14,10 +14,9 @@ type Admin = Awaited<ReturnType<typeof createAdmin>>
 export const runtime = 'nodejs'
 export const maxDuration = 300
 
-// ---- Tunables via env (all optional) ----
-const BATCH_SIZE = 10 // posts per run
-const CONCURRENCY = 5 // parallel posts
-const PER_POST_BUDGET_MS = 20000 // ~20s/post
+const BATCH_SIZE = 10
+const CONCURRENCY = 5
+const PER_POST_BUDGET_MS = 20000
 
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
@@ -116,7 +115,6 @@ export async function GET(req: NextRequest) {
 
 // ---------- helpers ----------
 
-// Fallback author fetch by comment IDs (when c.from is missing)
 async function fetchCommentAuthorsByIds(
   commentIds: string[],
   pageAccessToken: string,
@@ -277,11 +275,39 @@ async function reconcilePost(
       return false
     }
 
-    console.info(postSpan('FETCH_OK'), {
-      count: data?.length ?? 0,
-      after_in: after,
-      next_after: paging?.cursors?.after ?? null,
-    })
+    // ── NEW LOG BLOCK #1: What did Graph actually return?
+    if (data && data.length) {
+      const withFrom = data.filter((c) => !!c.from)
+      const withFromId = data.filter((c) => !!c.from?.id)
+      const withFromName = data.filter((c) => !!c.from?.name)
+      const withPic = data.filter((c) => !!c.from?.picture?.data?.url)
+      const preview = data.slice(0, 5).map((c) => ({
+        id: c.id,
+        parent: c.parent?.id ?? null,
+        from_id: c.from?.id ?? null,
+        from_name: c.from?.name ?? null,
+        has_pic: !!c.from?.picture?.data?.url,
+        msg_len: c.message?.length ?? 0,
+        created_time: c.created_time,
+      }))
+      console.info(postSpan('FETCH_OK_VERBOSE'), {
+        count: data.length,
+        stats: {
+          withFrom: withFrom.length,
+          withFromId: withFromId.length,
+          withFromName: withFromName.length,
+          withPicture: withPic.length,
+        },
+        preview,
+      })
+    } else {
+      console.info(postSpan('FETCH_OK'), {
+        count: data?.length ?? 0,
+        after_in: after,
+        next_after: paging?.cursors?.after ?? null,
+      })
+    }
+    // ── END NEW LOG BLOCK #1
 
     if (data?.length) {
       // Avatars for comments that already have from.id
@@ -332,6 +358,14 @@ async function reconcilePost(
             runId,
             post.post_id
           )
+          // extra insight
+          const resolvedNames = Object.values(authorFallback).filter(
+            (v) => !!v.from_name
+          ).length
+          console.info(postSpan('FALLBACK_DONE'), {
+            resolved: Object.keys(authorFallback).length,
+            resolvedNames,
+          })
         }
       } catch (e: any) {
         console.error(postSpan('FALLBACK_ERR'), { message: e?.message })
@@ -369,7 +403,21 @@ async function reconcilePost(
           updated_at: new Date().toISOString(),
         }
       })
-      console.info(postSpan('ROWS_BUILT'), { rows: rows.length })
+
+      // ── NEW LOG BLOCK #2: What will we upsert?
+      const previewRows = rows.slice(0, 5).map((r) => ({
+        comment_id: r.comment_id,
+        from_id: r.from_id,
+        from_name: r.from_name,
+        has_pic: !!r.from_picture_url,
+      }))
+      const rowsWithName = rows.filter((r) => !!r.from_name).length
+      console.info(postSpan('ROWS_PREVIEW'), {
+        total: rows.length,
+        withFromName: rowsWithName,
+        preview: previewRows,
+      })
+      // ── END NEW LOG BLOCK #2
 
       // Upsert in chunks
       const chunkSize = 500
@@ -405,7 +453,6 @@ async function reconcilePost(
       console.info(postSpan('NO_DATA_PAGE'))
     }
 
-    // Update resume cursor after each page
     after = paging?.cursors?.after
     console.info(postSpan('CURSOR_UPDATE'), { next_after: after ?? null })
     await supabase
@@ -416,7 +463,6 @@ async function reconcilePost(
     finished = !after
   } while (!finished)
 
-  // Finished this post
   console.time(postSpan('FINALIZE'))
   const { error: updErr } = await supabase
     .from('facebook_posts')
@@ -444,7 +490,6 @@ async function reconcilePost(
   return true
 }
 
-// Mark a post as deferred (time budget hit) and persist the cursor (if any)
 async function deferPost(
   supabase: Admin,
   post_id: string,
@@ -461,7 +506,6 @@ async function deferPost(
     .eq('post_id', post_id)
 }
 
-// Mark a post as error, increment retry_count and capture last_error
 async function markPostError(
   supabase: Admin,
   post_id: string,
