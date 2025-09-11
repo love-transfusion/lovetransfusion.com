@@ -22,10 +22,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'xbjzdshnnddfeqyninmm.supabase.co',
       },
-      {
-        protocol: 'https',
-        hostname: 'platform-lookaside.fbsbx.com',
-      },
     ],
   },
 }
