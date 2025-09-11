@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import BasicInformation from './BasicInformationTab'
 import ProfileSecurity from './ProfileSecurity'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 
 type I_Tabs = 'basic information' | 'security'
 
@@ -14,13 +15,7 @@ export interface I_ProfileForm {
 export interface I_UserWithProfilePicture extends I_supa_users_row {
   profile_pictures: I_supa_profile_pictures_row_unextended | null
 }
-const ProfileForm = ({
-  user,
-  users_data_website,
-}: {
-  user: I_UserWithProfilePicture
-  users_data_website: I_supa_users_data_website_row[]
-}) => {
+const ProfileForm = ({ user }: { user: I_supa_select_user_Response_Types }) => {
   const [activeTab, setactiveTab] = useState<I_Tabs>('basic information')
 
   const handleSwitchTabs = (tab: I_Tabs) => {
@@ -56,12 +51,7 @@ const ProfileForm = ({
           'md:max-w-[440px] mx-auto rounded-lg shadow-custom2 px-6 py-10 md:py-[40px] md:px-[60px]'
         }
       >
-        {activeTab === 'basic information' && (
-          <BasicInformation
-            user={user}
-            users_data_website={users_data_website}
-          />
-        )}
+        {activeTab === 'basic information' && <BasicInformation user={user} />}
         {activeTab === 'security' && <ProfileSecurity user={user} />}
       </div>
     </>

@@ -70,13 +70,8 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     .recipient as unknown
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
-  console.log({ FBComments })
-
   const formattedFBComments: I_Comments[] =
-    FBComments?.filter((item) => {
-      console.log({ isDeleted: item.is_deleted })
-      return !item.is_deleted
-    })?.map((item) => {
+    FBComments?.filter((item) => !item.is_deleted)?.map((item) => {
       return {
         type: 'facebook',
         id: item.comment_id,

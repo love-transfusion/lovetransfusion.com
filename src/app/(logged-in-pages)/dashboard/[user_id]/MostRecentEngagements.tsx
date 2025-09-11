@@ -93,10 +93,11 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
                       src={ltWebsiteIcon}
                       alt="LT Website Icon"
                       quality={100}
+                      className="min-w-[21px]"
                     />
                   )}
                   {item.type === 'facebook' && (
-                    <Icon_facebook2 className="text-primary my-auto" />
+                    <Icon_facebook2 className="text-primary my-auto min-w-[21px]" />
                   )}
                 </div>
               )

@@ -5,21 +5,23 @@ import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import { useForm } from 'react-hook-form'
 import { util_capitalize } from '@/app/utilities/util_capitalize'
-import { supa_update_users } from '@/app/_actions/users/actions'
+import {
+  I_supa_select_user_Response_Types,
+  supa_update_users,
+} from '@/app/_actions/users/actions'
 import { useStore } from 'zustand'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
 import { I_LocalImage, useUploadImage } from '@/app/hooks/useUploadImage'
 import Image from 'next/image'
 import Icon_upload from '@/app/components/icons/Icon_upload'
-import { I_ProfileForm, I_UserWithProfilePicture } from './ProfileForm'
+import { I_ProfileForm } from './ProfileForm'
+import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 const BasicInformation = ({
   user,
-  users_data_website,
 }: {
-  user: I_UserWithProfilePicture
-  users_data_website: I_supa_users_data_website_row[]
+  user: I_supa_select_user_Response_Types
 }) => {
   const [localImage, setlocalImage] = useState<I_LocalImage[]>([])
   const { getRootProps, getInputProps, images, error, uploadAllToSupabase } =
@@ -72,6 +74,10 @@ const BasicInformation = ({
     }
   }, [images])
 
+  const unknown_recipient =
+    user.recipients && (user.recipients[0].recipient as unknown)
+  const recipient = unknown_recipient as I_supaorg_recipient
+
   return (
     <div className="animate-slide-in-right">
       <div className={'flex flex-col gap-1'}>
@@ -79,9 +85,9 @@ const BasicInformation = ({
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-full text-center cursor-pointer w-[120px] h-[120px] relative ${
-              localImage.length > 0 ||
+              !!localImage.length ||
               user.profile_pictures?.storage_path ||
-              users_data_website[0].recipient?.profile_picture?.fullPath
+              recipient.recipients_profile_pictures.storage_path
                 ? 'border-white'
                 : 'border-gray-300'
             }`}
@@ -93,18 +99,17 @@ const BasicInformation = ({
                   ? localImage[localImage.length - 1].previewUrl
                   : `${
                       user.profile_pictures?.storage_path
-                        ? `${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL}${user.profile_pictures?.bucket_name}/${user.profile_pictures?.storage_path}`
-                        : `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}${users_data_website[0].recipient?.profile_picture?.fullPath}`
+                        ? `${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL}${user.profile_pictures.bucket_name}/${user.profile_pictures.storage_path}`
+                        : `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}${recipient.recipients_profile_pictures.bucket_name}/${recipient.recipients_profile_pictures.storage_path}`
                     }`
               }
               alt="profile placeholder"
               blurDataURL={
-                localImage.length > 0
+                !!localImage.length
                   ? localImage[localImage.length - 1].blurDataURL
                   : `${
                       user.profile_pictures?.blur_data_url ??
-                      users_data_website[0].recipient?.profile_picture
-                        ?.blurDataURL
+                      recipient.recipients_profile_pictures.blur_data_url
                     }`
               }
               placeholder={'blur'}
