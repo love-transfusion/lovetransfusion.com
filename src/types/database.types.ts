@@ -277,29 +277,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          recipient_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id: string
-          recipient_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          recipient_id?: string
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "receipients_deleted_messages_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "users_data_website"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "receipients_deleted_messages_user_id_fkey"
             columns: ["user_id"]
@@ -466,73 +456,6 @@ export type Database = {
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
-      }
-      users_data_facebook: {
-        Row: {
-          comments: Json | null
-          id: string
-          insights: Json | null
-          share_count: number
-          updated_at: string
-        }
-        Insert: {
-          comments?: Json | null
-          id: string
-          insights?: Json | null
-          share_count: number
-          updated_at?: string
-        }
-        Update: {
-          comments?: Json | null
-          id?: string
-          insights?: Json | null
-          share_count?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_data_facebook_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users_data_website: {
-        Row: {
-          created_at: string
-          id: string
-          profile_picture: Json | null
-          recipient: Json
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          profile_picture?: Json | null
-          recipient: Json
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          profile_picture?: Json | null
-          recipient?: Json
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_data_website_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

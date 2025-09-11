@@ -140,7 +140,6 @@ const Messages = ({
                           onClick={() =>
                             handleDelete({
                               id: item.id,
-                              recipient_id: selectedUser.id,
                               user_id: clUser_id,
                             })
                           }
