@@ -13,12 +13,14 @@ export interface I_TotalEngagements {
   recipient: I_supaorg_recipient
   fbInsights: [] | AdWiseInsight[]
   commentsCount: number
+  fbShareCount: number
 }
 
 const TotalEngagements = ({
   recipient,
   fbInsights,
-  commentsCount
+  commentsCount,
+  fbShareCount,
 }: I_TotalEngagements) => {
   const { total: totalOrgRecipientData } = getNetworkCount.orgCounts(recipient)
   const { Tooltip } = useTooltip({
@@ -29,7 +31,7 @@ const TotalEngagements = ({
   const { totalFacebookData } = getNetworkCount.fbCounts(
     fbInsights,
     commentsCount,
-    0
+    fbShareCount
   )
 
   return (

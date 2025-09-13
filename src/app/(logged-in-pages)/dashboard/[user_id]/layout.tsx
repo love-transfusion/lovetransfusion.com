@@ -127,6 +127,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     selectedUser.receipients_deleted_messages
   )
 
+  const fbShareCount = !!selectedUser.facebook_insights?.length
+    ? selectedUser.facebook_insights[0].shares
+    : 0
   return (
     <div className="">
       <ErrorMessage />
@@ -168,6 +171,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               recipient={selectedRecipient}
               fbInsights={fbInsights}
               commentsCount={commentsCount}
+              fbShareCount={fbShareCount}
             />
             <Image
               src={arrow}
@@ -188,6 +192,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               recipient={selectedRecipient}
               fbInsights={fbInsights}
               commentsCount={commentsCount}
+              fbShareCount={fbShareCount}
             />
           </div>
         </div>
@@ -197,6 +202,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               recipient={selectedRecipient}
               fbInsights={fbInsights}
               commentsCount={commentsCount}
+              fbShareCount={fbShareCount}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>

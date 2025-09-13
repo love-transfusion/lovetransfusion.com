@@ -5,11 +5,11 @@ import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import {
   markCommentDeleted,
   markCommentHidden,
-} from '@/app/utilities/facebook/new/helpers/webhookWrites'
+} from '@/app/utilities/facebook/helpers/webhookWrites'
 
 // ✅ ADDED: use your profile-picture util
-import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
-import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
+import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
+import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 
 // Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'

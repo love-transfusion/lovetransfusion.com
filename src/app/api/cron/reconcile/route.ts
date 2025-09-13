@@ -2,10 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
-import { util_fb_comments } from '@/app/utilities/facebook/new/util_fb_comments'
+import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
+import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
 import pLimit from 'p-limit'
-import { util_fb_profile_picture } from '@/app/utilities/facebook/new/util_fb_profile_picture'
+import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 

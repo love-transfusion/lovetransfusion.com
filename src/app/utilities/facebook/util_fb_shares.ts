@@ -39,7 +39,7 @@ export async function getShareCountForPost(opts: {
  * One-call wrapper: Ad ID -> Post ID -> Page Token -> Share count
  * Mirrors your fetchAdComments flow.
  */
-export async function util_fetchFBAdShareCount(options: {
+export async function util_fb_shares(options: {
   postID: string
   pageAccessToken: string
 }) {

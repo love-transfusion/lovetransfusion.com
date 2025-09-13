@@ -462,7 +462,7 @@ type FetchAdWiseInsightsParams =
 // --- Ad Wise Insights ---
 /**
  * ```
- * await util_fetchAdWiseInsights ({
+ * await util_fb_insights ({
       accountId || ad_id,
       apiVersion?,
       datePreset?,
@@ -470,7 +470,7 @@ type FetchAdWiseInsightsParams =
  * ```
   @returns AdWiseInsight[]
  */
-export const util_fetchAdWiseInsights = async ({
+export const util_fb_insights = async ({
   accountId,
   ad_id,
 }: FetchAdWiseInsightsParams): Promise<{
@@ -657,7 +657,7 @@ export const util_multiple_fetchAdWiseInsights = async (
   const customResult = ad_ids?.length
     ? await Promise.all(
         ad_ids.map(async (id) => {
-          return await util_fetchAdWiseInsights({
+          return await util_fb_insights({
             ad_id: id,
           })
         })

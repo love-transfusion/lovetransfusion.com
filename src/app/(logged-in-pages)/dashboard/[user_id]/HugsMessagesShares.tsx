@@ -24,12 +24,14 @@ interface I_HugsMessagesShares {
   recipient: I_supaorg_recipient
   fbInsights: [] | AdWiseInsight[]
   commentsCount: number
+  fbShareCount: number
 }
 
 const HugsMessagesShares = ({
   recipient,
   fbInsights,
   commentsCount,
+  fbShareCount,
 }: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
@@ -51,7 +53,14 @@ const HugsMessagesShares = ({
     comments: fbCommentsCount,
     shares: fbSharesCount,
     totalFacebookData,
-  } = getNetworkCount.fbCounts(fbInsights, commentsCount, 0)
+  } = getNetworkCount.fbCounts(fbInsights, commentsCount, fbShareCount)
+  console.log({
+    fbInsights,
+    fbHugsCount,
+    fbCommentsCount,
+    fbSharesCount,
+    totalFacebookData,
+  })
   return (
     <div
       className={

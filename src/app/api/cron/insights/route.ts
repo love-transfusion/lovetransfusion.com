@@ -2,11 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pLimit from 'p-limit'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { util_fetchAdWiseInsights } from '@/app/utilities/facebook/util_fb_insights'
-import { util_fb_postID } from '@/app/utilities/facebook/new/util_fb_postID'
-import { util_fb_pageToken } from '@/app/utilities/facebook/new/util_fb_pageToken'
-import { util_fetchFBAdShareCount } from '@/app/utilities/facebook/util_fetchFBAdShareCount'
+import { util_fb_insights } from '@/app/utilities/facebook/util_fb_insights'
+import { util_fb_postID } from '@/app/utilities/facebook/util_fb_postID'
+import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { Json } from '@/types/database.types'
+import { util_fb_shares } from '@/app/utilities/facebook/util_fb_shares'
 
 export const runtime = 'nodejs'
 
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   const fetched = await Promise.allSettled(
     tasks.map(({ user_id, ad_id }) =>
       limit(async () => {
-        const { data, error } = await util_fetchAdWiseInsights({ ad_id })
+        const { data, error } = await util_fb_insights({ ad_id })
         if (error) throw new Error(error)
 
         // --- NEW share count logic ---
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
                 pageId,
               })
               if (pageAccessToken) {
-                const { count } = await util_fetchFBAdShareCount({
+                const { count } = await util_fb_shares({
                   postID: postId,
                   pageAccessToken,
                 })

@@ -20,7 +20,7 @@ import {
 import FBAdIDs from './FBAdIDs'
 import { supa_update_recipients } from '@/app/_actions/recipients/actions'
 import { supa_update_facebook_posts } from '@/app/_actions/facebook_posts/actions'
-import { util_fb_postID } from '@/app/utilities/facebook/new/util_fb_postID'
+import { util_fb_postID } from '@/app/utilities/facebook/util_fb_postID'
 
 interface recipientFormTypes {
   facebookURL: string | null | undefined
