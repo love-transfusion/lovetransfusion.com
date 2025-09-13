@@ -28,10 +28,10 @@ export const resendEmail_AccountCredentials = async (
   await transport.sendMail({
     from: {
       name: 'Kevin Lengkeek',
-      address: 'kevinl@lovetransfusion.com',
+      address: 'kevinl@lovetransfusion.org',
     },
     // to: email,
-    to: 'kevinl@lovetransfusion.com',
+    to: 'kevinl@lovetransfusion.org',
     subject: 'Your LoveTransfusion Account Info',
     html: `
     <!DOCTYPE html>

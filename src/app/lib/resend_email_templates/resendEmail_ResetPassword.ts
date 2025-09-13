@@ -32,7 +32,7 @@ export const resendEmail_ResetPassword = async (
   await transport.sendMail({
     from: {
       name: 'Kevin Lengkeek',
-      address: 'kevinl@lovetransfusion.com',
+      address: 'kevinl@lovetransfusion.org',
     },
     to: email,
     subject: 'Reset Your Password',

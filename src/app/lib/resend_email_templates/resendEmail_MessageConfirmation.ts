@@ -34,7 +34,7 @@ export const resendEmail_MessageConfirmation = async (
   await transport.sendMail({
     from: {
       name: 'Kevin Lengkeek',
-      address: 'kevinl@lovetransfusion.com',
+      address: 'kevinl@lovetransfusion.org',
     },
     to: email,
     subject: 'Your Message Has Been Received',
