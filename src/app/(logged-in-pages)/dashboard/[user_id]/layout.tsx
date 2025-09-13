@@ -63,7 +63,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       clCurrentPage: 1,
       clLimit: 10,
       post_id:
-        selectedUser.facebook_posts && selectedUser.facebook_posts[0].post_id,
+        selectedUser.facebook_posts && !!selectedUser.facebook_posts.length
+          ? selectedUser.facebook_posts[0].post_id
+          : undefined,
     })
 
   const unknown_selectedRecipient = (selectedUser.recipients ?? [])[0]

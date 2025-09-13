@@ -28,7 +28,7 @@ export const resendEmail_AccountCredentials = async (
   await transport.sendMail({
     from: {
       name: 'Kevin Lengkeek',
-      address: 'kevinl@lovetransfusion.org',
+      address: 'kevinl@lovetransfusion.com',
     },
     // to: email,
     to: 'kevinl@lovetransfusion.org',
