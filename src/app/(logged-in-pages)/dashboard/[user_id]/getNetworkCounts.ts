@@ -7,10 +7,9 @@ const getFBDataCounts = (
   facebook_comments_length: number,
   facebook_share_count: number
 ) => {
-  const totalFacebookLikeHugCare = fbInsights?.reduce(
-    (sum, item) => sum + item.cl_total_reactions,
-    0
-  )
+  const totalFacebookLikeHugCare = !!fbInsights.length
+    ? fbInsights?.reduce((sum, item) => sum + item.cl_total_reactions, 0)
+    : 0
   const totalFBComments = facebook_comments_length
   const totalFBShares = facebook_share_count ?? 0
   const totalFacebookData =

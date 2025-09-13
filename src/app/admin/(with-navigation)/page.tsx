@@ -117,6 +117,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
 
                       const unknown_FBInsightsCount =
                         item.user?.facebook_insights &&
+                        !!item.user.facebook_insights.length &&
                         (item.user?.facebook_insights[0].insights as unknown)
                       const FBInsights = unknown_FBInsightsCount as
                         | AdInsight[]
@@ -127,6 +128,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
 
                       const share_count =
                         item.user?.facebook_insights &&
+                        item.user.facebook_insights.length &&
                         item.user.facebook_insights[0].shares
 
                       const facebook_post =

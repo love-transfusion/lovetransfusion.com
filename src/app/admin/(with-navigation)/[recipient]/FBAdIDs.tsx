@@ -4,6 +4,7 @@ import Icon_pencil from '@/app/components/icons/Icon_pencil'
 import Icon_right from '@/app/components/icons/Icon_right'
 import Icon_trash from '@/app/components/icons/Icon_trash'
 import Input from '@/app/components/inputs/basic-input/Input'
+import { regex } from '@/app/lib/regex/regexCheck'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import React, {
   ChangeEvent,
@@ -32,6 +33,18 @@ const FBAdIDs = ({
   const [inputValue, setinputValue] = useState<string>('')
   const { settoast } = useStore(utilityStore)
 
+  const checkValidity = () => {
+    if (!inputValue.trim()) return false
+    if (inputValue.length > 22 || !regex.isNumber(inputValue)) {
+      settoast({
+        clDescription: 'The Ad ID you entered is invalid.',
+        clStatus: 'error',
+      })
+      return false
+    }
+    return true
+  }
+
   const appendCurrentInputValue = () => {
     if (
       FBAdIDsArray.includes(inputValue) ||
@@ -43,7 +56,9 @@ const FBAdIDs = ({
       })
       return
     }
-    if (!inputValue.trim()) return
+
+    const isValid = checkValidity()
+    if (!isValid) return
 
     setFBAdIDs((prev) => {
       return [...prev, inputValue]
@@ -62,7 +77,9 @@ const FBAdIDs = ({
       })
       return
     }
-    if (!inputValue.trim()) return
+
+    const isValid = checkValidity()
+    if (!isValid) return
 
     setFBAdIDs((prev) => {
       return prev.map((i) => {

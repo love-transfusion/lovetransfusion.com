@@ -48,7 +48,7 @@ const Popup = ({
             <Icon_close
               onClick={handleCloseIconClick}
               className={twMerge(
-                'w-14 h-14 md:w-[80px] md:h-[80px] text-white absolute top-5 right-5 cursor-pointer z-10',
+                'w-14 h-14 md:w-[80px] md:h-[80px] text-white absolute top-5 right-5 cursor-pointer z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]',
                 clIconStyle
               )}
             />
