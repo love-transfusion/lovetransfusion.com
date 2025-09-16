@@ -56,7 +56,7 @@ const MessageSlot = async (props: MessageSlot_Types) => {
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
   const formattedFBComments: I_Comments[] =
-    FBComments?.filter((item) => !item.is_deleted)?.map((item) => {
+    FBComments?.map((item) => {
       return {
         type: 'facebook',
         id: item.comment_id,

@@ -20,6 +20,8 @@ export const supa_select_facebook_comments = async (options: {
       .from('facebook_comments')
       .select('*', { count: 'exact' })
       .eq('post_id', options.post_id)
+      .neq('is_hidden', true)
+      .neq('is_deleted', true)
       .order('created_time', { ascending: false })
       .limit(newLimit)
       .range(from, to)
