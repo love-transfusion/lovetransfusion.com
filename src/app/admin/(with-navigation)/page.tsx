@@ -49,7 +49,6 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
     mode: 'search',
     searchIDs: recipients && recipients.map((item) => item.id),
   })
-
   const combinedData: I_combineddataOfRecipient[] =
     (recipients &&
       recipients.map((item) => {
@@ -65,7 +64,6 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
         }
       })) ??
     []
-
   return (
     <>
       <div

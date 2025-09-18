@@ -46,15 +46,6 @@ const SlidingSupportersName = ({ clRecipient }: I_SlidingSupportersName) => {
               <Icon_heart className="size-[14px]" />
               <p className="w-fit text-nowrap text-sm">
                 {item.name ?? 'Someone Who Cares'}
-                <span className="capitalize">
-                  {(item.location?.city &&
-                    `${' - ' + item.location?.city.replaceAll('%20', ' ')}`) ||
-                    (item.location?.country &&
-                      `${
-                        '- ' + item.location?.country.replaceAll('%20', ' ')
-                      }`) ||
-                    ''}
-                </span>
               </p>
             </div>
           )
