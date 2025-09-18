@@ -69,6 +69,11 @@ export const resendEmail_AccountCredentials = async (
 
                   <p style="font-size: 14px; color: #777;">For security, we recommend changing your password after logging in.</p>
                   <br />
+                  <p style="font-size: 14px; color: #000;">Please do not reply to this email, as replies are not monitored. If you need assistance, please visit <a href="https://www.lovetransfusion.org/contact" target="_blank" style="color: inherit; text-decoration: none;">
+  https://www.lovetransfusion.org/contact
+</a>
+</p>
+                  <br />
                   <a href="https://www.lovetransfusion.com/login" style="background-color: #2E8EDD; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">Log In Now</a>
                 </td>
               </tr>
