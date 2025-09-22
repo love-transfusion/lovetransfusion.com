@@ -54,13 +54,6 @@ const HugsMessagesShares = ({
     shares: fbSharesCount,
     totalFacebookData,
   } = getNetworkCount.fbCounts(fbInsights, commentsCount, fbShareCount)
-  // console.log({
-  //   fbInsights,
-  //   fbHugsCount,
-  //   fbCommentsCount,
-  //   fbSharesCount,
-  //   totalFacebookData,
-  // })
   return (
     <div
       className={

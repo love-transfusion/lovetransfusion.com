@@ -61,7 +61,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
   const { data: FBComments, count: commentsCount } =
     await supa_select_facebook_comments({
       clCurrentPage: 1,
-      clLimit: 10,
+      clLimit: 100,
       post_id:
         selectedUser.facebook_posts && !!selectedUser.facebook_posts.length
           ? selectedUser.facebook_posts[0].post_id
@@ -136,7 +136,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     <div className="">
       <ErrorMessage />
       <WelcomeMessage selectedUser={selectedUser} />
-      <SlidingSupportersName clRecipient={selectedRecipient} />
+      <SlidingSupportersName
+        clRecipient={selectedRecipient}
+        formattedFBComments={formattedFBComments}
+      />
       {/* Profile and Map Section */}
       <div
         className={

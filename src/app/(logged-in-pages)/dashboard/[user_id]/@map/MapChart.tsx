@@ -46,7 +46,7 @@ const MapChart = ({
     const loadMap = async () => {
       if (mappedData.length < 1) setLoading(true)
 
-      const res = await fetch('/maps/world.json', { cache: 'force-cache' })
+      const res = await fetch('/maps/world_detailed_level2.json', { cache: 'force-cache' })
       const worldJson = await res.json()
       registerMap('world', worldJson)
 
@@ -132,7 +132,8 @@ const MapChart = ({
           scaleLimit: { min: 1, max: 10 },
           itemStyle: {
             areaColor: '#E2F2FA',
-            borderColor: '#DAEBFA',
+            borderWidth: 0.8,
+            borderColor: '#d6eafc',
           },
           emphasis: {
             label: { show: false },
