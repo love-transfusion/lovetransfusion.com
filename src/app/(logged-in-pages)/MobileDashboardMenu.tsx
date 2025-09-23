@@ -23,7 +23,7 @@ const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
   return (
     <>
       <Icon_menu
-        className="size-6 text-white 2xl:hidden cursor-pointer"
+        className="size-6 text-white xl:hidden cursor-pointer"
         onClick={() => clToggleDrawer()}
       />
       <Drawer

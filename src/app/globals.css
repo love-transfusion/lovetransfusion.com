@@ -61,7 +61,12 @@
     height: 26.5vw !important;
   }
 }
-@media (min-width: 768px) and (max-width: 1439px) {
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .echarts-for-react {
+    height: 320px !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
   .echarts-for-react {
     height: 370px !important;
   }

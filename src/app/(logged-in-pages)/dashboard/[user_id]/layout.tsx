@@ -143,7 +143,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       {/* Profile and Map Section */}
       <div
         className={
-          'flex flex-wrap xl:flex-nowrap gap-2 md:gap-5 xl:gap-0 pt-[30px] xl:pt-[53px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 2xl:pl-[59px] pr-0 md:pr-[34px] 2xl:pr-[49px] border-b-4 border-[#B0E0F1]'
+          'flex flex-wrap xl:flex-nowrap gap-2 md:gap-5 xl:gap-0 pt-[30px] xl:pt-[53px] pb-8 md:pb-[38px] xl:pb-[50px] pl-0 md:pl-10 xl:pl-6 2xl:pl-[59px] pr-0 md:pr-[34px] xl:pr-2 2xl:pr-[49px] border-b-4 border-[#B0E0F1]'
         }
       >
         <div
@@ -182,7 +182,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               src={arrow}
               alt="arrow"
               quality={100}
-              className=" max-sm:hidden absolute top-[9px] left-[64px] my-auto min-w-[260px]"
+              className=" max-sm:hidden absolute top-[9px] xl:top-2 2xl:top-[9px] left-[64px] my-auto min-w-[260px] xl:min-w-[220px] 2xl:min-w-[260px]"
             />
           </div>
         </div>

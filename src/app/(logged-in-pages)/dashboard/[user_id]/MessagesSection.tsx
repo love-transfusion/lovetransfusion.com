@@ -38,11 +38,15 @@ const MessagesSection = ({
   return (
     <div
       className={
-        'flex flex-col-reverse md:flex-row items-center md:items-start justify-center gap-4 md:gap-[65px] pl-5 pr-5 md:pl-[60px] md:pr-[60px] 2xl:pl-[86px] 2xl:pr-0 pt-5 pb-5 md:pt-7 md:pb-7 bg-[#EFF7FC] min-h-[130px]'
+        'flex flex-col-reverse md:flex-row items-center md:items-start justify-center gap-4 md:gap-[65px] pl-5 pr-5 md:pl-[60px] md:pr-[60px] xl:pl-9 xl:pr-9 2xl:pl-[86px] 2xl:pr-0 pt-5 pb-5 md:pt-7 md:pb-7 bg-[#EFF7FC] min-h-[130px]'
       }
     >
       {comments.length > 0 && (
-        <div className={'md:min-w-full xl:min-w-[900px] w-full max-w-[959px]'}>
+        <div
+          className={
+            'md:min-w-full xl:min-w-[600px] 2xl:min-w-[760px] w-full max-w-[959px]'
+          }
+        >
           <div className={'flex gap-9'}>
             <DividerText
               clContainerClassName="hidden md:block"

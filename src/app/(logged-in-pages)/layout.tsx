@@ -29,7 +29,7 @@ const UserIDLayout = async ({
     <>
       <div
         className={
-          'grid grid-cols-1 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
+          'grid grid-cols-1 xl:grid-cols-[95px_calc(100%-95px)] 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
         }
       >
         <NavigationMenu clIsAdmin={isadmin} />
@@ -54,7 +54,7 @@ const UserIDLayout = async ({
             >
               <div className={'flex gap-[11px] items-center'}>
                 <MobileDashboardMenu clIsAdmin={isadmin} />
-                <div className="flex gap-[40px] xl:gap-[90px]">
+                <div className="flex gap-[40px] xl:gap-8 2xl:gap-[90px]">
                   <p
                     className={
                       'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[3px] md:tracking-[5.8px] -mt-[1px]'

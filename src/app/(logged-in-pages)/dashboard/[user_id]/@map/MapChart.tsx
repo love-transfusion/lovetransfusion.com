@@ -133,7 +133,7 @@ const MapChart = ({
           itemStyle: {
             areaColor: '#E2F2FA',
             borderWidth: 0.8,
-            borderColor: '#d6eafc',
+            borderColor: '#a1d5ef',
           },
           emphasis: {
             label: { show: false },

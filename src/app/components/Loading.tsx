@@ -20,7 +20,7 @@ const LoadingComponent = ({
       )}
     >
       <div className={'relative w-fit'}>
-        <div className={'overflow-hidden rounded-full w-fit h-fit'}>
+        <div className={'overflow-hidden rounded-full w-fit h-fit mx-auto'}>
           <div className="rounded-full p-[6px] bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] size-20 relative animate-spin">
             <div
               className={
@@ -31,7 +31,7 @@ const LoadingComponent = ({
           <Image
             src={LTlogo}
             alt="Component"
-            className="absolute inset-[6px] bg-white rounded-full"
+            className="absolute inset-[6px] mx-auto bg-white rounded-full"
           />
         </div>
         <p className={'text-center'}>{clLoadingText ?? 'Loading...'}</p>

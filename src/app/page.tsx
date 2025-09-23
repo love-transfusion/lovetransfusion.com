@@ -29,7 +29,7 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-variable-68 font-bold text-2xl md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto'
+              'font-acumin-variable-68 font-bold text-balance text-[28px] md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto'
             }
           >
             Connecting People Who Hurt With Those Who Care
@@ -43,7 +43,7 @@ const Homepage = async () => {
           </p>
           <div
             className={
-              'flex flex-col lg:flex-row gap-[54px] w-full mx-auto max-w-[940px] mt-8 md:mt-[61px]'
+              'flex flex-col lg:flex-row gap-[54px] items-center lg:items-start w-full mx-auto max-w-[940px] mt-8 md:mt-[61px]'
             }
           >
             <div
@@ -63,7 +63,7 @@ const Homepage = async () => {
                   quality={100}
                   width={205}
                   height={206}
-                  className="rounded-full ring-[6px] border-[4px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[205px] min-w-[213px]"
+                  className="rounded-full ring-[6px] border-[4px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[160px] min-w-[160px] md:min-w-[213px]"
                 />
                 <Image
                   src={brandLogo}
@@ -71,7 +71,7 @@ const Homepage = async () => {
                   width={67}
                   height={68}
                   quality={100}
-                  className="absolute ml-[2px] -bottom-[6px] -right-[6px]"
+                  className="absolute ml-[2px] -bottom-[6px] -right-[6px] max-sm:max-w-[50px]"
                 />
               </div>
               <p

@@ -57,7 +57,7 @@ const HugsMessagesShares = ({
   return (
     <div
       className={
-        'flex flex-col md:flex-row gap-3 2xl:gap-6 pl-3 pr-3 md:pl-[15px] justify-center'
+        'flex flex-col mt-[unset] md:mt-8 lg:mt-[unset] xl:mt-5 2xl:mt-[unset] ml-0 xl:-ml-[40px] 2xl:ml-0 md:flex-row gap-3 2xl:gap-6 pl-3 pr-3 md:pl-[15px] justify-center'
       }
     >
       <ToolTipTotal

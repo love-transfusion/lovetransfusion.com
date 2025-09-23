@@ -12,7 +12,7 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
   return (
     <div
       className={
-        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-[18px] pt-[3px] -mt-[6px] max-h-[586px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[337px] overflow-hidden relative mx-auto'
+        'pl-4 md:pl-[39px] xl:pl-[10px] pr-4 md:pr-[39px] xl:pr-6 2xl:pr-[18px] pt-[3px] -mt-[6px] max-h-[586px] md:min-w-[337px] lg:min-w-[640px] xl:min-w-[290px] 2xl:min-w-[337px] overflow-hidden relative mx-auto'
       }
     >
       <div
@@ -83,9 +83,13 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
                       />
                     )}
                     {index === 0 ? (
-                      <p className={'text-[#009933]'}>{item.name}</p>
+                      <p className={'text-[#009933] line-clamp-1'}>
+                        {item.name}
+                      </p>
                     ) : (
-                      <p className={'text-[#009933]'}>{item.name}</p>
+                      <p className={'text-[#009933] line-clamp-1'}>
+                        {item.name}
+                      </p>
                     )}
                   </div>
                   {item.type === 'website' && (

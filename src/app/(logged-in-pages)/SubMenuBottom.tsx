@@ -17,8 +17,16 @@ interface SubMenuBottomTypes {
 const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
   return (
     <>
-      <div className={'mt-[54px] flex flex-col gap-[15px]'}>
-        <p className={'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light'}>
+      <div
+        className={
+          'mt-[54px] flex flex-col items-start xl:items-center 2xl:items-start gap-[15px]'
+        }
+      >
+        <p
+          className={
+            'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light text-left xl:text-center 2xl:text-left'
+          }
+        >
           HELP & SUPPORT
         </p>
         {!clIsAdmin && <QuickTour clToggleDrawer={clToggleDrawer} />}
@@ -34,12 +42,20 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px]'}>Help Center</p>
+            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Help Center</p>
           </div>
         </Link>
       </div>
-      <div className={'mt-[54px] flex flex-col gap-[15px]'}>
-        <p className={'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light'}>
+      <div
+        className={
+          'mt-[54px] flex flex-col items-start xl:items-center 2xl:items-start gap-[15px]'
+        }
+      >
+        <p
+          className={
+            'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light text-left xl:text-center 2xl:text-left'
+          }
+        >
           MORE
         </p>
         <Link href={'/about-us'}>
@@ -54,7 +70,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px]'}>About Us</p>
+            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>About Us</p>
           </div>
         </Link>
         <Link href={'/contact-us'}>
@@ -69,7 +85,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px]'}>Contact Us</p>
+            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Contact Us</p>
           </div>
         </Link>
         <div
@@ -79,10 +95,14 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
             src={mousePointer}
             alt="heart"
             quality={100}
-            className="size-[28px]"
+            className="size-[28px] block xl:hidden 2xl:block"
           />
           <SignoutContainerComponent>
-            <p className={'active:text-primary-300 select-none -mt-[1px]'}>
+            <p
+              className={
+                'active:text-primary-300 select-none xl:text-lg 2xl:text-xl'
+              }
+            >
               Logout
             </p>
           </SignoutContainerComponent>
