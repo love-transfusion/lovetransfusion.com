@@ -29,7 +29,7 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-variable-68 font-bold text-balance text-[28px] md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto'
+              'font-acumin-variable-68 font-bold text-balance text-[28px] md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight'
             }
           >
             Connecting People Who Hurt With Those Who Care

@@ -39,7 +39,7 @@ const PublicNavigationMenu = ({
               src={ltLogo}
               alt="Love Transfusion logo"
               quality={100}
-              className="max-w-[180px] md:max-w-[unset]"
+              className="max-w-[195px] md:max-w-[unset]"
             />
           </Link>
         </div>
