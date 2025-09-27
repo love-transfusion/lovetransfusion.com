@@ -16,6 +16,8 @@ const BATCH_SIZE = 10
 const CONCURRENCY = 5
 const PER_POST_BUDGET_MS = 20000
 
+const NON_EXISTENT_MARKER = 'tombstoned: non-existent/off-surface'
+
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
   return auth === `Bearer ${process.env.CRON_SECRET}`
@@ -29,6 +31,29 @@ const trim = (v: unknown, max = 500) => {
   } catch {
     return String(v)
   }
+}
+
+// --- classify common Graph errors so we can tombstone "gone" posts
+function classifyGraphError(e: any) {
+  const msg: string =
+    e?.message || e?.error?.message || e?.response?.data?.error?.message || ''
+  const code = e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code
+  const subcode =
+    e?.error_subcode ??
+    e?.error?.error_subcode ??
+    e?.response?.data?.error?.error_subcode
+
+  // Typical patterns for "object does not exist / unsupported get request"
+  const nonExistent =
+    /does not exist|cannot be loaded|unsupported get request/i.test(msg) ||
+    (code === 100 && (subcode === 33 || subcode === 24))
+
+  // Permission-y problems (keep as normal error → retryable/visible)
+  const permission =
+    /permissions|not authorized|requires.*access|(#200)/i.test(msg) ||
+    code === 200
+
+  return { nonExistent, permission, msg, code, subcode }
 }
 
 export async function GET(req: NextRequest) {
@@ -58,6 +83,8 @@ export async function GET(req: NextRequest) {
   const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
     .select('*')
+    // Exclude previously tombstoned (non-existent/off-surface) posts
+    .not('last_error', 'ilike', `${NON_EXISTENT_MARKER}%`)
     .in('sync_status', ['idle', 'deferred', 'error'] as any)
     .order('last_synced_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
@@ -287,7 +314,34 @@ async function reconcilePost(
     console.timeEnd(postSpan('FETCH_COMMENTS'))
 
     if (error) {
-      console.error(postSpan('FETCH_ERR'), { error })
+      // classify and tombstone non-existent/off-surface posts
+      const { nonExistent, permission, msg, code, subcode } =
+        classifyGraphError(error)
+      console.error(postSpan('FETCH_ERR'), { error, msg, code, subcode })
+
+      if (nonExistent) {
+        console.warn(postSpan('TOMBSTONE'), {
+          reason: 'non-existent/off-surface',
+        })
+        await supabase
+          .from('facebook_posts')
+          .update({
+            // keep status simple; exclude via last_error marker in PICK_POSTS
+            sync_status: 'idle',
+            next_cursor: null,
+            retry_count: 0,
+            last_error: NON_EXISTENT_MARKER,
+            last_synced_at: new Date().toISOString(),
+          })
+          .eq('post_id', post.post_id)
+        return false
+      }
+
+      if (permission) {
+        await markPostError(supabase, post.post_id, 'permissions error')
+        return false
+      }
+
       await markPostError(supabase, post.post_id, `util_fb_comments error`)
       return false
     }
@@ -481,7 +535,8 @@ async function reconcilePost(
       console.info(postSpan('NO_DATA_PAGE'))
     }
 
-    after = paging?.cursors?.after
+    const pagingAfter = (paging as any)?.cursors?.after
+    after = pagingAfter
     console.info(postSpan('CURSOR_UPDATE'), { next_after: after ?? null })
     await supabase
       .from('facebook_posts')
