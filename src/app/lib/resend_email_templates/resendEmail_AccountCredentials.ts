@@ -32,6 +32,7 @@ export const resendEmail_AccountCredentials = async (
     },
     // to: email,
     to: 'kevinl@lovetransfusion.org',
+    // to: 'cltubigon@gmail.com',
     subject: 'Your LoveTransfusion Account Info',
     html: `
     <!DOCTYPE html>
