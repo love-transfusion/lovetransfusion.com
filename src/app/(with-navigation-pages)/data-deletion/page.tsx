@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import LinkCustom from '@/app/components/Link/LinkCustom'
 
 const DataDeletionPage = () => {
   return (
@@ -30,14 +31,10 @@ const DataDeletionPage = () => {
           <div>
             <p className={'font-bold mb-[6px]'}>How to request deletion</p>
             <p className={''}>
-              Email{' '}
-              <Link
-                href={'mailto:support@lovetransfusion.com'}
-                className="text-primary"
-              >
-                support@lovetransfusion.com
-              </Link>{' '}
-              with subject <strong>“Data Deletion Request”</strong> and include:
+              <LinkCustom href={'/contact-us'} className="text-primary">
+                Contact us
+              </LinkCustom>{' '}
+              and start the message with ““Data Deletion Request” :
             </p>
             <p className={''}>1. Your name and contact email</p>
             <p className={''}>
@@ -94,10 +91,10 @@ const DataDeletionPage = () => {
           <div>
             <p className={'font-bold'}>Contact</p>
             <Link
-              href={'mailto:support@lovetransfusion.com'}
+              href={'/contact-us'}
               className="text-primary"
             >
-              support@lovetransfusion.com
+              Contact Us
             </Link>
           </div>
           <p className={'italic'}>Last updated: September 26, 2025</p>
