@@ -40,20 +40,23 @@ const MessageSlot = async (props: MessageSlot_Types) => {
     supa_select_user(user_id),
   ])
 
-  if (!selectedUser) return
+  if (!selectedUser || !selectedUser.fb_post_id) return
 
-  const { data: FBComments, count } = await supa_select_facebook_comments({
+  const {
+    data: FBComments,
+    count,
+  } = await supa_select_facebook_comments({
     clCurrentPage: page,
     clLimit,
-    post_id:
-      selectedUser.facebook_posts && !!selectedUser.facebook_posts.length
-        ? selectedUser.facebook_posts[0].post_id
-        : undefined,
+    post_id: selectedUser.fb_post_id,
   })
 
-  const unknown_selectedRecipient = (selectedUser.recipients ?? [])[0]
-    .recipient as unknown
-  const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
+  const selectedRecipient =
+    selectedUser.recipients &&
+    !!selectedUser.recipients.length &&
+    (selectedUser.recipients[0].recipient as unknown as
+      | I_supaorg_recipient
+      | undefined)
 
   const formattedFBComments: I_Comments[] =
     FBComments?.map((item) => {
@@ -67,20 +70,24 @@ const MessageSlot = async (props: MessageSlot_Types) => {
       }
     }) ?? []
 
-  const formattedWebsiteComments: I_Comments[] | null =
-    selectedRecipient.comments.map((item) => {
-      return {
-        type: 'website',
-        id: item.id,
-        name: item.name ?? 'Someone Who Cares',
-        message: item.comment ?? 'Empty',
-        created_at: item.created_at,
-        profile_picture_website: item.public_profiles,
-      }
-    })
+  const formattedWebsiteComments: I_Comments[] | null = selectedRecipient
+    ? selectedRecipient.comments.map((item) => {
+        return {
+          type: 'website',
+          id: item.id,
+          name: item.name ?? 'Someone Who Cares',
+          message: item.comment ?? 'Empty',
+          created_at: item.created_at,
+          profile_picture_website: item.public_profiles,
+        }
+      })
+    : null
 
   // Group the website comments to fit pagination of the other networks
-  const groupedWebsiteComments = chunkArray(formattedWebsiteComments, clLimit) // clLimit is the basis of how many items per array
+  const groupedWebsiteComments = chunkArray(
+    formattedWebsiteComments ?? [],
+    clLimit
+  ) // clLimit is the basis of how many items per array
 
   const allComments = await filter_deleted_comments(
     [

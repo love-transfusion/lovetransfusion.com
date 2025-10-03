@@ -55,16 +55,13 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     supa_select_user(user_id),
   ])
 
-  if (!selectedUser) return
+  if (!selectedUser || !selectedUser.fb_post_id) return
 
   const { data: FBComments, count: commentsCount } =
     await supa_select_facebook_comments({
       clCurrentPage: 1,
       clLimit: 100,
-      post_id:
-        selectedUser.facebook_posts && !!selectedUser.facebook_posts.length
-          ? selectedUser.facebook_posts[0].post_id
-          : undefined,
+      post_id: selectedUser.fb_post_id,
     })
 
   const unknown_selectedRecipient =

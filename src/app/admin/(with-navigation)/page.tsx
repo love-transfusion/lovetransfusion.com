@@ -125,14 +125,12 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                       const recipient = unknown_recipient as I_supaorg_recipient
 
                       const facebook_post =
-                        item.user?.facebook_posts &&
-                        !!item.user.facebook_posts.length
-                          ? item.user.facebook_posts[0]
-                          : undefined
+                        item.user?.facebook_posts && item.user.facebook_posts
 
                       const facebook_comments_count =
-                        facebook_post?.facebook_comments
-                          ? facebook_post?.facebook_comments[0].count
+                        facebook_post?.facebook_comments &&
+                        facebook_post.facebook_comments.length
+                          ? facebook_post.facebook_comments[0].count
                           : 0
 
                       return (

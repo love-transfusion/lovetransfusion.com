@@ -28,7 +28,7 @@ export interface I_supa_select_user_Response_Types extends I_supa_users_row {
   profile_pictures: I_supa_profile_pictures_row_unextended | null
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients?: I_supa_recipients_row[] | null
-  facebook_posts?: I_supa_facebook_posts_row[]
+  facebook_posts: I_supa_facebook_posts_row | null
   facebook_insights2?: I_supa_facebook_insights2_row[]
   google_analytics?: I_supa_google_analytics_row | null
 }
@@ -76,7 +76,7 @@ export interface I_supa_select_user_Response_Types_withCommentsCount
   profile_pictures: I_supa_profile_pictures_row_unextended | null
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients?: I_supa_recipients_row[] | null
-  facebook_posts?: I_supa_facebook_posts_row_with_count[]
+  facebook_posts: I_supa_facebook_posts_row_with_count | null
   facebook_insights2?: I_supa_facebook_insights2_row[]
   google_analytics?: I_supa_google_analytics_row | null
 }
