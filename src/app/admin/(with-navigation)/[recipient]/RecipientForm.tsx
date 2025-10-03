@@ -85,10 +85,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
           message: 'This Post ID is already in use.',
         })
         setFocus('facebookPostID')
-        // settoast({
-        //   clDescription: 'This Post ID is already in use.',
-        //   clStatus: 'error',
-        // })
         return 'duplicate'
       }
       tasks1.push(supa_delete_facebook_posts(recipient_id))
@@ -118,6 +114,15 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     fb_post_id: string | null
   ): Promise<'ok' | 'duplicate' | 'error'> => {
     if (fb_post_id) {
+      const { data: dataExists } = await supa_select_facebook_posts(fb_post_id)
+      if (dataExists) {
+        setError('facebookPostID', {
+          type: 'validate',
+          message: 'This Post ID is already in use.',
+        })
+        setFocus('facebookPostID')
+        return 'duplicate'
+      }
       const { error } = await supa_upsert_facebook_posts({
         post_id: fb_post_id,
         page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
