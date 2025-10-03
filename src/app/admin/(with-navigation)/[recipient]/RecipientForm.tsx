@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import facebook from './images/facebook.webp'
 import insta from './images/insta.webp'
 import lovetransfusion from './images/lovetransfusion.webp'
@@ -18,9 +18,13 @@ import {
   supa_update_users,
 } from '@/app/_actions/users/actions'
 import { supa_update_recipients } from '@/app/_actions/recipients/actions'
-import { supa_update_facebook_posts } from '@/app/_actions/facebook_posts/actions'
+import {
+  supa_delete_facebook_posts,
+  supa_upsert_facebook_posts,
+} from '@/app/_actions/facebook_posts/actions'
 import Link from 'next/link'
 import Icon_information from '@/app/components/icons/Icon_information'
+import { supa_delete_facebook_insights2 } from '@/app/_actions/facebook_insights2/actions'
 
 interface recipientFormTypes {
   facebookPostID: string
@@ -41,10 +45,17 @@ const getFacebookPostID = (postID: string) => {
 }
 
 const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
+  const [isSubmitted, setisSubmitted] = useState(false)
   const {
     handleSubmit,
     register,
-    formState: { isSubmitting: isLoading, isSubmitSuccessful, errors },
+    reset,
+    formState: {
+      isSubmitting: isLoading,
+      isSubmitSuccessful,
+      errors,
+      dirtyFields,
+    },
   } = useForm<recipientFormTypes>({
     defaultValues: async () => {
       return {
@@ -58,12 +69,44 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   })
   const { settoast } = useStore(utilityStore)
 
+  const isFacebookPostIdDirty = !!dirtyFields.facebookPostID
+  console.log({ isFacebookPostIdDirty })
   const updateUser = async (
     recipient_id: string,
     fb_post_id: string | null
   ) => {
+    const tasks1 = []
+    const tasks2 = []
+    if (isFacebookPostIdDirty && fb_post_id) {
+      tasks1.push(supa_delete_facebook_posts(recipient_id))
+      if (user?.fb_post_id) {
+        tasks1.push(supa_delete_facebook_insights2(user.fb_post_id))
+      }
+      tasks2.push(
+        supa_upsert_facebook_posts({
+          post_id: fb_post_id,
+          page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+          user_id: recipient_id,
+          last_synced_at: null,
+        })
+      )
+      tasks2.push(supa_update_users({ fb_post_id, id: recipient_id }))
+    }
+
+    await Promise.all(tasks1)
+    await Promise.all(tasks2)
+    settoast({
+      clDescription: 'Account successfully updated.',
+      clStatus: 'success',
+    })
+  }
+
+  const insertOrUpdate = async (
+    recipient_id: string,
+    fb_post_id: string | null
+  ) => {
     if (fb_post_id) {
-      const { error } = await supa_update_facebook_posts({
+      const { error } = await supa_upsert_facebook_posts({
         post_id: fb_post_id,
         page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
         user_id: recipient_id,
@@ -86,6 +129,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       clDescription: 'Successfully updated recipient',
       clStatus: 'success',
     })
+    reset()
   }
 
   const onSubmit = async (rawData: recipientFormTypes) => {
@@ -110,7 +154,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       }
 
       if (!error && data && data.user?.id) {
-        await updateUser(data.user.id, post_id)
+        await insertOrUpdate(data.user.id, post_id)
         settoast({
           clDescription: 'Account successfully created.',
           clStatus: 'success',
@@ -119,35 +163,55 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     } else {
       await updateUser(user.id, post_id)
     }
+    reset(rawData)
+    setisSubmitted(true)
   }
+  console.log({ userpostID: user?.fb_post_id, isSubmitted })
+
+  useEffect(() => {
+    setisSubmitted(false)
+  }, [isFacebookPostIdDirty])
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div
           className={'grid grid-cols-1 md:grid-cols-2 w-full gap-4 mt-[15px]'}
         >
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={facebook}
-              quality={100}
-              alt="facebook"
-              className="max-h-[42px]"
-            />
-            <Input
-              clPlaceholder="Type Facebook post ID"
-              className="placeholder:text-neutral-400 border-neutral-400 py-2"
-              clVariant="input2"
-              clContainerClassName="w-full"
-              {...register('facebookPostID')}
-              clErrorMessage={errors.facebookPostID?.message}
-              clRightIcon={
-                <div title="How to get Post ID?">
-                  <Link href={'/images/how-to-get-postID.png'} target="_blank">
-                    <Icon_information />
-                  </Link>
-                </div>
-              }
-            />
+          <div>
+            <div className={'flex gap-4 w-full'}>
+              <Image
+                src={facebook}
+                quality={100}
+                alt="facebook"
+                className="max-h-[42px]"
+              />
+              <Input
+                clPlaceholder="Type Facebook post ID"
+                className="placeholder:text-neutral-400 border-neutral-400 py-2"
+                clVariant="input2"
+                clContainerClassName="w-full"
+                {...register('facebookPostID')}
+                clErrorMessage={errors.facebookPostID?.message}
+                clRightIcon={
+                  <div title="How to get Post ID?">
+                    <Link
+                      href={'/images/how-to-get-postID.png'}
+                      target="_blank"
+                    >
+                      <Icon_information />
+                    </Link>
+                  </div>
+                }
+              />
+            </div>
+            {isFacebookPostIdDirty && user?.fb_post_id && !isSubmitted && (
+              <div className="bg-primary-50 rounded-lg border border-primary-200 py-3 px-5 mt-2">
+                <p className={''}>
+                  Changing this Facebook Post ID will permanently delete all
+                  related data.
+                </p>
+              </div>
+            )}
           </div>
           <div className={'flex gap-4 w-full'}>
             <Image
