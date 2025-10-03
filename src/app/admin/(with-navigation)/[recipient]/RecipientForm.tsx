@@ -70,6 +70,26 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
 
   const isFacebookPostIdDirty = !!dirtyFields.facebookPostID
 
+  const checkIfThereIsAnyThatExists = async (opt: {
+    fb_post_id?: string
+  }): Promise<boolean> => {
+    const { fb_post_id } = opt
+    if (fb_post_id) {
+      const { data: fbDataExists } = await supa_select_facebook_posts(
+        fb_post_id
+      )
+      if (fbDataExists) {
+        setError('facebookPostID', {
+          type: 'validate',
+          message: 'This Post ID is already in use.',
+        })
+        setFocus('facebookPostID')
+        return !!fbDataExists
+      }
+    }
+    return false
+  }
+
   const updateUser = async (
     recipient_id: string,
     fb_post_id: string | null
@@ -78,15 +98,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     const tasks2 = []
 
     if (isFacebookPostIdDirty && fb_post_id) {
-      const { data: dataExists } = await supa_select_facebook_posts(fb_post_id)
-      if (dataExists) {
-        setError('facebookPostID', {
-          type: 'validate',
-          message: 'This Post ID is already in use.',
-        })
-        setFocus('facebookPostID')
-        return 'duplicate'
-      }
       tasks1.push(supa_delete_facebook_posts(recipient_id))
       tasks2.push(
         supa_upsert_facebook_posts({
@@ -114,15 +125,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     fb_post_id: string | null
   ): Promise<'ok' | 'duplicate' | 'error'> => {
     if (fb_post_id) {
-      const { data: dataExists } = await supa_select_facebook_posts(fb_post_id)
-      if (dataExists) {
-        setError('facebookPostID', {
-          type: 'validate',
-          message: 'This Post ID is already in use.',
-        })
-        setFocus('facebookPostID')
-        return 'duplicate'
-      }
       const { error } = await supa_upsert_facebook_posts({
         post_id: fb_post_id,
         page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
@@ -141,10 +143,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
         user_id: recipient_id,
       }),
     ])
-    settoast({
-      clDescription: 'Successfully updated recipient',
-      clStatus: 'success',
-    })
     reset()
     return 'ok'
   }
@@ -155,6 +153,15 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       : null
 
     if (!isFacebookPostIdDirty) return
+
+    if (post_id) {
+      const dataExists = await checkIfThereIsAnyThatExists({
+        fb_post_id: post_id,
+      })
+      if (dataExists) {
+        return
+      }
+    }
 
     if (!user) {
       // Create an account for the recipient
@@ -174,16 +181,14 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       }
 
       if (!error && data && data.user?.id) {
-        const status = await insertOrUpdate(data.user.id, post_id)
-
-        if (status === 'ok') {
-          settoast({
-            clDescription: 'Account successfully created.',
-            clStatus: 'success',
-          })
-          reset(rawData)
-          setisSubmitted(true)
-        }
+        await insertOrUpdate(data.user.id, post_id)
+        settoast({
+          clDescription: 'Account successfully created.',
+          clStatus: 'success',
+        })
+        reset(rawData)
+        setisSubmitted(true)
+        return
       }
     } else {
       const status = await updateUser(user.id, post_id)
