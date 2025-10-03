@@ -1,145 +1,262 @@
+// app/api/cron/sync-fb-insights/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server'
-import pLimit from 'p-limit'
-import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { util_fb_insights } from '@/app/utilities/facebook/util_fb_insights'
-import { util_fb_postID } from '@/app/utilities/facebook/util_fb_postID'
-import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { Json } from '@/types/database.types'
+import {
+  supa_insert_facebook_insights2,
+  supa_update_facebook_insights2,
+} from '@/app/_actions/facebook_insights2/actions'
+import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
+import { merge_old_and_new_insights } from '@/app/api/cron/insights/helpers'
+import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
+import {
+  I_Region_Insight_Types,
+  util_fb_reachByRegion_multiAds,
+} from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
+import { NextRequest, NextResponse } from 'next/server'
+import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_shares } from '@/app/utilities/facebook/util_fb_shares'
+import { util_fb_reactions_total } from '@/app/utilities/facebook/util_fb_reactions_total'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
-  if (auth === `Bearer ${process.env.CRON_SECRET}`) return true
-  return false
+  return (
+    !!process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`
+  )
 }
 
-export async function GET(req: NextRequest) {
-  if (!isAuthorizedCron(req)) {
-    return new NextResponse('Unauthorized', { status: 401 })
+type UserRow = {
+  id: string
+  fb_post_id: string | null
+  facebook_insights2: Array<{
+    insights: Json
+    post_id: string
+    shares: number
+    last_synced_at: string
+    created_at: string
+  }>
+}
+
+type JobResult =
+  | { userId: string; status: 'skipped:no-postid' }
+  | { userId: string; status: 'ok:insert' | 'ok:update' | 'ok:shares-only' }
+  | {
+      userId: string
+      status: 'error:insert' | 'error:update' | 'error:exception'
+    }
+
+const runWithConcurrency = async <T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T, idx: number) => Promise<R>
+): Promise<R[]> => {
+  const executing = new Set<Promise<any>>()
+  const results: Promise<R>[] = []
+  for (let i = 0; i < items.length; i++) {
+    const p = Promise.resolve().then(() => worker(items[i], i))
+    results.push(p)
+    executing.add(p)
+    const done = () => executing.delete(p)
+    p.then(done).catch(done)
+    if (executing.size >= limit) await Promise.race(executing)
   }
+  return Promise.all(results)
+}
 
-  const supabase = await createAdmin()
+export const GET = async (req: NextRequest) => {
+  try {
+    if (!isAuthorizedCron(req)) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
 
-  // 0) load users who have ad IDs configured
-  const { data: users, error: usersErr } = await supabase
-    .from('users')
-    .select('id, fb_ad_IDs')
+    const supabase = await createAdmin()
 
-  if (usersErr) {
+    const now = new Date()
+    const yesterdayIso = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1)
+    ).toISOString()
+
+    // 1) Fetch ALL users that have at least one insights row (no .lt filter)
+    const { data: users, error: usersErr } = await supabase
+      .from('users')
+      .select('id,fb_post_id,facebook_insights2(*)')
+
+    if (usersErr) {
+      return NextResponse.json(
+        {
+          ok: false as const,
+          error: 'select-users',
+          details: usersErr.message,
+          processed: 0,
+          results: [] as JobResult[],
+        },
+        { status: 500 }
+      )
+    }
+
+    if (!users || users.length === 0) {
+      return NextResponse.json({
+        ok: true as const,
+        processed: 0,
+        results: [],
+        note: 'No users to process.',
+      })
+    }
+
+    // 2) Cache: postId per adId, and pageAccessToken once
+    let pageAccessToken: string | null
+    try {
+      const { data } = await util_fb_pageToken({
+        pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+      })
+      pageAccessToken = data
+    } catch {
+      pageAccessToken = null
+    }
+
+    const processUser = async (user: UserRow): Promise<JobResult> => {
+      try {
+        if (!user.fb_post_id) {
+          return { userId: user.id, status: 'skipped:no-postid' }
+        }
+        const post_id = user.fb_post_id
+
+        // pick latest insights row for this user
+        const rows = Array.isArray(user.facebook_insights2)
+          ? user.facebook_insights2
+          : []
+        // ensure we pick the newest by last_synced_at (fallback: created_at)
+        rows.sort((a, b) => {
+          const A = a.last_synced_at || a.created_at || ''
+          const B = b.last_synced_at || b.created_at || ''
+          return A < B ? 1 : A > B ? -1 : 0
+        })
+        const latest = rows[0]
+        if (!latest) {
+          // treat as "no existing": init
+
+          // shares + total reactions IN PARALLEL
+          let shares = 0
+          let total_reactions = 0
+          try {
+            if (pageAccessToken) {
+              const [sharesRes, reactionsRes] = await Promise.all([
+                util_fb_shares({ postID: post_id, pageAccessToken }),
+                util_fb_reactions_total(post_id),
+              ])
+              const { count } = sharesRes
+              const { totalReactions } = reactionsRes
+              shares = Number.isFinite(count) ? count : 0
+              total_reactions = totalReactions
+            }
+          } catch {
+            shares = 0
+            total_reactions = 0
+          }
+
+          const init = await util_fb_reachByRegion_multiAds({
+            endAnchor: '37mon',
+            post_id,
+          })
+          const { error } = await supa_insert_facebook_insights2({
+            user_id: user.id,
+            insights: init,
+            post_id,
+            shares,
+            total_reactions,
+            last_synced_at: util_formatDateToUTCString(
+              new Date(init.timeRangeRequested.until)
+            ),
+          })
+          return {
+            userId: user.id,
+            status: error ? 'error:insert' : 'ok:insert',
+          }
+        }
+
+        // We have an existing row
+        const existingInsights =
+          latest.insights as unknown as I_Region_Insight_Types
+
+        // Always refresh SHARES + TOTAL REACTIONS every run (in parallel)
+        let shares = 0
+        let total_reactions = 0
+        try {
+          if (pageAccessToken) {
+            const [sharesRes, reactionsRes] = await Promise.all([
+              util_fb_shares({ postID: post_id, pageAccessToken }),
+              util_fb_reactions_total(post_id),
+            ])
+            const { count } = sharesRes
+            const { totalReactions } = reactionsRes
+            total_reactions = totalReactions
+            shares = Number.isFinite(count) ? count : 0
+          }
+        } catch {
+          shares = 0
+          total_reactions = 0
+        }
+
+        // Decide if we also need heavy INSIGHTS update
+        const needInsightsUpdate =
+          new Date(latest.last_synced_at) < new Date(yesterdayIso)
+
+        if (!needInsightsUpdate) {
+          // Shares-only write (keep insights + last_synced_at unchanged)
+          const { error } = await supa_update_facebook_insights2({
+            insights: existingInsights,
+            post_id,
+            shares, // new shares
+            total_reactions,
+            last_synced_at: latest.last_synced_at, // unchanged
+          })
+          return {
+            userId: user.id,
+            status: error ? 'error:update' : 'ok:shares-only',
+          }
+        }
+
+        // Heavy update (yesterday window)
+        const fresh = await util_fb_reachByRegion_multiAds({
+          post_id,
+          endAnchor: 'yesterday',
+        })
+        const merged = merge_old_and_new_insights(existingInsights, fresh)
+
+        const { error } = await supa_update_facebook_insights2({
+          insights: merged,
+          post_id,
+          shares, // also persist new shares
+          last_synced_at: util_formatDateToUTCString(
+            new Date(fresh.timeRangeApplied.until)
+          ),
+        })
+        return { userId: user.id, status: error ? 'error:update' : 'ok:update' }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        return { userId: user.id, status: 'error:exception' }
+      }
+    }
+
+    const CONCURRENCY = 4
+    const results = await runWithConcurrency(users, CONCURRENCY, processUser)
+
+    return NextResponse.json({
+      ok: true as const,
+      processed: results.length,
+      results,
+    })
+  } catch (err: any) {
     return NextResponse.json(
-      { ok: false, error: usersErr.message },
+      {
+        ok: false as const,
+        error: 'unhandled',
+        details: err?.message ?? String(err),
+      },
       { status: 500 }
     )
   }
-
-  // Build tasks: (user_id, ad_id)
-  const tasks: Array<{ user_id: string; ad_id: string }> = []
-  for (const u of users ?? []) {
-    const user_id = u.id as string
-    const raw = u.fb_ad_IDs as any
-    let adIds: string[] = []
-    if (Array.isArray(raw)) {
-      adIds = raw
-        .map((x: any) => (typeof x === 'string' ? x : x?.id))
-        .filter((x: any) => typeof x === 'string' && x.length > 0)
-    }
-    for (const ad_id of adIds) tasks.push({ user_id, ad_id })
-  }
-
-  if (tasks.length === 0) {
-    return NextResponse.json({ ok: true, tasks: 0, upserts: 0 })
-  }
-
-  const limit = pLimit(5)
-  const nowIso = new Date().toISOString()
-
-  const fetched = await Promise.allSettled(
-    tasks.map(({ user_id, ad_id }) =>
-      limit(async () => {
-        const { data, error } = await util_fb_insights({ ad_id })
-        if (error) throw new Error(error)
-
-        // --- NEW share count logic ---
-        let shares: number | null = null
-        try {
-          const { data: postId } = await util_fb_postID({ adId: ad_id })
-          if (postId) {
-            const pageId = postId.includes('_') ? postId.split('_')[0] : null
-            if (pageId) {
-              const { data: pageAccessToken } = await util_fb_pageToken({
-                pageId,
-              })
-              if (pageAccessToken) {
-                const { count } = await util_fb_shares({
-                  postID: postId,
-                  pageAccessToken,
-                })
-                shares = Number.isFinite(count) ? count : 0
-              }
-            }
-          }
-        } catch {
-          shares = null
-        }
-
-        const insights = data as Json
-        // Use your interface for type safety
-        const row: I_supa_facebook_insights_insert = {
-          user_id,
-          ad_id,
-          insights: insights ?? [],
-          last_synced_at: nowIso,
-          shares: shares ?? 0,
-        }
-        return row
-      })
-    )
-  )
-
-  const rows: I_supa_facebook_insights_insert[] = []
-  const errors: Array<{ user_id: string; ad_id: string; error: string }> = []
-
-  fetched.forEach((r, idx) => {
-    const t = tasks[idx]
-    if (r.status === 'fulfilled') {
-      rows.push(r.value)
-    } else {
-      errors.push({
-        user_id: t.user_id,
-        ad_id: t.ad_id,
-        error: r.reason?.message ?? 'fetch failed',
-      })
-    }
-  })
-
-  if (rows.length > 0) {
-    const CHUNK = 500
-    for (let i = 0; i < rows.length; i += CHUNK) {
-      const chunk = rows.slice(i, i + CHUNK)
-      const { error: upErr } = await supabase.from('facebook_insights').upsert(
-        chunk.map((r) => ({
-          user_id: r.user_id,
-          ad_id: r.ad_id,
-          insights: r.insights,
-          last_synced_at: r.last_synced_at,
-          shares: r.shares,
-        })),
-        { onConflict: 'user_id,ad_id' } as any
-      )
-      if (upErr) {
-        console.error('insights upsert error:', upErr.message)
-      }
-    }
-  }
-
-  return NextResponse.json({
-    ok: true,
-    tasks: tasks.length,
-    fetched_ok: rows.length,
-    fetched_err: errors.length,
-    errors,
-  })
 }

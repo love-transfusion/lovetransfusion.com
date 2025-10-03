@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React from 'react'
 import facebook from './images/facebook.webp'
 import insta from './images/insta.webp'
 import lovetransfusion from './images/lovetransfusion.webp'
@@ -17,13 +17,13 @@ import {
   I_supa_select_user_Response_Types,
   supa_update_users,
 } from '@/app/_actions/users/actions'
-import FBAdIDs from './FBAdIDs'
 import { supa_update_recipients } from '@/app/_actions/recipients/actions'
 import { supa_update_facebook_posts } from '@/app/_actions/facebook_posts/actions'
-import { util_fb_postID } from '@/app/utilities/facebook/util_fb_postID'
+import Link from 'next/link'
+import Icon_information from '@/app/components/icons/Icon_information'
 
 interface recipientFormTypes {
-  facebookURL: string | null | undefined
+  facebookPostID: string
   twitterURL: string | null | undefined
   instagramURL: string | null | undefined
   pinteresetURL: string | null | undefined
@@ -34,18 +34,14 @@ interface RecipientForm {
   recipientObject: I_supaorg_recipient_hugs_counters_comments
   recipient: UUID
   user: I_supa_select_user_Response_Types | null
-  existingAdIDs: string[] | null
 }
 
-const RecipientForm = ({
-  user,
-  recipientObject,
-  existingAdIDs,
-}: RecipientForm) => {
-  const [isFBAdIDActive, setisFBAdIDActive] = useState<boolean>(false)
-  const unknown_FBAdIDsArray = user?.fb_ad_IDs as unknown
-  const initialFBAdIDs = unknown_FBAdIDsArray as string[] | undefined
-  const [FBAdIDsArray, setFBAdIDs] = useState<string[]>(initialFBAdIDs ?? [])
+const getFacebookPostID = (postID: string) => {
+  const arrPostID = postID.split('_')
+  return arrPostID.length > 1 ? arrPostID[1] : postID
+}
+
+const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   const {
     handleSubmit,
     register,
@@ -53,7 +49,7 @@ const RecipientForm = ({
   } = useForm<recipientFormTypes>({
     defaultValues: async () => {
       return {
-        facebookURL: '',
+        facebookPostID: getFacebookPostID(user?.fb_post_id || ''),
         twitterURL: '',
         instagramURL: '',
         pinteresetURL: '',
@@ -63,12 +59,11 @@ const RecipientForm = ({
   })
   const { settoast } = useStore(utilityStore)
 
-  const updateUser = async (recipient_id: string) => {
-    const [{ data: post_id }] = await Promise.all([
-      util_fb_postID({ adId: FBAdIDsArray[0] }),
+  const updateUser = async (recipient_id: string, fb_post_id: string) => {
+    await Promise.all([
       supa_update_users({
         id: recipient_id,
-        fb_ad_IDs: FBAdIDsArray || null,
+        fb_post_id,
       }),
       supa_update_recipients({
         id: recipientObject.id,
@@ -76,17 +71,16 @@ const RecipientForm = ({
       }),
     ])
 
-    if (post_id) {
-      await supa_update_facebook_posts({
-        post_id,
-        page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-        user_id: recipient_id,
-        last_synced_at: null,
-      })
-    }
+    await supa_update_facebook_posts({
+      post_id: fb_post_id,
+      page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+      user_id: recipient_id,
+      last_synced_at: null,
+    })
   }
 
-  const onSubmit = async () => {
+  const onSubmit = async (rawData: recipientFormTypes) => {
+    const post_id = getFacebookPostID(rawData.facebookPostID)
     if (!user) {
       // Create an account for the recipient
       const { data, error } = await supa_admin_create_account({
@@ -96,7 +90,7 @@ const RecipientForm = ({
         recipient_name: recipientObject.first_name!,
         recipient_id: recipientObject.id,
       })
-      
+
       if (error) {
         settoast({
           clDescription: error,
@@ -105,14 +99,14 @@ const RecipientForm = ({
       }
 
       if (!error && data && data.user?.id) {
-        await updateUser(data.user.id)
+        await updateUser(data.user.id, post_id)
         settoast({
           clDescription: 'Account successfully created.',
           clStatus: 'success',
         })
       }
     } else {
-      await updateUser(user.id)
+      await updateUser(user.id, post_id)
       settoast({
         clDescription: 'Successfully updated recipient',
         clStatus: 'success',
@@ -133,12 +127,18 @@ const RecipientForm = ({
               className="max-h-[42px]"
             />
             <Input
-              disabled
-              clPlaceholder="Type URL"
+              clPlaceholder="Type Facebook post ID"
               className="placeholder:text-neutral-400 border-neutral-400 py-2"
               clVariant="input2"
               clContainerClassName="w-full"
-              {...register('facebookURL')}
+              {...register('facebookPostID')}
+              clRightIcon={
+                <div title="How to get Post ID?">
+                  <Link href={'/images/how-to-get-postID.png'} target="_blank">
+                    <Icon_information />
+                  </Link>
+                </div>
+              }
             />
           </div>
           <div className={'flex gap-4 w-full'}>
@@ -212,20 +212,19 @@ const RecipientForm = ({
           </div>
         </div>
 
-        <FBAdIDs
+        {/* <FBAdIDs
           FBAdIDsArray={FBAdIDsArray}
           setFBAdIDs={setFBAdIDs}
           existingAdIDs={existingAdIDs}
           setisFBAdIDActive={setisFBAdIDActive}
-        />
+        /> */}
 
         <Button
           clType="submit"
-          clDisabled={isLoading || isFBAdIDActive}
+          clDisabled={isLoading}
           clVariant="outlined"
           className={`flex py-1 shadow-custom1 w-[259px] h-[46px] items-center pr-5 rounded-[4px] max-sm:w-full mt-[26px] ml-auto mb-[18px] ${
-            (isLoading || isFBAdIDActive) &&
-            'bg-neutral-300 hover:bg-neutral-300'
+            isLoading && 'bg-neutral-300 hover:bg-neutral-300'
           }`}
         >
           <div

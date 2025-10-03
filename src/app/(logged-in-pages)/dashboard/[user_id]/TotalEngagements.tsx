@@ -3,24 +3,23 @@ import Image from 'next/image'
 import React from 'react'
 import ripple from './images/ripple.png'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
-import { getNetworkCount } from './getNetworkCounts'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
+import { getNetworkCount } from './getNetworkCounts'
 // import { useStore } from 'zustand'
 // import utilityStore from '@/app/utilities/store/utilityStore'
 
 export interface I_TotalEngagements {
   recipient: I_supaorg_recipient
-  fbInsights: [] | AdWiseInsight[]
+  totalReactions: number
   commentsCount: number
-  fbShareCount: number
+  shares: number
 }
 
 const TotalEngagements = ({
   recipient,
-  fbInsights,
+  totalReactions,
   commentsCount,
-  fbShareCount,
+  shares,
 }: I_TotalEngagements) => {
   const { total: totalOrgRecipientData } = getNetworkCount.orgCounts(recipient)
   const { Tooltip } = useTooltip({
@@ -28,11 +27,7 @@ const TotalEngagements = ({
     clUser_id: recipient.id,
   })
 
-  const { totalFacebookData } = getNetworkCount.fbCounts(
-    fbInsights,
-    commentsCount,
-    fbShareCount
-  )
+  const totalFacebookData = totalReactions + commentsCount + shares
 
   return (
     <div

@@ -3,7 +3,7 @@
 import { I_CountryPathTotalFormat } from './getAnalyticsCountryPathTotal'
 import rawCities from '@/app/lib/geonames/cities.json'
 
-type CityEntry = {
+type LocationEntry = {
   city: string
   country: string | null
   state: string
@@ -11,14 +11,21 @@ type CityEntry = {
   lng: number
 }
 
-const cities = rawCities as Record<string, CityEntry>
+const geoDataset = rawCities as Record<string, LocationEntry>
 
 export type GeoPoint = {
   name: string
   value: [number, number, number, number, number] // [lng, lat, views, hugs, messages]
 }
 
-const formatReadyToSearchRemoveCity = (str: string) => {
+/**
+ * Normalize a location string (city, state, or country) for search.
+ * - Removes the word "city"
+ * - Removes spaces
+ * - Trims whitespace
+ * - Lowercases everything
+ */
+const normalizeLocationKey = (str: string) => {
   return str
     ?.replaceAll(/\bcity\b/gi, '')
     .replaceAll(' ', '')
@@ -27,21 +34,22 @@ const formatReadyToSearchRemoveCity = (str: string) => {
 }
 
 // 🧠 Pre-index for instant lookup
-const cityMap = new Map<string, CityEntry>()
-const regionMap = new Map<string, CityEntry>()
+const cityLookup = new Map<string, LocationEntry>()
+const regionLookup = new Map<string, LocationEntry>()
 
-for (const key of Object.keys(cities)) {
-  const entry = cities[key]
-  const cityKey = `${formatReadyToSearchRemoveCity(entry.city)}_${key
+for (const key of Object.keys(geoDataset)) {
+  const entry = geoDataset[key]
+
+  const cityKey = `${normalizeLocationKey(entry.city)}_${key
     .slice(-2)
     .toLowerCase()}`
-  cityMap.set(cityKey, entry)
+  cityLookup.set(cityKey, entry)
 
-  const regionKey = `${formatReadyToSearchRemoveCity(entry.state)}_${key
-    .slice(-2)
-    .toLowerCase()}`
   if (entry.state) {
-    regionMap.set(regionKey, entry)
+    const regionKey = `${normalizeLocationKey(entry.state)}_${key
+      .slice(-2)
+      .toLowerCase()}`
+    regionLookup.set(regionKey, entry)
   }
 }
 
@@ -50,46 +58,46 @@ export const mapAnalyticsToGeoPoints = async (
 ): Promise<GeoPoint[]> => {
   const resultMap = new Map<string, GeoPoint>()
 
-  for (const entry of analytics) {
-    const rawCity = entry.cl_city || ''
-    const rawRegion = entry.cl_region || ''
-    const countryCode = formatReadyToSearchRemoveCity(
-      entry.cl_country_code || ''
-    )
-    const city = formatReadyToSearchRemoveCity(rawCity)
-    const region = formatReadyToSearchRemoveCity(rawRegion)
+  for (const record of analytics) {
+    const rawCityName = record.cl_city || ''
+    const rawRegionName = record.cl_region || ''
+    const countryCodeKey = normalizeLocationKey(record.cl_country_code || '')
 
-    const isCityUnset =
-      !rawCity ||
-      rawCity.trim().toLowerCase() === '(not set)' ||
-      city === '' ||
-      city === '(notset)'
+    const normalizedCityKey = normalizeLocationKey(rawCityName)
+    const normalizedRegionKey = normalizeLocationKey(rawRegionName)
 
-    // Fast O(1) match
-    const matchFromCity = cityMap.get(`${city}_${countryCode}`)
+    const isCityMissing =
+      !rawCityName ||
+      rawCityName.trim().toLowerCase() === '(not set)' ||
+      normalizedCityKey === '' ||
+      normalizedCityKey === '(notset)'
 
-    let match = matchFromCity
+    // Try city first
+    const cityMatch = cityLookup.get(`${normalizedCityKey}_${countryCodeKey}`)
+    let matchedEntry = cityMatch
 
-    // Fallback to region if needed
-    if (!match && (isCityUnset || !matchFromCity)) {
-      match = regionMap.get(`${region}_${countryCode}`)
+    // Fall back to region if no city or unusable
+    if (!matchedEntry && (isCityMissing || !cityMatch)) {
+      matchedEntry = regionLookup.get(
+        `${normalizedRegionKey}_${countryCodeKey}`
+      )
     }
 
-    if (!match) continue
+    if (!matchedEntry) continue
 
-    const lng = parseFloat(match.lng.toFixed(6))
-    const lat = parseFloat(match.lat.toFixed(6))
-    const key = `${lng},${lat}`
+    const lng = parseFloat(matchedEntry.lng.toFixed(6))
+    const lat = parseFloat(matchedEntry.lat.toFixed(6))
+    const coordKey = `${lng},${lat}`
 
-    if (resultMap.has(key)) {
-      const existing = resultMap.get(key)!
-      existing.value[2] += entry.clViews
-      existing.value[3] += entry.clHugs
-      existing.value[4] += entry.clMessages
+    if (resultMap.has(coordKey)) {
+      const existing = resultMap.get(coordKey)!
+      existing.value[2] += record.clViews
+      existing.value[3] += record.clHugs
+      existing.value[4] += record.clMessages
     } else {
-      resultMap.set(key, {
-        name: match.city,
-        value: [lng, lat, entry.clViews, entry.clHugs, entry.clMessages],
+      resultMap.set(coordKey, {
+        name: matchedEntry.city,
+        value: [lng, lat, record.clViews, record.clHugs, record.clMessages],
       })
     }
   }

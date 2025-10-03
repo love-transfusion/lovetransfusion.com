@@ -14,7 +14,6 @@ import MostRecentEngagementContainer from './MostRecentEngagementContainer'
 import { Metadata } from 'next'
 import { I_Comments } from '@/types/Comments.types'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { supa_select_facebook_comments } from '@/app/_actions/facebook_comments/actions'
 
 interface I_userDashboardLayout {
@@ -122,11 +121,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     }
   )
 
-  const unknown_fbInsights = !!selectedUser.facebook_insights?.length
-    ? (selectedUser.facebook_insights[0].insights as unknown)
-    : []
-
-  const fbInsights = unknown_fbInsights as AdWiseInsight[]
+  const facebook_insights2 = !!selectedUser.facebook_insights2?.length
+    ? selectedUser.facebook_insights2[0]
+    : null
 
   const allEngagements = await filter_deleted_comments(
     [
@@ -137,9 +134,6 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     selectedUser.receipients_deleted_messages
   )
 
-  const fbShareCount = !!selectedUser.facebook_insights?.length
-    ? selectedUser.facebook_insights[0].shares
-    : 0
   return (
     <div className="">
       <ErrorMessage />
@@ -182,9 +176,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
               recipient={selectedRecipient}
-              fbInsights={fbInsights}
+              totalReactions={facebook_insights2?.total_reactions || 0}
               commentsCount={commentsCount}
-              fbShareCount={fbShareCount}
+              shares={facebook_insights2?.shares || 0}
             />
             <Image
               src={arrow}
@@ -203,9 +197,11 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'hidden xl:block'}>
             <HugsMessagesShares
               recipient={selectedRecipient}
-              fbInsights={fbInsights}
-              commentsCount={commentsCount}
-              fbShareCount={fbShareCount}
+              fbData={{
+                total_comments: commentsCount,
+                total_reactions: facebook_insights2?.total_reactions || 0,
+                total_shares: facebook_insights2?.shares || 0,
+              }}
             />
           </div>
         </div>
@@ -213,9 +209,11 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'xl:hidden'}>
             <HugsMessagesShares
               recipient={selectedRecipient}
-              fbInsights={fbInsights}
-              commentsCount={commentsCount}
-              fbShareCount={fbShareCount}
+              fbData={{
+                total_comments: commentsCount,
+                total_reactions: facebook_insights2?.total_reactions || 0,
+                total_shares: facebook_insights2?.shares || 0,
+              }}
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>

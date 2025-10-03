@@ -3,7 +3,6 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
-  supa_select_all_fb_ad_ids,
   supa_select_user,
 } from '@/app/_actions/users/actions'
 import RecipientForm from './RecipientForm'
@@ -27,8 +26,6 @@ const RecipientPage = async (props: { params: Params }) => {
   const { recipient } = await props.params
 
   const { data: user } = await supa_select_user(recipient)
-
-  const { data: existingAdIDs } = await supa_select_all_fb_ad_ids()
 
   const { data: recipientData } = await supa_select_recipients(recipient)
 
@@ -133,7 +130,6 @@ const RecipientPage = async (props: { params: Params }) => {
           />
         </div>
         <RecipientForm
-          existingAdIDs={existingAdIDs}
           recipientObject={recipientObject}
           recipient={recipient}
           user={user}

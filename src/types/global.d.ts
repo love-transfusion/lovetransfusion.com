@@ -61,6 +61,14 @@ declare global {
   type I_supa_facebook_insights_row =
     DB['public']['Tables']['facebook_insights']['Row']
 
+  // facebook_insights2 table
+  type I_supa_facebook_insights2_insert =
+    DB['public']['Tables']['facebook_insights2']['Insert']
+  type I_supa_facebook_insights2_update =
+    DB['public']['Tables']['facebook_insights2']['Update']
+  type I_supa_facebook_insights2_row =
+    DB['public']['Tables']['facebook_insights2']['Row']
+
   // google_analytics table
   type I_supa_google_analytics_insert =
     DB['public']['Tables']['google_analytics']['Insert']

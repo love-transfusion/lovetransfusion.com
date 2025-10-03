@@ -6,9 +6,14 @@ import messages from './images/MESSAGES.png'
 import shares from './images/SHARES.png'
 import ripple from './images/ripple.png'
 import useTooltip from '@/app/hooks/this-website-only/useTooltips'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { getNetworkCount } from './getNetworkCounts'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
+
+export interface I_fbData {
+  total_reactions: number
+  total_shares: number
+  total_comments: number
+}
 
 export interface I_fb_comments_Types {
   id: string
@@ -22,17 +27,10 @@ export interface I_fb_comments_Types {
 
 interface I_HugsMessagesShares {
   recipient: I_supaorg_recipient
-  fbInsights: [] | AdWiseInsight[]
-  commentsCount: number
-  fbShareCount: number
+  fbData: I_fbData
 }
 
-const HugsMessagesShares = ({
-  recipient,
-  fbInsights,
-  commentsCount,
-  fbShareCount,
-}: I_HugsMessagesShares) => {
+const HugsMessagesShares = ({ recipient, fbData }: I_HugsMessagesShares) => {
   const {
     hugs: totalHugs,
     comments: totalComments,
@@ -48,12 +46,9 @@ const HugsMessagesShares = ({
     clTooltipTitle: 'Engagements',
     clUser_id: recipient.id,
   })
-  const {
-    hugs: fbHugsCount,
-    comments: fbCommentsCount,
-    shares: fbSharesCount,
-    totalFacebookData,
-  } = getNetworkCount.fbCounts(fbInsights, commentsCount, fbShareCount)
+
+  const totalFacebookData =
+    fbData.total_shares + fbData.total_comments + fbData.total_reactions
   return (
     <div
       className={
@@ -105,7 +100,7 @@ const HugsMessagesShares = ({
                 'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
               }
             >
-              {totalHugs + fbHugsCount}
+              {totalHugs + fbData.total_reactions}
             </p>
           </div>
         </Tooltip>
@@ -125,7 +120,7 @@ const HugsMessagesShares = ({
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalComments + fbCommentsCount}
+            {totalComments + fbData.total_comments}
           </p>
         </div>
       </div>
@@ -144,7 +139,7 @@ const HugsMessagesShares = ({
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalShares + fbSharesCount}
+            {totalShares + fbData.total_shares}
           </p>
         </div>
       </div>

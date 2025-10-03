@@ -7,19 +7,18 @@ import ResetUserInStore from './ResetUserInStore'
 import DeleteUser from './DeleteUser'
 import Icon_dashboard from '@/app/components/icons/Icon_dashboard'
 import {
-  I_supa_select_user_Response_Types,
+  I_supa_select_user_Response_Types_withCommentsCount,
   supa_select_users_all,
 } from '@/app/_actions/users/actions'
 import Pagination from '@/app/components/Pagination'
 import { supa_select_recipients_all } from '@/app/_actions/recipients/actions'
 import LinkCustom from '@/app/components/Link/LinkCustom'
 import Engagements from './Engagements'
-import { AdInsight } from '@/app/utilities/facebook/util_fb_insights'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 
 export interface I_combineddataOfRecipient {
   recipientRow: I_supa_recipients_row
-  user: I_supa_select_user_Response_Types | null | undefined
+  user: I_supa_select_user_Response_Types_withCommentsCount | null | undefined
   hasCreatedAccount: boolean
   isPresentInLTOrg: boolean
   isDraft: boolean
@@ -49,6 +48,8 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
     mode: 'search',
     searchIDs: recipients && recipients.map((item) => item.id),
   })
+
+  // users[0].facebook_posts[0].facebook_comments[0].count
   const combinedData: I_combineddataOfRecipient[] =
     (recipients &&
       recipients.map((item) => {
@@ -113,30 +114,27 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                       const recipientData = item.recipientRow
                         .recipient as I_supaOrg_recipients_row
 
-                      const unknown_FBInsightsCount =
-                        item.user?.facebook_insights &&
-                        !!item.user.facebook_insights.length &&
-                        (item.user?.facebook_insights[0].insights as unknown)
-                      const FBInsights = unknown_FBInsightsCount as
-                        | AdInsight[]
-                        | undefined
+                      const FBInsights =
+                        item.user?.facebook_insights2 &&
+                        !!item.user.facebook_insights2.length
+                          ? item.user?.facebook_insights2[0]
+                          : null
+
                       const unknown_recipient = item.recipientRow
                         .recipient as unknown
                       const recipient = unknown_recipient as I_supaorg_recipient
 
-                      const share_count =
-                        item.user?.facebook_insights &&
-                        item.user.facebook_insights.length &&
-                        item.user.facebook_insights[0].shares
-
                       const facebook_post =
                         item.user?.facebook_posts &&
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (item.user?.facebook_posts[0] as any)
+                        !!item.user.facebook_posts.length
+                          ? item.user.facebook_posts[0]
+                          : undefined
 
                       const facebook_comments_count =
-                        facebook_post?.facebook_comments &&
-                        facebook_post.facebook_comments[0]?.count
+                        facebook_post?.facebook_comments
+                          ? facebook_post?.facebook_comments[0].count
+                          : 0
+
                       return (
                         <tr
                           key={recipientData.id}
@@ -174,10 +172,13 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                           </td>
                           <td className="py-[6px] px-2">
                             <Engagements
-                              fbInsights={FBInsights ?? []}
+                              fb_data={{
+                                total_comments: facebook_comments_count,
+                                total_reactions:
+                                  FBInsights?.total_reactions || 0,
+                                total_shares: FBInsights?.shares || 0,
+                              }}
                               recipient={recipient}
-                              comments_count={facebook_comments_count ?? 0}
-                              share_count={share_count ?? 0}
                             />
                           </td>
                           <td className="py-[6px] px-3">

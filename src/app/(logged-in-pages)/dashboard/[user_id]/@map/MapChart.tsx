@@ -9,13 +9,11 @@ import {
 } from '@/app/utilities/analytics/mapAnalyticsToGeoPoints'
 import { I_CountryPathTotalFormat } from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
-import { AdWiseInsight } from '@/app/utilities/facebook/util_fb_insights'
 import MapControls from './MapControls'
 
 interface Props {
   user_id: string
-  facebookAdData: [] | AdWiseInsight[]
-  analyticsWithCountryPathTotal: I_CountryPathTotalFormat[]
+  prepared_analytics: I_CountryPathTotalFormat[]
 }
 type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
@@ -31,11 +29,7 @@ const defaultPoint = [
   },
 ]
 
-const MapChart = ({
-  user_id,
-  facebookAdData,
-  analyticsWithCountryPathTotal,
-}: Props) => {
+const MapChart = ({ user_id, prepared_analytics }: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -46,43 +40,20 @@ const MapChart = ({
     const loadMap = async () => {
       if (mappedData.length < 1) setLoading(true)
 
-      const res = await fetch('/maps/world_detailed_level2.json', { cache: 'force-cache' })
+      const res = await fetch('/maps/world_detailed_level2.json', {
+        cache: 'force-cache',
+      })
       const worldJson = await res.json()
       registerMap('world', worldJson)
 
-      const formattedFacebookData =
-        facebookAdData?.map((fbdata) => {
-          const {
-            cl_region,
-            cl_country,
-            cl_country_code,
-            cl_city,
-            cl_total_reactions,
-            cl_impressions,
-          } = fbdata
-          return {
-            cl_region,
-            cl_country,
-            cl_country_code,
-            cl_city,
-            clViews: cl_impressions,
-            clMessages: 0,
-            clHugs: cl_total_reactions,
-          }
-        }) ?? []
-
-      const combinedAnalytics = [
-        ...analyticsWithCountryPathTotal,
-        ...formattedFacebookData,
-        ...defaultPoint,
-      ]
+      const combinedAnalytics = [...prepared_analytics, ...defaultPoint]
 
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
         (item) => item.clViews
       )
 
-      const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages || [])
+      const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages)
       setMappedData(mapped)
 
       // 🧠 Calculate min/max
