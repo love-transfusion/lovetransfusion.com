@@ -53,19 +53,23 @@ export const supa_update_facebook_insights2 = async (
   }
 }
 
-export const supa_delete_facebook_insights2 = async (post_id: string) => {
-  const supabase = await createAdmin()
-  try {
-    const { error } = await supabase
-      .from('facebook_insights2')
-      .delete()
-      .eq('post_id', post_id)
-    console.log({ error })
-    if (error) throw new Error(error.message)
-    return { error: null }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    const thisError = error?.message as string
-    return { error: thisError }
-  }
-}
+// export const supa_delete_facebook_insights2 = async (
+//   post_id: string,
+//   recipient_id: string
+// ) => {
+//   const supabase = await createAdmin()
+//   try {
+//     const { error } = await supabase
+//       .from('facebook_insights2')
+//       .delete()
+//       .eq('post_id', post_id)
+//       .eq('user_id', recipient_id)
+//     console.log({ error })
+//     if (error) throw new Error(error.message)
+//     return { error: null }
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   } catch (error: any) {
+//     const thisError = error?.message as string
+//     return { error: thisError }
+//   }
+// }

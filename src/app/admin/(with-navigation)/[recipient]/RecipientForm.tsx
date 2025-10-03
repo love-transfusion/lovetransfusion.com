@@ -24,7 +24,6 @@ import {
 } from '@/app/_actions/facebook_posts/actions'
 import Link from 'next/link'
 import Icon_information from '@/app/components/icons/Icon_information'
-import { supa_delete_facebook_insights2 } from '@/app/_actions/facebook_insights2/actions'
 
 interface recipientFormTypes {
   facebookPostID: string
@@ -70,18 +69,17 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   const { settoast } = useStore(utilityStore)
 
   const isFacebookPostIdDirty = !!dirtyFields.facebookPostID
-  console.log({ isFacebookPostIdDirty })
+
   const updateUser = async (
     recipient_id: string,
     fb_post_id: string | null
   ) => {
     const tasks1 = []
     const tasks2 = []
+    console.log({ fb_post_id, userfbid: user?.fb_post_id })
     if (isFacebookPostIdDirty && fb_post_id) {
+      console.log('entered else')
       tasks1.push(supa_delete_facebook_posts(recipient_id))
-      if (user?.fb_post_id) {
-        tasks1.push(supa_delete_facebook_insights2(user.fb_post_id))
-      }
       tasks2.push(
         supa_upsert_facebook_posts({
           post_id: fb_post_id,
@@ -91,6 +89,10 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
         })
       )
       tasks2.push(supa_update_users({ fb_post_id, id: recipient_id }))
+    } else if (!fb_post_id && user?.fb_post_id) {
+      console.log('entered else if')
+      tasks1.push(supa_delete_facebook_posts(recipient_id))
+      tasks1.push(supa_update_users({ fb_post_id: null, id: recipient_id }))
     }
 
     await Promise.all(tasks1)
@@ -136,6 +138,10 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     const post_id = rawData.facebookPostID
       ? `${process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!}_${rawData.facebookPostID}`
       : null
+
+    console.log({ post_id })
+    if (!isFacebookPostIdDirty) return
+
     if (!user) {
       // Create an account for the recipient
       const { data, error } = await supa_admin_create_account({
@@ -161,6 +167,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
         })
       }
     } else {
+      console.log('entered else')
       await updateUser(user.id, post_id)
     }
     reset(rawData)
