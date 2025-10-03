@@ -65,7 +65,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       user_id: recipient_id,
       last_synced_at: null,
     })
-    // console.log({ error })
     if (error) return settoast({ clDescription: error, clStatus: 'error' })
 
     await Promise.all([

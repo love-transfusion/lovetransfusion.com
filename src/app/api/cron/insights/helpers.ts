@@ -15,78 +15,90 @@ type RegionInsight = {
   messages?: string[]
 }
 
+const makeKey = (region: string, country: string) =>
+  `${region}|${(country || '').toUpperCase()}`
+
 const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
   const map = new Map<string, Row>()
   for (const r of [...a, ...b]) {
-    const prev = map.get(r.cl_region)
+    const region = r.cl_region ?? 'Unknown'
+    const country = (r.cl_country_code ?? '').toUpperCase()
+    const key = makeKey(region, country)
+
+    const prev = map.get(key)
     if (!prev) {
-      map.set(r.cl_region, { ...r })
+      map.set(key, {
+        cl_region: region,
+        cl_country_code: country,
+        cl_reach: r.cl_reach ?? 0,
+        cl_impressions: r.cl_impressions ?? 0,
+      })
     } else {
-      map.set(r.cl_region, {
-        cl_region: r.cl_region,
+      map.set(key, {
+        cl_region: region,
+        cl_country_code: country, // ✅ keep ISO-2, not region name
         cl_reach: (prev.cl_reach ?? 0) + (r.cl_reach ?? 0),
-        cl_impressions:
-          (prev.cl_impressions ?? 0) + (r.cl_impressions ?? 0) || undefined,
-        cl_country_code: r.cl_region,
+        cl_impressions: (prev.cl_impressions ?? 0) + (r.cl_impressions ?? 0),
       })
     }
   }
-  return Array.from(map.values())
+  return Array.from(map.values()).sort((a, b) => b.cl_reach - a.cl_reach)
 }
 
 const uniq = <T>(arr: T[] = []): T[] => Array.from(new Set(arr))
 
 /**
  * Merge "old" (already stored) insights with "fresh" (just fetched) insights.
- * Assumes both shapes are RegionInsight-like.
  */
 export const merge_old_and_new_insights = (
   oldI: Partial<RegionInsight> | undefined,
   freshI: RegionInsight
 ): RegionInsight => {
   if (!oldI || Object.keys(oldI).length === 0) {
+    const rows = mergeRegionRows([], freshI.rows)
     return {
       ...freshI,
       adIds: uniq(freshI.adIds),
-      rows: mergeRegionRows([], freshI.rows),
+      rows,
+      totalReach: rows.reduce((s, r) => s + (r.cl_reach ?? 0), 0), // ✅ recompute
     }
   }
 
   const old = oldI as RegionInsight
+  const rows = mergeRegionRows(old.rows ?? [], freshI.rows ?? [])
 
   return {
     adIds: uniq([...(old.adIds ?? []), ...(freshI.adIds ?? [])]),
-    // Keep earliest "since" and latest "until" across both
     timeRangeRequested: {
       since:
         old.timeRangeRequested?.since && freshI.timeRangeRequested?.since
-          ? old.timeRangeRequested.since < freshI.timeRangeRequested.since
-            ? old.timeRangeRequested.since
-            : freshI.timeRangeRequested.since
+          ? (old.timeRangeRequested.since < freshI.timeRangeRequested.since
+              ? old.timeRangeRequested.since
+              : freshI.timeRangeRequested.since)
           : old.timeRangeRequested?.since ?? freshI.timeRangeRequested.since,
       until:
         old.timeRangeRequested?.until && freshI.timeRangeRequested?.until
-          ? old.timeRangeRequested.until > freshI.timeRangeRequested.until
-            ? old.timeRangeRequested.until
-            : freshI.timeRangeRequested.until
+          ? (old.timeRangeRequested.until > freshI.timeRangeRequested.until
+              ? old.timeRangeRequested.until
+              : freshI.timeRangeRequested.until)
           : old.timeRangeRequested?.until ?? freshI.timeRangeRequested.until,
     },
     timeRangeApplied: {
       since:
         old.timeRangeApplied?.since && freshI.timeRangeApplied?.since
-          ? old.timeRangeApplied.since < freshI.timeRangeApplied.since
-            ? old.timeRangeApplied.since
-            : freshI.timeRangeApplied.since
+          ? (old.timeRangeApplied.since < freshI.timeRangeApplied.since
+              ? old.timeRangeApplied.since
+              : freshI.timeRangeApplied.since)
           : old.timeRangeApplied?.since ?? freshI.timeRangeApplied.since,
       until:
         old.timeRangeApplied?.until && freshI.timeRangeApplied?.until
-          ? old.timeRangeApplied.until > freshI.timeRangeApplied.until
-            ? old.timeRangeApplied.until
-            : freshI.timeRangeApplied.until
+          ? (old.timeRangeApplied.until > freshI.timeRangeApplied.until
+              ? old.timeRangeApplied.until
+              : freshI.timeRangeApplied.until)
           : old.timeRangeApplied?.until ?? freshI.timeRangeApplied.until,
     },
-    rows: mergeRegionRows(old.rows ?? [], freshI.rows ?? []),
-    totalReach: (old.totalReach ?? 0) + (freshI.totalReach ?? 0),
+    rows,
+    totalReach: rows.reduce((s, r) => s + (r.cl_reach ?? 0), 0), // ✅ recompute
     messages: uniq([...(old.messages ?? []), ...(freshI.messages ?? [])]),
   }
 }
