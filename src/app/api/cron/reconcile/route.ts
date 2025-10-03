@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import pLimit from 'p-limit'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
-import pLimit from 'p-limit'
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
@@ -15,6 +15,7 @@ export const maxDuration = 300
 const BATCH_SIZE = 10
 const CONCURRENCY = 5
 const PER_POST_BUDGET_MS = 20000
+const RETRY_MAX = 10
 
 const NON_EXISTENT_MARKER = 'tombstoned: non-existent/off-surface'
 
@@ -35,13 +36,23 @@ const trim = (v: unknown, max = 500) => {
 
 // --- classify common Graph errors so we can tombstone "gone" posts
 function classifyGraphError(e: any) {
+  // ✅ handle raw string errors from util_fb_comments
   const msg: string =
-    e?.message || e?.error?.message || e?.response?.data?.error?.message || ''
-  const code = e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code
+    (typeof e === 'string' && e) ||
+    e?.message ||
+    e?.error?.message ||
+    e?.response?.data?.error?.message ||
+    ''
+  const code =
+    (typeof e === 'object' &&
+      (e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code)) ||
+    undefined
   const subcode =
-    e?.error_subcode ??
-    e?.error?.error_subcode ??
-    e?.response?.data?.error?.error_subcode
+    (typeof e === 'object' &&
+      (e?.error_subcode ??
+        e?.error?.error_subcode ??
+        e?.response?.data?.error?.error_subcode)) ||
+    undefined
 
   // Typical patterns for "object does not exist / unsupported get request"
   const nonExistent =
@@ -79,12 +90,16 @@ export async function GET(req: NextRequest) {
   const supabase = await createAdmin()
   console.info(span('SB_READY'))
 
+  // ---------- PICK_POSTS (NULL-safe filters) ----------
   console.time(span('PICK_POSTS'))
+  const marker = `${NON_EXISTENT_MARKER}%`
   const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
     .select('*')
-    // Exclude previously tombstoned (non-existent/off-surface) posts
-    .not('last_error', 'ilike', `${NON_EXISTENT_MARKER}%`)
+    // include rows where last_error IS NULL OR NOT ILIKE marker
+    .or(`last_error.is.null,last_error.not.ilike.${marker}`)
+    // include rows where retry_count IS NULL OR < RETRY_MAX
+    .or(`retry_count.is.null,retry_count.lt.${RETRY_MAX}`)
     .in('sync_status', ['idle', 'deferred', 'error'] as any)
     .order('last_synced_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
@@ -346,12 +361,12 @@ async function reconcilePost(
       return false
     }
 
-    // >>> DIAG: Dump raw sample from Graph (includes raw from)
+    // >>> DIAG
     if (data && data.length) {
       const withFrom = data.filter((c) => !!c.from)
       const withFromId = data.filter((c) => !!c.from?.id)
       const withFromName = data.filter((c) => !!c.from?.name)
-      const withPic = data.filter((c) => !!c.from?.picture?.data?.url)
+      const withPic = data.filter((c) => !!(c as any).from?.picture?.data?.url)
       const preview = data.slice(0, 5).map((c) => ({
         id: c.id,
         parent: c.parent?.id ?? null,
@@ -359,7 +374,7 @@ async function reconcilePost(
           ? {
               id: c.from.id ?? null,
               name: c.from.name ?? null,
-              has_pic: !!c.from?.picture?.data?.url,
+              has_pic: !!(c as any).from?.picture?.data?.url,
             }
           : null,
         msg_len: c.message?.length ?? 0,
@@ -375,19 +390,11 @@ async function reconcilePost(
         },
         preview,
       })
-
-      // >>> DIAG: emit a guidance hint if names nearly all missing
-      if (withFromName.length < Math.ceil(data.length * 0.1)) {
-        console.warn(postSpan('DIAG_SUMMARY'), {
-          hint: 'Graph returned almost no commenter identities. This typically happens when Page Public Metadata Access is not granted OR commenters hide identity for the Page. See also code 10 seen in avatar batch.',
-          identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
-        })
-      }
     } else {
       console.info(postSpan('FETCH_OK'), {
         count: data?.length ?? 0,
         after_in: after,
-        next_after: paging?.cursors?.after ?? null,
+        next_after: (paging as any)?.cursors?.after ?? null,
       })
     }
 
@@ -478,9 +485,9 @@ async function reconcilePost(
           from_name: fromName,
           from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
           created_time: createdISO,
-          like_count: c.like_count ?? null,
-          comment_count: c.comment_count ?? null,
-          permalink_url: c.permalink_url ?? null,
+          like_count: (c as any).like_count ?? null,
+          comment_count: (c as any).comment_count ?? null,
+          permalink_url: (c as any).permalink_url ?? null,
           is_hidden: false,
           is_deleted: false,
           raw: c as any,
@@ -566,11 +573,12 @@ async function reconcilePost(
       post.post_id,
       `last_synced_at update failed: ${updErr.message}`
     )
-    return false
+  } else {
+    console.info(postSpan('END_OK'))
+    return true
   }
 
-  console.info(postSpan('END_OK'))
-  return true
+  return false
 }
 
 async function deferPost(
@@ -594,13 +602,18 @@ async function markPostError(
   post_id: string,
   message: string
 ) {
-  console.error(`[ERROR ${post_id}]`, { message })
+  // ✅ cap runaway retries and optionally mark as idle after cap
+  const current = await getCurrentRetry(supabase, post_id)
+  const next = (current ?? 0) + 1
   await supabase
     .from('facebook_posts')
     .update({
-      sync_status: 'error',
-      retry_count: (await getCurrentRetry(supabase, post_id)) + 1,
+      sync_status: next >= RETRY_MAX ? 'idle' : 'error',
+      retry_count: next,
       last_error: message.slice(0, 1000),
+      ...(next >= RETRY_MAX
+        ? { last_synced_at: new Date().toISOString() }
+        : {}),
     })
     .eq('post_id', post_id)
 }

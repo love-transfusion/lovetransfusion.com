@@ -58,14 +58,20 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   })
   const { settoast } = useStore(utilityStore)
 
-  const updateUser = async (recipient_id: string, fb_post_id: string) => {
-    const { error } = await supa_update_facebook_posts({
-      post_id: fb_post_id,
-      page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-      user_id: recipient_id,
-      last_synced_at: null,
-    })
-    if (error) return settoast({ clDescription: error, clStatus: 'error' })
+  const updateUser = async (
+    recipient_id: string,
+    fb_post_id: string | null
+  ) => {
+    if (fb_post_id) {
+      const { error } = await supa_update_facebook_posts({
+        post_id: fb_post_id,
+        page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+        user_id: recipient_id,
+        last_synced_at: null,
+      })
+      console.log({ error })
+      if (error) return settoast({ clDescription: error, clStatus: 'error' })
+    }
 
     await Promise.all([
       supa_update_users({
@@ -84,9 +90,9 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   }
 
   const onSubmit = async (rawData: recipientFormTypes) => {
-    const post_id = `${process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!}_${
-      rawData.facebookPostID
-    }`
+    const post_id = rawData.facebookPostID
+      ? `${process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!}_${rawData.facebookPostID}`
+      : null
     if (!user) {
       // Create an account for the recipient
       const { data, error } = await supa_admin_create_account({
@@ -133,13 +139,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
               className="placeholder:text-neutral-400 border-neutral-400 py-2"
               clVariant="input2"
               clContainerClassName="w-full"
-              {...register('facebookPostID', {
-                required: 'Facebook post ID is required.',
-                pattern: {
-                  value: /^[0-9]{13,20}$/,
-                  message: 'Please enter a Facebook post ID',
-                },
-              })}
+              {...register('facebookPostID')}
               clErrorMessage={errors.facebookPostID?.message}
               clRightIcon={
                 <div title="How to get Post ID?">
