@@ -2,9 +2,7 @@ import Icon_left from '@/app/components/icons/Icon_left'
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  supa_select_user,
-} from '@/app/_actions/users/actions'
+import { supa_select_user } from '@/app/_actions/users/actions'
 import RecipientForm from './RecipientForm'
 import { supa_select_recipients } from '@/app/_actions/recipients/actions'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
@@ -129,11 +127,7 @@ const RecipientPage = async (props: { params: Params }) => {
             }}
           />
         </div>
-        <RecipientForm
-          recipientObject={recipientObject}
-          recipient={recipient}
-          user={user}
-        />
+        <RecipientForm recipientObject={recipientObject} user={user} />
       </div>
     </div>
   )
