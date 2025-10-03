@@ -18,7 +18,10 @@ import {
   supa_update_users,
 } from '@/app/_actions/users/actions'
 import { supa_update_recipients } from '@/app/_actions/recipients/actions'
-import { supa_update_facebook_posts } from '@/app/_actions/facebook_posts/actions'
+import {
+  supa_insert_facebook_posts,
+  supa_update_facebook_posts,
+} from '@/app/_actions/facebook_posts/actions'
 import Link from 'next/link'
 import Icon_information from '@/app/components/icons/Icon_information'
 
@@ -60,15 +63,27 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
 
   const updateUser = async (
     recipient_id: string,
-    fb_post_id: string | null
+    fb_post_id: string | null,
+    isInsert: boolean
   ) => {
-    if (fb_post_id) {
-      const { error } = await supa_update_facebook_posts({
+    if (fb_post_id && isInsert) {
+      const { error } = await supa_insert_facebook_posts({
         post_id: fb_post_id,
         page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
         user_id: recipient_id,
         last_synced_at: null,
       })
+      if (error) return settoast({ clDescription: error, clStatus: 'error' })
+    } else if (fb_post_id && !isInsert && user?.id) {
+      const { error } = await supa_update_facebook_posts(
+        {
+          post_id: fb_post_id,
+          page_id: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+          user_id: recipient_id,
+          last_synced_at: null,
+        },
+        user.id
+      )
       if (error) return settoast({ clDescription: error, clStatus: 'error' })
     }
 
@@ -110,14 +125,14 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       }
 
       if (!error && data && data.user?.id) {
-        await updateUser(data.user.id, post_id)
+        await updateUser(data.user.id, post_id, true)
         settoast({
           clDescription: 'Account successfully created.',
           clStatus: 'success',
         })
       }
     } else {
-      await updateUser(user.id, post_id)
+      await updateUser(user.id, post_id, false)
     }
   }
   return (
