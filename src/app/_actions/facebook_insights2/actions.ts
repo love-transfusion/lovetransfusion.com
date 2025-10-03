@@ -64,7 +64,6 @@ export const supa_update_facebook_insights2 = async (
 //       .delete()
 //       .eq('post_id', post_id)
 //       .eq('user_id', recipient_id)
-//     console.log({ error })
 //     if (error) throw new Error(error.message)
 //     return { error: null }
 //     // eslint-disable-next-line @typescript-eslint/no-explicit-any

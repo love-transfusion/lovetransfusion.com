@@ -152,7 +152,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       ? `${process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!}_${rawData.facebookPostID}`
       : null
 
-    if (!isFacebookPostIdDirty) return
+    if (!isFacebookPostIdDirty && user) return
 
     if (post_id) {
       const dataExists = await checkIfThereIsAnyThatExists({
