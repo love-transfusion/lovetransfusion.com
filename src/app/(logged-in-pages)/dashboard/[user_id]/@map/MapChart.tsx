@@ -48,7 +48,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
 
       const combinedAnalytics = [...prepared_analytics, ...defaultPoint]
 
-      // console.log({ combinedAnalytics })
+      console.log({ combinedAnalytics })
 
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
@@ -56,7 +56,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       )
 
       const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages)
-      // console.log({ mapped })
+      console.log({ mapped })
       setMappedData(mapped)
 
       // 🧠 Calculate min/max

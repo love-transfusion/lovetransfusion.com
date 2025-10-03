@@ -1,5 +1,10 @@
 type TimeRange = { since: string; until: string }
-type Row = { cl_region: string; cl_reach: number; cl_impressions?: number }
+type Row = {
+  cl_region: string
+  cl_reach: number
+  cl_impressions?: number
+  cl_country_code: string
+}
 
 type RegionInsight = {
   adIds: string[]
@@ -22,6 +27,7 @@ const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
         cl_reach: (prev.cl_reach ?? 0) + (r.cl_reach ?? 0),
         cl_impressions:
           (prev.cl_impressions ?? 0) + (r.cl_impressions ?? 0) || undefined,
+        cl_country_code: r.cl_region,
       })
     }
   }

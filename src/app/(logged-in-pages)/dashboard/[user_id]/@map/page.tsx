@@ -57,6 +57,7 @@ const MapSlot = async (props: { params: Params }) => {
   })
 
   const paidInsights = preparePaidInsights(FBInsights)
+  console.log({ paidInsights })
 
   // console.log({ analyticsWithCountryPathTotal })
   // console.log({ paidInsights })

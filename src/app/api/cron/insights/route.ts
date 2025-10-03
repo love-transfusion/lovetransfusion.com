@@ -235,7 +235,7 @@ export const GET = async (req: NextRequest) => {
           ),
         })
         return { userId: user.id, status: error ? 'error:update' : 'ok:update' }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         return { userId: user.id, status: 'error:exception' }
       }
