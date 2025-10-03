@@ -13,13 +13,11 @@ import { supa_admin_create_account } from '@/app/_actions/admin/actions'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import { useForm } from 'react-hook-form'
-import {
-  I_supa_select_user_Response_Types,
-  supa_update_users,
-} from '@/app/_actions/users/actions'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 import { supa_update_recipients } from '@/app/_actions/recipients/actions'
 import {
   supa_delete_facebook_posts,
+  supa_select_facebook_posts,
   supa_upsert_facebook_posts,
 } from '@/app/_actions/facebook_posts/actions'
 import Link from 'next/link'
@@ -49,6 +47,8 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     handleSubmit,
     register,
     reset,
+    setError,
+    setFocus,
     formState: {
       isSubmitting: isLoading,
       isSubmitSuccessful,
@@ -58,7 +58,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   } = useForm<recipientFormTypes>({
     defaultValues: async () => {
       return {
-        facebookPostID: getFacebookPostID(user?.fb_post_id || ''),
+        facebookPostID: getFacebookPostID(user?.facebook_posts?.post_id || ''),
         twitterURL: '',
         instagramURL: '',
         pinteresetURL: '',
@@ -73,12 +73,24 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   const updateUser = async (
     recipient_id: string,
     fb_post_id: string | null
-  ) => {
+  ): Promise<'ok' | 'duplicate' | 'error'> => {
     const tasks1 = []
     const tasks2 = []
-    console.log({ fb_post_id, userfbid: user?.fb_post_id })
+
     if (isFacebookPostIdDirty && fb_post_id) {
-      console.log('entered else')
+      const { data: dataExists } = await supa_select_facebook_posts(fb_post_id)
+      if (dataExists) {
+        setError('facebookPostID', {
+          type: 'validate',
+          message: 'This Post ID is already in use.',
+        })
+        setFocus('facebookPostID')
+        // settoast({
+        //   clDescription: 'This Post ID is already in use.',
+        //   clStatus: 'error',
+        // })
+        return 'duplicate'
+      }
       tasks1.push(supa_delete_facebook_posts(recipient_id))
       tasks2.push(
         supa_upsert_facebook_posts({
@@ -88,11 +100,8 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
           last_synced_at: null,
         })
       )
-      tasks2.push(supa_update_users({ fb_post_id, id: recipient_id }))
-    } else if (!fb_post_id && user?.fb_post_id) {
-      console.log('entered else if')
+    } else if (!fb_post_id) {
       tasks1.push(supa_delete_facebook_posts(recipient_id))
-      tasks1.push(supa_update_users({ fb_post_id: null, id: recipient_id }))
     }
 
     await Promise.all(tasks1)
@@ -101,12 +110,13 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       clDescription: 'Account successfully updated.',
       clStatus: 'success',
     })
+    return 'ok'
   }
 
   const insertOrUpdate = async (
     recipient_id: string,
     fb_post_id: string | null
-  ) => {
+  ): Promise<'ok' | 'duplicate' | 'error'> => {
     if (fb_post_id) {
       const { error } = await supa_upsert_facebook_posts({
         post_id: fb_post_id,
@@ -114,14 +124,13 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
         user_id: recipient_id,
         last_synced_at: null,
       })
-      if (error) return settoast({ clDescription: error, clStatus: 'error' })
+      if (error) {
+        settoast({ clDescription: error, clStatus: 'error' })
+        return 'error'
+      }
     }
 
     await Promise.all([
-      supa_update_users({
-        id: recipient_id,
-        fb_post_id,
-      }),
       supa_update_recipients({
         id: recipientObject.id,
         user_id: recipient_id,
@@ -132,6 +141,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       clStatus: 'success',
     })
     reset()
+    return 'ok'
   }
 
   const onSubmit = async (rawData: recipientFormTypes) => {
@@ -139,7 +149,6 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       ? `${process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!}_${rawData.facebookPostID}`
       : null
 
-    console.log({ post_id })
     if (!isFacebookPostIdDirty) return
 
     if (!user) {
@@ -160,20 +169,30 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       }
 
       if (!error && data && data.user?.id) {
-        await insertOrUpdate(data.user.id, post_id)
-        settoast({
-          clDescription: 'Account successfully created.',
-          clStatus: 'success',
-        })
+        const status = await insertOrUpdate(data.user.id, post_id)
+
+        if (status === 'ok') {
+          settoast({
+            clDescription: 'Account successfully created.',
+            clStatus: 'success',
+          })
+          reset(rawData)
+          setisSubmitted(true)
+        }
       }
     } else {
-      console.log('entered else')
-      await updateUser(user.id, post_id)
+      const status = await updateUser(user.id, post_id)
+
+      if (status === 'duplicate') {
+        // Nothing else; allow handleSubmit promise to resolve -> isLoading false
+        return
+      }
+      if (status === 'ok') {
+        reset(rawData) // ✅ now resets for existing users too
+        setisSubmitted(true) // ✅ show "submitted" state
+      }
     }
-    reset(rawData)
-    setisSubmitted(true)
   }
-  console.log({ userpostID: user?.fb_post_id, isSubmitted })
 
   useEffect(() => {
     setisSubmitted(false)
@@ -211,14 +230,16 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
                 }
               />
             </div>
-            {isFacebookPostIdDirty && user?.fb_post_id && !isSubmitted && (
-              <div className="bg-primary-50 rounded-lg border border-primary-200 py-3 px-5 mt-2">
-                <p className={''}>
-                  Changing this Facebook Post ID will permanently delete all
-                  related data.
-                </p>
-              </div>
-            )}
+            {isFacebookPostIdDirty &&
+              user?.facebook_posts?.post_id &&
+              !isSubmitted && (
+                <div className="bg-primary-50 rounded-lg border border-primary-200 py-3 px-5 mt-2">
+                  <p className={''}>
+                    Changing this Facebook Post ID will permanently delete all
+                    related data.
+                  </p>
+                </div>
+              )}
           </div>
           <div className={'flex gap-4 w-full'}>
             <Image

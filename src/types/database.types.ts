@@ -144,6 +144,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: 'facebook_insights2_post_id_fkey'
+            columns: ['post_id']
+            isOneToOne: true
+            referencedRelation: 'facebook_posts'
+            referencedColumns: ['post_id']
+          },
+          {
             foreignKeyName: 'facebook_insights2_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
@@ -451,7 +458,6 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string
-          fb_post_id: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -466,7 +472,6 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email: string
-          fb_post_id?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -481,7 +486,6 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string
-          fb_post_id?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null

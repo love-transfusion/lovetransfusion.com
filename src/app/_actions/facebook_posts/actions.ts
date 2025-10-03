@@ -90,3 +90,25 @@ export const supa_delete_facebook_posts = async (recipient_id: string) => {
     return { error: thisError }
   }
 }
+
+export const supa_select_facebook_posts = async (post_id: string) => {
+  const user = await getCurrentUser()
+  const isadmin = isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
+  if (!isadmin) throw new Error('You are not authorized.')
+
+  const supabase = await createAdmin()
+
+  try {
+    const { data, error } = await supabase
+      .from('facebook_posts')
+      .select()
+      .eq('post_id', post_id)
+      .single()
+    if (error) throw new Error(error.message)
+    return { data, error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { data: null, error: thisError }
+  }
+}

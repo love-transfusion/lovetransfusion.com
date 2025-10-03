@@ -42,11 +42,11 @@ const MessageSlot = async (props: MessageSlot_Types) => {
 
   if (!selectedUser) return
 
-  const { data: FBComments, count } = selectedUser.fb_post_id
+  const { data: FBComments, count } = selectedUser.facebook_posts?.post_id
     ? await supa_select_facebook_comments({
         clCurrentPage: page,
         clLimit,
-        post_id: selectedUser.fb_post_id,
+        post_id: selectedUser.facebook_posts.post_id,
       })
     : { data: [], count: 0 }
 

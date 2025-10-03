@@ -22,7 +22,6 @@ export const maxDuration = 60
 
 type UserRow = {
   id: string
-  fb_post_id: string | null
   facebook_insights2: Array<{
     insights: Json
     post_id: string
@@ -30,6 +29,9 @@ type UserRow = {
     last_synced_at: string
     created_at: string
   }>
+  facebook_posts: {
+    post_id: string
+  } | null
 }
 
 type JobResult =
@@ -68,7 +70,7 @@ const runJob = async () => {
 
   const { data: users, error: usersErr } = await supabase
     .from('users')
-    .select('id,fb_post_id,facebook_insights2(*)')
+    .select('id,facebook_insights2(*),facebook_posts(post_id)')
 
   if (usersErr) {
     return {
@@ -101,10 +103,10 @@ const runJob = async () => {
 
   const processUser = async (user: UserRow): Promise<JobResult> => {
     try {
-      if (!user.fb_post_id) {
+      if (!user.facebook_posts?.post_id) {
         return { userId: user.id, status: 'skipped:no-postid' }
       }
-      const post_id = user.fb_post_id
+      const post_id = user.facebook_posts.post_id
 
       const rows = Array.isArray(user.facebook_insights2)
         ? user.facebook_insights2
