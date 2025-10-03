@@ -42,6 +42,8 @@ const MapSlot = async (props: { params: Params }) => {
     selectedUser.recipients && (selectedUser.recipients[0].recipient as unknown)
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
+  console.log({ selectedUser })
+
   const FBInsights = !!selectedUser.facebook_insights2?.length
     ? (selectedUser.facebook_insights2[0]
         .insights as unknown as I_Region_Insight_Types)

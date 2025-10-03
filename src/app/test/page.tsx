@@ -139,6 +139,7 @@ const runJob = async () => {
           endAnchor: '37mon',
           post_id,
         })
+        console.log({ initRows: init.rows })
         const { error } = await supa_insert_facebook_insights2({
           user_id: user.id,
           insights: init,
@@ -176,6 +177,7 @@ const runJob = async () => {
         post_id,
         endAnchor: 'yesterday',
       })
+      console.log({ freshRows: fresh.rows })
       const merged = merge_old_and_new_insights(existingInsights, fresh)
 
       const { error } = await supa_update_facebook_insights2({
@@ -187,7 +189,7 @@ const runJob = async () => {
         ),
       })
       return { userId: user.id, status: error ? 'error:update' : 'ok:update' }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return { userId: user.id, status: 'error:exception' }
     }
