@@ -72,11 +72,16 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
 
   const checkIfThereIsAnyThatExists = async (opt: {
     fb_post_id?: string
+    recipient_id?: string
   }): Promise<boolean> => {
-    const { fb_post_id } = opt
+    const { fb_post_id, recipient_id } = opt
+    
+    if (!recipient_id) return false
+    
     if (fb_post_id) {
       const { data: fbDataExists } = await supa_select_facebook_posts(
-        fb_post_id
+        fb_post_id,
+        recipient_id
       )
       if (fbDataExists) {
         setError('facebookPostID', {
@@ -157,6 +162,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     if (post_id) {
       const dataExists = await checkIfThereIsAnyThatExists({
         fb_post_id: post_id,
+        recipient_id: user?.id,
       })
       if (dataExists) {
         return

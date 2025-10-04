@@ -91,7 +91,10 @@ export const supa_delete_facebook_posts = async (recipient_id: string) => {
   }
 }
 
-export const supa_select_facebook_posts = async (post_id: string) => {
+export const supa_select_facebook_posts = async (
+  post_id: string,
+  recipient_id: string
+) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role, clThrowIfUnauthorized: true })
   if (!isadmin) throw new Error('You are not authorized.')
@@ -103,6 +106,7 @@ export const supa_select_facebook_posts = async (post_id: string) => {
       .from('facebook_posts')
       .select()
       .eq('post_id', post_id)
+      .eq('user_id', recipient_id)
       .single()
     if (error) throw new Error(error.message)
     return { data, error: null }
