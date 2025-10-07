@@ -89,7 +89,6 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       profile_picture: item.from_picture_url,
     }
   })
-
   const formattedWebsiteComments: I_Comments[] | null =
     selectedRecipient.comments.map((item) => {
       return {
@@ -132,14 +131,13 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     ],
     selectedUser.receipients_deleted_messages
   )
-
   return (
     <div className="">
       <ErrorMessage />
       <WelcomeMessage selectedUser={selectedUser} />
       <SlidingSupportersName
-        clRecipient={selectedRecipient}
-        formattedFBComments={formattedFBComments}
+        // clRecipient={selectedRecipient}
+        allEngagements={allEngagements}
       />
       {/* Profile and Map Section */}
       <div
@@ -155,6 +153,8 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <RecipientProfilePicture
             recipientObj={selectedRecipient}
             selectedUser={selectedUser}
+            sizes="(min-width: 1441px) 190px, (min-width: 768px) 120px, 135px"
+            priority
           />
           <div className={'mt-2 text-left md:text-center -ml-[9px]'}>
             <p
@@ -184,6 +184,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               alt="arrow"
               quality={100}
               className=" max-sm:hidden absolute top-[9px] xl:top-2 2xl:top-[9px] left-[64px] my-auto min-w-[260px] xl:min-w-[220px] 2xl:min-w-[260px]"
+              priority
             />
           </div>
         </div>

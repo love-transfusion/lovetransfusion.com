@@ -66,6 +66,8 @@ const UserIDLayout = async ({
                     src={dots}
                     alt="dots"
                     quality={100}
+                    width={20}
+                    height={32}
                     className="hidden xl:block"
                   />
                   <div className={'hidden md:flex gap-[17px] ml-[5px]'}>

@@ -195,7 +195,7 @@ async function fetchCommentAuthorsByIds(
     return out
   }
 
-  const GRAPH_VER = process.env.NEXT_PUBLIC_GRAPH_VERSION || 'v20.0'
+  const GRAPH_VER = process.env.NEXT_PUBLIC_GRAPH_VERSION!
   const unique = Array.from(new Set(commentIds.filter(Boolean)))
   const chunkSize = 50
 

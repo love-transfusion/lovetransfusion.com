@@ -1,15 +1,18 @@
-import Image from 'next/image'
+import Image, { ImageProps } from 'next/image'
 import React from 'react'
 import brandLogo from '@/app/images/homepage/brand-logo.svg'
 import { I_UserWithProfilePicture } from '../../profile/[user_id]/ProfileForm'
 
+interface RecipientProfilePictureProps extends Omit<ImageProps, 'src' | 'alt'> {
+  recipientObj: I_supaorg_recipient_hugs_counters_comments
+  selectedUser: I_UserWithProfilePicture | null
+}
+
 const RecipientProfilePicture = ({
   recipientObj,
   selectedUser,
-}: {
-  recipientObj: I_supaorg_recipient_hugs_counters_comments
-  selectedUser: I_UserWithProfilePicture | null
-}) => {
+  ...props
+}: RecipientProfilePictureProps) => {
   const profile_pictures = selectedUser?.profile_pictures
   const blurDataURL = selectedUser?.profile_pictures?.blur_data_url || undefined
   return (
@@ -34,6 +37,7 @@ const RecipientProfilePicture = ({
           alt="Profile picture of adley"
           quality={100}
           fill
+          {...props}
           className="object-cover"
         />
       </div>

@@ -108,18 +108,18 @@ export const GET = async (req: NextRequest) => {
       })
     }
 
-    // 2) Cache: postId per adId, and pageAccessToken once
-    let pageAccessToken: string | null
-    try {
-      const { data } = await util_fb_pageToken({
-        pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-      })
-      pageAccessToken = data
-    } catch {
-      pageAccessToken = null
-    }
-
     const processUser = async (user: UserRow): Promise<JobResult> => {
+      // inside processUser, before calling shares/reactions
+      let pageAccessToken: string | null = null
+      try {
+        const { data } = await util_fb_pageToken({
+          pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+        })
+        pageAccessToken = data
+      } catch {
+        pageAccessToken = null
+      }
+
       try {
         if (!user.facebook_posts?.post_id) {
           return { userId: user.id, status: 'skipped:no-postid' }
@@ -232,6 +232,7 @@ export const GET = async (req: NextRequest) => {
           insights: merged,
           post_id,
           shares, // also persist new shares
+          total_reactions,
           last_synced_at: util_formatDateToUTCString(
             new Date(fresh.timeRangeApplied.until)
           ),

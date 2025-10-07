@@ -20,7 +20,7 @@ const RecipientName = () => {
         >
           <div
             className={
-              'w-[120px] md:w-[200px] lg:w-[138px] xl:w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-90 md:opacity-50 animate-pulse h-6 rounded-md'
+              'w-[120px] md:w-[200px] lg:w-[138px] xl:w-[200px] bg-gradient-to-br from-primary-50 to-primary-200 opacity-90 md:opacity-50 animate-pulse h-7 md:h-6 rounded-md'
             }
           />
         </div>

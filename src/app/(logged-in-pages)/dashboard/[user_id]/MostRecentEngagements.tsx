@@ -61,7 +61,7 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
                         src={
                           item.profile_picture_website &&
                           item.profile_picture_website.profile_picture?.fullPath
-                            ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture?.fullPath}`
+                            ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture.fullPath}`
                             : anonymous
                         }
                         alt="Profile picture of engager"

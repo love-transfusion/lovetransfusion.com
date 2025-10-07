@@ -57,14 +57,14 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       setMappedData(mapped)
 
       // 🧠 Calculate min/max
-      const totals = mapped.map((d) => d.value[3] + d.value[4])
+      const totals = mapped.map((d) => d.value[2])
       const minTotal = Math.min(...totals)
       const maxTotal = Math.max(...totals)
 
       const calculateSymbolSize = (val: any[]) => {
-        const total = val[3] + val[4]
-        const minSize = 5
-        const maxSize = 20
+        const total = val[2]
+        const minSize = 4
+        const maxSize = 22
 
         if (maxTotal === minTotal) return (minSize + maxSize) / 2
         const normalized = (total - minTotal) / (maxTotal - minTotal)

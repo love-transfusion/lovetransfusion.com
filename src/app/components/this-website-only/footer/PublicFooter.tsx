@@ -11,11 +11,7 @@ import footerLogo from '@/app/images/main-logo.png'
 const PublicFooter = () => {
   return (
     <div className="bg-primary text-white text-sm md:text-base font-extralight">
-      <div
-        className={
-          'pt-10 md:pt-10 px-4 lg:px-0'
-        }
-      >
+      <div className={'pt-10 md:pt-10 px-4 lg:px-0'}>
         <div className={'max-w-[1104px] mx-auto md:px-6 lg:px-10 xl:px-0 '}>
           <div className={'w-fit mx-auto'}>
             <Link href={'/'} className="">
@@ -61,7 +57,7 @@ const PublicFooter = () => {
                 src={webIcon}
                 alt="web icon"
                 quality={100}
-                className="w-[30px] h-[30px]"
+                className="w-[30px]"
               />
             </Link>
             <Link
