@@ -18,38 +18,63 @@ export type GeoPoint = {
   value: [number, number, number, number, number] // [lng, lat, views, hugs, messages]
 }
 
-/**
- * Normalize a location string (city, state, or country) for search.
- * - Removes the word "city"
- * - Removes spaces
- * - Trims whitespace
- * - Lowercases everything
- */
-const normalizeLocationKey = (str: string) => {
-  return str
+const normalizeLocationKey = (str: string) =>
+  str
     ?.replaceAll(/\bcity\b/gi, '')
     .replaceAll(' ', '')
     .trim()
     .toLowerCase()
-}
 
-// 🧠 Pre-index for instant lookup
+// --- Lookups ---
+// City lookup: normalized "city_countrycode" -> entry
 const cityLookup = new Map<string, LocationEntry>()
-const regionLookup = new Map<string, LocationEntry>()
 
-for (const key of Object.keys(geoDataset)) {
-  const entry = geoDataset[key]
+// Region centroid: normalized "state_countrycode" -> { state, lat, lng }
+type RegionCentroid = { state: string; lat: number; lng: number }
+const regionCentroidLookup = new Map<string, RegionCentroid>()
 
-  const cityKey = `${normalizeLocationKey(entry.city)}_${key
-    .slice(-2)
-    .toLowerCase()}`
-  cityLookup.set(cityKey, entry)
+// Build lookups (also compute region centroids)
+{
+  // temp aggregation store
+  const agg = new Map<
+    string,
+    { state: string; sumLat: number; sumLng: number; count: number }
+  >()
 
-  if (entry.state) {
-    const regionKey = `${normalizeLocationKey(entry.state)}_${key
-      .slice(-2)
-      .toLowerCase()}`
-    regionLookup.set(regionKey, entry)
+  for (const key of Object.keys(geoDataset)) {
+    const entry = geoDataset[key]
+    const cc = key.slice(-2).toLowerCase()
+
+    // city lookup
+    const cityKey = `${normalizeLocationKey(entry.city)}_${cc}`
+    cityLookup.set(cityKey, entry)
+
+    // region aggregation
+    if (entry.state) {
+      const regionKey = `${normalizeLocationKey(entry.state)}_${cc}`
+      const cur = agg.get(regionKey)
+      if (!cur) {
+        agg.set(regionKey, {
+          state: entry.state,
+          sumLat: entry.lat,
+          sumLng: entry.lng,
+          count: 1,
+        })
+      } else {
+        cur.sumLat += entry.lat
+        cur.sumLng += entry.lng
+        cur.count += 1
+      }
+    }
+  }
+
+  // finalize centroids
+  for (const [key, v] of agg.entries()) {
+    regionCentroidLookup.set(key, {
+      state: v.state,
+      lat: v.sumLat / v.count,
+      lng: v.sumLng / v.count,
+    })
   }
 }
 
@@ -72,21 +97,30 @@ export const mapAnalyticsToGeoPoints = async (
       normalizedCityKey === '' ||
       normalizedCityKey === '(notset)'
 
-    // Try city first
-    const cityMatch = cityLookup.get(`${normalizedCityKey}_${countryCodeKey}`)
-    let matchedEntry = cityMatch
+    // 1) Try city
+    const cityMatch = normalizedCityKey
+      ? cityLookup.get(`${normalizedCityKey}_${countryCodeKey}`)
+      : undefined
 
-    // Fall back to region if no city or unusable
-    if (!matchedEntry && (isCityMissing || !cityMatch)) {
-      matchedEntry = regionLookup.get(
-        `${normalizedRegionKey}_${countryCodeKey}`
-      )
-    }
+    // 2) If no city or unusable, try region centroid
+    const regionMatch =
+      !cityMatch && (isCityMissing || !cityMatch) && normalizedRegionKey
+        ? regionCentroidLookup.get(`${normalizedRegionKey}_${countryCodeKey}`)
+        : undefined
 
-    if (!matchedEntry) continue
+    // If neither matched, skip
+    if (!cityMatch && !regionMatch) continue
 
-    const lng = parseFloat(matchedEntry.lng.toFixed(6))
-    const lat = parseFloat(matchedEntry.lat.toFixed(6))
+    // Coordinates + display name
+    const isRegionChosen = !!regionMatch && !cityMatch
+    const lng = parseFloat(
+      (isRegionChosen ? regionMatch!.lng : cityMatch!.lng).toFixed(6)
+    )
+    const lat = parseFloat(
+      (isRegionChosen ? regionMatch!.lat : cityMatch!.lat).toFixed(6)
+    )
+    const displayName = isRegionChosen ? regionMatch!.state : cityMatch!.city
+
     const coordKey = `${lng},${lat}`
 
     if (resultMap.has(coordKey)) {
@@ -96,7 +130,7 @@ export const mapAnalyticsToGeoPoints = async (
       existing.value[4] += record.clMessages
     } else {
       resultMap.set(coordKey, {
-        name: matchedEntry.city,
+        name: displayName,
         value: [lng, lat, record.clViews, record.clHugs, record.clMessages],
       })
     }

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import ltWebsiteIcon from './images/world-w.svg'
 import { I_Comments } from '@/types/Comments.types'
 import Icon_facebook2 from '@/app/components/icons/Icon_facebook2'
+import FacebookProfilePic from './FacebookProfilePic'
 interface I_MostRecentEngagements {
   allEngagements: I_Comments[]
 }
@@ -72,14 +73,8 @@ const MostRecentEngagements = ({ allEngagements }: I_MostRecentEngagements) => {
                       />
                     )}
                     {item.type === 'facebook' && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={
-                          item.profile_picture ??
-                          `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
-                        }
-                        alt="Profile picture of engager"
-                        className="border-[3px] border-[#288CCC] rounded-full w-[37.7px] h-[37.7px]"
+                      <FacebookProfilePic
+                        fbProfilePicURL={item.profile_picture}
                       />
                     )}
                     {index === 0 ? (

@@ -112,14 +112,19 @@ const Messages = ({
 
                         {(item.type === 'facebook' ||
                           item.type === 'instagram') && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={
                               item.profile_picture ??
                               `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
                             }
                             alt="Profile picture of engager"
                             className=""
+                            width={54}
+                            height={54}
+                            onError={(e) => {
+                              e.currentTarget.src = `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
+                            }}
+                            unoptimized
                           />
                         )}
                       </div>

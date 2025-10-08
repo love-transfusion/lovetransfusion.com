@@ -100,7 +100,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
           zoom: 1.2,
           layoutSize: '100%',
           label: { show: false },
-          scaleLimit: { min: 1, max: 10 },
+          scaleLimit: { min: 1, max: 20 },
           itemStyle: {
             areaColor: '#E2F2FA',
             borderWidth: 0.8,

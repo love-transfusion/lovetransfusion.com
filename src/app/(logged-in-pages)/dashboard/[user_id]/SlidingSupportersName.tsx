@@ -58,6 +58,9 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
                   height={25}
                   alt="Profile picture"
                   className="rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.src = `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
+                  }}
                   unoptimized
                 />
               ) : (
