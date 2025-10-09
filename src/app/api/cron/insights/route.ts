@@ -81,9 +81,7 @@ export const GET = async (req: NextRequest) => {
     const SCAN_PAGE_SIZE = 400 // users fetched per scan page
     const PROCESS_LIMIT = 80 // max users processed per invocation
     const WORKER_CONCURRENCY = 3 // parallel workers within this invocation
-    const SYNC_COOLDOWN_MINUTES = Number(
-      process.env.FB_SYNC_COOLDOWN_MINUTES ?? 120
-    )
+    const SYNC_COOLDOWN_MINUTES = 2
 
     const cooldownCutoffISO = new Date(
       Date.now() - SYNC_COOLDOWN_MINUTES * 60_000
