@@ -1,4 +1,5 @@
-type TimeRange = { since: string; until: string }
+import { RegionInsightByDate } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
+
 type Row = {
   cl_region: string
   cl_reach: number
@@ -6,18 +7,10 @@ type Row = {
   cl_country_code: string
 }
 
-type RegionInsight = {
-  adIds: string[]
-  timeRangeRequested: TimeRange
-  timeRangeApplied: TimeRange
-  rows: Row[]
-  totalReach: number
-  messages?: string[]
-}
-
 const makeKey = (region: string, country: string) =>
   `${region}|${(country || '').toUpperCase()}`
 
+/** Merge rows within ONE date (dedupe per region+country; sum reach/imp). */
 const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
   const map = new Map<string, Row>()
   for (const r of [...a, ...b]) {
@@ -36,7 +29,7 @@ const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
     } else {
       map.set(key, {
         cl_region: region,
-        cl_country_code: country, // ✅ keep ISO-2, not region name
+        cl_country_code: country,
         cl_reach: (prev.cl_reach ?? 0) + (r.cl_reach ?? 0),
         cl_impressions: (prev.cl_impressions ?? 0) + (r.cl_impressions ?? 0),
       })
@@ -45,60 +38,57 @@ const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
   return Array.from(map.values()).sort((a, b) => b.cl_reach - a.cl_reach)
 }
 
-const uniq = <T>(arr: T[] = []): T[] => Array.from(new Set(arr))
-
 /**
- * Merge "old" (already stored) insights with "fresh" (just fetched) insights.
+ * Replace-on-overlap strategy:
+ * - Keep all old days that don't appear in fresh.
+ * - For any date that exists in fresh, REPLACE that date's rows with fresh rows.
+ * - Always union adIds.
  */
-export const merge_old_and_new_insights = (
-  oldI: Partial<RegionInsight> | undefined,
-  freshI: RegionInsight
-): RegionInsight => {
-  if (!oldI || Object.keys(oldI).length === 0) {
-    const rows = mergeRegionRows([], freshI.rows)
+export const merge_old_and_new_regionInsightsByDate = (
+  oldI: RegionInsightByDate | undefined,
+  freshI: RegionInsightByDate
+): RegionInsightByDate => {
+  if (!oldI || !oldI.days?.length) {
     return {
-      ...freshI,
-      adIds: uniq(freshI.adIds),
-      rows,
-      totalReach: rows.reduce((s, r) => s + (r.cl_reach ?? 0), 0), // ✅ recompute
+      adIds: [...new Set(freshI.adIds)],
+      days: [...freshI.days].map((d) => ({
+        date: d.date,
+        rows: mergeRegionRows([], d.rows),
+      })),
     }
   }
 
-  const old = oldI as RegionInsight
-  const rows = mergeRegionRows(old.rows ?? [], freshI.rows ?? [])
+  const adIds = Array.from(
+    new Set([...(oldI.adIds ?? []), ...(freshI.adIds ?? [])])
+  )
 
-  return {
-    adIds: uniq([...(old.adIds ?? []), ...(freshI.adIds ?? [])]),
-    timeRangeRequested: {
-      since:
-        old.timeRangeRequested?.since && freshI.timeRangeRequested?.since
-          ? (old.timeRangeRequested.since < freshI.timeRangeRequested.since
-              ? old.timeRangeRequested.since
-              : freshI.timeRangeRequested.since)
-          : old.timeRangeRequested?.since ?? freshI.timeRangeRequested.since,
-      until:
-        old.timeRangeRequested?.until && freshI.timeRangeRequested?.until
-          ? (old.timeRangeRequested.until > freshI.timeRangeRequested.until
-              ? old.timeRangeRequested.until
-              : freshI.timeRangeRequested.until)
-          : old.timeRangeRequested?.until ?? freshI.timeRangeRequested.until,
-    },
-    timeRangeApplied: {
-      since:
-        old.timeRangeApplied?.since && freshI.timeRangeApplied?.since
-          ? (old.timeRangeApplied.since < freshI.timeRangeApplied.since
-              ? old.timeRangeApplied.since
-              : freshI.timeRangeApplied.since)
-          : old.timeRangeApplied?.since ?? freshI.timeRangeApplied.since,
-      until:
-        old.timeRangeApplied?.until && freshI.timeRangeApplied?.until
-          ? (old.timeRangeApplied.until > freshI.timeRangeApplied.until
-              ? old.timeRangeApplied.until
-              : freshI.timeRangeApplied.until)
-          : old.timeRangeApplied?.until ?? freshI.timeRangeApplied.until,
-    },
-    rows,
-    totalReach: rows.reduce((s, r) => s + (r.cl_reach ?? 0), 0), // ✅ recompute
-    messages: uniq([...(old.messages ?? []), ...(freshI.messages ?? [])]),
+  // Index fresh by date for O(1) replacement checks.
+  const freshByDate = new Map<string, Row[]>()
+  for (const d of freshI.days ?? []) {
+    // normalize/dedupe within the day just in case
+    freshByDate.set(d.date, mergeRegionRows([], d.rows))
   }
+
+  const outDaysMap = new Map<string, Row[]>()
+
+  // 1) Start with all old days that are NOT in fresh
+  for (const d of oldI.days ?? []) {
+    if (!freshByDate.has(d.date)) {
+      // keep old day (normalize/dedupe within day)
+      outDaysMap.set(d.date, mergeRegionRows([], d.rows))
+    }
+    // if fresh has this date, we will replace later
+  }
+
+  // 2) Add/replace with fresh days
+  for (const [date, rows] of freshByDate.entries()) {
+    outDaysMap.set(date, rows) // replace-on-overlap
+  }
+
+  // 3) Build sorted array
+  const days = [...outDaysMap.entries()]
+    .map(([date, rows]) => ({ date, rows }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+
+  return { adIds, days }
 }

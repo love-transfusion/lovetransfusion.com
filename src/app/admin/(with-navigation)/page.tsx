@@ -115,9 +115,9 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                         .recipient as I_supaOrg_recipients_row
 
                       const FBInsights =
-                        item.user?.facebook_insights2 &&
-                        !!item.user.facebook_insights2.length
-                          ? item.user?.facebook_insights2[0]
+                        item.user?.facebook_insights &&
+                        !!item.user.facebook_insights.length
+                          ? item.user?.facebook_insights[0]
                           : null
 
                       const unknown_recipient = item.recipientRow

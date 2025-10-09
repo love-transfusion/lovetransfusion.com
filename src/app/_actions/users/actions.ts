@@ -29,7 +29,7 @@ export interface I_supa_select_user_Response_Types extends I_supa_users_row {
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients?: I_supa_recipients_row[] | null
   facebook_posts: I_supa_facebook_posts_row | null
-  facebook_insights2?: I_supa_facebook_insights2_row[]
+  facebook_insights?: I_supa_facebook_insights_row[]
   google_analytics?: I_supa_google_analytics_row | null
 }
 
@@ -45,7 +45,7 @@ export const supa_select_user = async (
   const { data, error } = await supabase
     .from('users')
     .select(
-      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights2(*), facebook_posts(*), google_analytics(*)'
+      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)'
     )
     .eq('id', user_id)
     .single()
@@ -77,7 +77,7 @@ export interface I_supa_select_user_Response_Types_withCommentsCount
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients?: I_supa_recipients_row[] | null
   facebook_posts: I_supa_facebook_posts_row_with_count | null
-  facebook_insights2?: I_supa_facebook_insights2_row[]
+  facebook_insights?: I_supa_facebook_insights_row[]
   google_analytics?: I_supa_google_analytics_row | null
 }
 
@@ -105,7 +105,7 @@ export const supa_select_users_all = async (
     let query = supabase
       .from('users')
       .select(
-        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights2(*), facebook_posts(*, facebook_comments(count)), google_analytics(*)'
+        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(count)), google_analytics(*)'
       )
 
     if (options.mode === 'search' && options.searchIDs) {

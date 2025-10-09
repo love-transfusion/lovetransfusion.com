@@ -4,25 +4,25 @@
 import { util_fb_AdIDs } from './util_fb_AdIDs'
 
 type TimeRange = { since: string; until: string }
+
 type Row = {
   cl_region: string
   cl_reach: number
-  cl_impressions: number
+  cl_impressions?: number
   cl_country_code: string
 }
 
-export type I_Region_Insight_Types = {
-  adIds: string[]
-  timeRangeRequested: TimeRange
-  timeRangeApplied: TimeRange
-  earliestAvailableSince: string
-  clampedToRetentionWindow: boolean
-  rows: Row[]
-  totalReach: number
-  messages: string[]
+type DayBucket = {
+  date: string // 'YYYY-MM-DD' (UTC)
+  rows: Row[] // merged rows for that date
 }
 
-type EndAnchor = 'yesterday' | '37mon'
+export type RegionInsightByDate = {
+  adIds: string[]
+  days: DayBucket[]
+}
+
+type EndAnchor = '37mon' | 'today'
 
 const FB_API_VERSION = 'v22.0'
 const FB_BASE = `https://graph.facebook.com/${FB_API_VERSION}`
@@ -60,56 +60,25 @@ const addUtcMonths = (d: Date, months: number): Date => {
 
 /**
  * Build windows based on endAnchor:
- *  - 'yesterday': end = yesterday; start = end - 2 days (short 3-day span)
- *  - '37mon':    end = today - 2 days; start = max(today - 37 months, <= end)
- * Notes:
- *  - Meta enforces start >= (today - 37 months), not relative to end (#3018).
- *  - We chunk into <=365d slices for stability.
+ *  - '37mon': end = yesterday;     start = max(today-37mo, <= end)
+ *  - 'today': end = today;         start = today (single-day)
+ * Chunk into <=365-day slices for stability.
  */
-const buildWindows = (
-  endAnchor: EndAnchor
-): {
-  windows: TimeRange[]
-  timeRangeApplied: TimeRange
-  earliestAvailableSince: string
-  clamped: boolean
-  messages: string[]
-} => {
+const buildWindows = (endAnchor: EndAnchor): { windows: TimeRange[] } => {
   const todayUTC = utcStartOfToday()
-  const retentionFloor = addUtcMonths(todayUTC, -37) // rule #3018
+  const retentionFloor = addUtcMonths(todayUTC, -37)
 
-  // Determine end
-  const end =
-    endAnchor === 'yesterday'
-      ? addUtcDays(todayUTC, -1) // yesterday
-      : addUtcDays(todayUTC, -2) // two days before today
-
-  // Determine start
   let start: Date
-  let clamped = false
-  const messages: string[] = []
+  let end: Date
 
-  if (endAnchor === 'yesterday') {
-    // Short window: 2 days before yesterday ... yesterday
-    start = addUtcDays(end, -2)
-    messages.push(
-      `Window anchored to 'yesterday': ${ymd(start)} → ${ymd(end)} (UTC).`
-    )
+  if (endAnchor === 'today') {
+    start = todayUTC
+    end = todayUTC
   } else {
-    // Long window: today-37mo ... (today-2d), clamped to Meta's retention floor
-    start = retentionFloor
-    if (start > end) {
-      // Edge case (very new account or clock skew)
-      start = end
-    }
-    clamped = true // by definition we're enforcing the 37-month floor
-    messages.push(
-      `Window anchored to '37mon': last 37 months ending ${ymd(end)} (UTC).`,
-      `Start set to ${ymd(start)} to comply with Meta retention (#3018).`
-    )
+    end = addUtcDays(todayUTC, -1) // yesterday
+    start = retentionFloor > end ? end : retentionFloor
   }
 
-  // Build <=365-day windows
   const windows: TimeRange[] = []
   if (start <= end) {
     let cursor = start
@@ -130,13 +99,7 @@ const buildWindows = (
     }
   }
 
-  return {
-    windows,
-    timeRangeApplied: { since: ymd(start), until: ymd(end) },
-    earliestAvailableSince: ymd(retentionFloor),
-    clamped,
-    messages,
-  }
+  return { windows }
 }
 
 const fetchJson = async (url: string) => {
@@ -156,66 +119,65 @@ const buildAdInsightsUrl = (adId: string, tr: TimeRange, after?: string) => {
   p.set('level', 'ad')
   p.set('time_range', JSON.stringify(tr))
   p.set('fields', 'reach,impressions')
+  p.set('time_increment', '1') // daily buckets
   p.set('limit', '500')
   if (after) p.set('after', after)
   return `${FB_BASE}/${adId}/insights?${p.toString()}`
 }
 
-const getRegionRowsForAdWindow = async (
-  adId: string,
-  tr: TimeRange
-): Promise<Row[]> => {
+/**
+ * Fetch per-day rows for a single (adId, time range).
+ * Returns Map<date, Map<region|country, {reach,impressions,region,country}>>
+ */
+const getPerDayMapsForAdWindow = async (adId: string, tr: TimeRange) => {
   let url = buildAdInsightsUrl(adId, tr)
-  const rows: Row[] = []
+  const byDate = new Map<
+    string,
+    Map<
+      string,
+      { reach: number; impressions: number; region: string; country: string }
+    >
+  >()
 
   while (url) {
     const json = await fetchJson(url)
     const data: any[] = Array.isArray(json.data) ? json.data : []
+
     for (const d of data) {
-      const region = d.region ?? 'Unknown'
-      const country = (d.country ?? '').toUpperCase() // ISO-2 (e.g., 'IN')
+      const date = (d.date_start as string) ?? null
+      if (!date) continue
+
+      const region = (d.region as string) ?? 'Unknown'
+      const country = ((d.country as string) ?? '').toUpperCase()
       const reach = Number(d.reach ?? 0)
-      const impressions =
-        d.impressions != null ? Number(d.impressions) : undefined
-      if (reach > 0)
-        rows.push({
-          cl_region: region,
-          cl_reach: reach,
-          cl_impressions: impressions ?? 0,
-          cl_country_code: country,
-        })
+      const impressions = d.impressions != null ? Number(d.impressions) : 0
+      if (reach <= 0) continue
+
+      let dateMap = byDate.get(date)
+      if (!dateMap) {
+        dateMap = new Map()
+        byDate.set(date, dateMap)
+      }
+
+      const key = `${region}|${country}`
+      const prev = dateMap.get(key) ?? {
+        reach: 0,
+        impressions: 0,
+        region,
+        country,
+      }
+      dateMap.set(key, {
+        reach: prev.reach + reach,
+        impressions: prev.impressions + impressions,
+        region,
+        country,
+      })
     }
+
     url = (json?.paging?.next as string | undefined) || ''
   }
 
-  // collapse within window
-  const map = new Map<
-    string,
-    { reach: number; impressions: number; region: string; country: string }
-  >()
-
-  for (const r of rows) {
-    const key = `${r.cl_region}|${r.cl_country_code}` // ← use region+country
-    const prev = map.get(key) ?? {
-      reach: 0,
-      impressions: 0,
-      region: r.cl_region,
-      country: r.cl_country_code,
-    }
-    map.set(key, {
-      reach: prev.reach + r.cl_reach,
-      impressions: prev.impressions + r.cl_impressions,
-      region: prev.region,
-      country: prev.country,
-    })
-  }
-
-  return [...map.values()].map((v) => ({
-    cl_region: v.region,
-    cl_country_code: v.country,
-    cl_reach: v.reach,
-    cl_impressions: v.impressions,
-  }))
+  return byDate
 }
 
 const withLimit = async <T>(
@@ -245,11 +207,66 @@ const withLimit = async <T>(
   })
 }
 
+const mergeResults = (
+  results: Map<
+    string,
+    Map<
+      string,
+      { reach: number; impressions: number; region: string; country: string }
+    >
+  >[]
+): DayBucket[] => {
+  const globalByDate = new Map<
+    string,
+    Map<
+      string,
+      { reach: number; impressions: number; region: string; country: string }
+    >
+  >()
+
+  for (const byDate of results) {
+    for (const [date, dateMap] of byDate.entries()) {
+      let destDateMap = globalByDate.get(date)
+      if (!destDateMap) {
+        destDateMap = new Map()
+        globalByDate.set(date, destDateMap)
+      }
+      for (const [key, v] of dateMap.entries()) {
+        const prev = destDateMap.get(key) ?? {
+          reach: 0,
+          impressions: 0,
+          region: v.region,
+          country: v.country,
+        }
+        destDateMap.set(key, {
+          reach: prev.reach + v.reach,
+          impressions: prev.impressions + v.impressions,
+          region: prev.region,
+          country: prev.country,
+        })
+      }
+    }
+  }
+
+  const days: DayBucket[] = [...globalByDate.entries()]
+    .map(([date, dateMap]) => {
+      const rows: Row[] = [...dateMap.values()]
+        .map((v) => ({
+          cl_region: v.region,
+          cl_country_code: v.country,
+          cl_reach: v.reach,
+          cl_impressions: v.impressions,
+        }))
+        .sort((a, b) => b.cl_reach - a.cl_reach)
+      return { date, rows }
+    })
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+
+  return days
+}
+
 /**
- * PUBLIC: Reach by region across MULTIPLE Ad IDs.
- * - endAnchor:
- *   • 'yesterday' → end=yesterday, start=end-2d
- *   • '37mon'     → end=today-2d, start=max(today-37mo, <= end)  (Meta #3018)
+ * Main: supports '37mon' and 'today'
  */
 export const util_fb_reachByRegion_multiAds = async ({
   endAnchor,
@@ -259,70 +276,53 @@ export const util_fb_reachByRegion_multiAds = async ({
   endAnchor: EndAnchor
   post_id: string
   concurrency?: number
-}): Promise<I_Region_Insight_Types> => {
+}): Promise<RegionInsightByDate> => {
   const adIds = await util_fb_AdIDs(post_id)
-  if (!adIds || !!!adIds.length) throw new Error('Ad IDs is missing')
-
+  if (!adIds || !adIds.length) throw new Error('Ad IDs is missing')
   if (!ACCESS_TOKEN) throw new Error('FACEBOOK_SYSTEM_TOKEN is missing')
 
-  const {
-    windows,
-    timeRangeApplied,
-    earliestAvailableSince,
-    clamped,
-    messages,
-  } = buildWindows(endAnchor)
+  const { windows } = buildWindows(endAnchor)
 
-  const requested: TimeRange = { ...timeRangeApplied }
-
-  const tasks: Array<() => Promise<Row[]>> = []
-  for (const adId of adIds)
-    for (const w of windows) tasks.push(() => getRegionRowsForAdWindow(adId, w))
-
-  const chunks = await withLimit(concurrency, tasks)
-
-  const combined = new Map<
-    string,
-    { reach: number; impressions: number; region: string; country: string }
-  >()
-
-  for (const rows of chunks) {
-    for (const r of rows) {
-      const key = `${r.cl_region}|${r.cl_country_code}` // ← region+country again
-      const prev = combined.get(key) ?? {
-        reach: 0,
-        impressions: 0,
-        region: r.cl_region,
-        country: r.cl_country_code,
-      }
-      combined.set(key, {
-        reach: prev.reach + r.cl_reach,
-        impressions: prev.impressions + r.cl_impressions,
-        region: prev.region,
-        country: prev.country,
-      })
+  const tasks: Array<
+    () => Promise<
+      Map<
+        string,
+        Map<
+          string,
+          {
+            reach: number
+            impressions: number
+            region: string
+            country: string
+          }
+        >
+      >
+    >
+  > = []
+  for (const adId of adIds) {
+    for (const w of windows) {
+      tasks.push(() => getPerDayMapsForAdWindow(adId, w))
     }
   }
 
-  const collapsed: Row[] = [...combined.values()]
-    .map((v) => ({
-      cl_region: v.region,
-      cl_country_code: v.country,
-      cl_reach: v.reach,
-      cl_impressions: v.impressions,
-    }))
-    .sort((a, b) => b.cl_reach - a.cl_reach)
+  const results = await withLimit(concurrency, tasks)
+  const days = mergeResults(results)
+  return { adIds, days }
+}
 
-  const totalReach = collapsed.reduce((s, r) => s + r.cl_reach, 0)
-
-  return {
-    adIds,
-    timeRangeRequested: requested,
-    timeRangeApplied,
-    earliestAvailableSince,
-    clampedToRetentionWindow: clamped,
-    rows: collapsed,
-    totalReach,
-    messages,
-  }
+/**
+ * Convenience helper for "today" (single-day, partial)
+ */
+export const util_fb_reachByRegion_today_multiAds = async ({
+  post_id,
+  concurrency = 3,
+}: {
+  post_id: string
+  concurrency?: number
+}) => {
+  return await util_fb_reachByRegion_multiAds({
+    endAnchor: 'today',
+    post_id,
+    concurrency,
+  })
 }

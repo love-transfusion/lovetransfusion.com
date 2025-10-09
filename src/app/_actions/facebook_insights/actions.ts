@@ -2,11 +2,11 @@
 
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 
-export const supa_select_facebook_insights2 = async (user_id: string) => {
+export const supa_select_facebook_insights = async (user_id: string) => {
   const supabase = await createAdmin()
   try {
     const { data, error } = await supabase
-      .from('facebook_insights2')
+      .from('facebook_insights')
       .select()
       .eq('user_id', user_id)
       .single()
@@ -19,12 +19,12 @@ export const supa_select_facebook_insights2 = async (user_id: string) => {
   }
 }
 
-export const supa_insert_facebook_insights2 = async (
-  rawData: I_supa_facebook_insights2_insert
+export const supa_insert_facebook_insights = async (
+  rawData: I_supa_facebook_insights_insert
 ) => {
   const supabase = await createAdmin()
   try {
-    const { error } = await supabase.from('facebook_insights2').insert(rawData)
+    const { error } = await supabase.from('facebook_insights').insert(rawData)
     if (error) throw new Error(error.message)
     return { error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,14 +34,14 @@ export const supa_insert_facebook_insights2 = async (
   }
 }
 
-export const supa_update_facebook_insights2 = async (
-  rawData: I_supa_facebook_insights2_update
+export const supa_update_facebook_insights = async (
+  rawData: I_supa_facebook_insights_update
 ) => {
   if (!rawData.post_id) return { error: 'Post ID is required.' }
   const supabase = await createAdmin()
   try {
     const { error } = await supabase
-      .from('facebook_insights2')
+      .from('facebook_insights')
       .update(rawData)
       .eq('post_id', rawData.post_id)
     if (error) throw new Error(error.message)
@@ -60,7 +60,7 @@ export const supa_update_facebook_insights2 = async (
 //   const supabase = await createAdmin()
 //   try {
 //     const { error } = await supabase
-//       .from('facebook_insights2')
+//       .from('facebook_insights')
 //       .delete()
 //       .eq('post_id', post_id)
 //       .eq('user_id', recipient_id)

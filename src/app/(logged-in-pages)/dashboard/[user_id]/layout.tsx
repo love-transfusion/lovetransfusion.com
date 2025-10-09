@@ -119,8 +119,8 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     }
   )
 
-  const facebook_insights2 = !!selectedUser.facebook_insights2?.length
-    ? selectedUser.facebook_insights2[0]
+  const facebook_insights = !!selectedUser.facebook_insights?.length
+    ? selectedUser.facebook_insights[0]
     : null
 
   const allEngagements = await filter_deleted_comments(
@@ -175,9 +175,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
               recipient={selectedRecipient}
-              totalReactions={facebook_insights2?.total_reactions || 0}
+              totalReactions={facebook_insights?.total_reactions || 0}
               commentsCount={commentsCount}
-              shares={facebook_insights2?.shares || 0}
+              shares={facebook_insights?.shares || 0}
             />
             <Image
               src={arrow}
@@ -199,8 +199,8 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               recipient={selectedRecipient}
               fbData={{
                 total_comments: commentsCount,
-                total_reactions: facebook_insights2?.total_reactions || 0,
-                total_shares: facebook_insights2?.shares || 0,
+                total_reactions: facebook_insights?.total_reactions || 0,
+                total_shares: facebook_insights?.shares || 0,
               }}
             />
           </div>
@@ -211,8 +211,8 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               recipient={selectedRecipient}
               fbData={{
                 total_comments: commentsCount,
-                total_reactions: facebook_insights2?.total_reactions || 0,
-                total_shares: facebook_insights2?.shares || 0,
+                total_reactions: facebook_insights?.total_reactions || 0,
+                total_shares: facebook_insights?.shares || 0,
               }}
             />
           </div>

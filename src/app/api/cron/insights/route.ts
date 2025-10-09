@@ -1,25 +1,43 @@
 // app/api/cron/sync-fb-insights/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Json } from '@/types/database.types'
-import {
-  supa_insert_facebook_insights2,
-  supa_update_facebook_insights2,
-} from '@/app/_actions/facebook_insights2/actions'
-import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { merge_old_and_new_insights } from '@/app/api/cron/insights/helpers'
-import { util_formatDateToUTCString } from '@/app/utilities/date-and-time/util_formatDateToUTCString'
-import {
-  I_Region_Insight_Types,
-  util_fb_reachByRegion_multiAds,
-} from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
 import { NextRequest, NextResponse } from 'next/server'
+import { Json } from '@/types/database.types'
+import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_shares } from '@/app/utilities/facebook/util_fb_shares'
 import { util_fb_reactions_total } from '@/app/utilities/facebook/util_fb_reactions_total'
+import { util_fb_reachByRegion_multiAds } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
+import {
+  supa_insert_facebook_insights,
+  supa_update_facebook_insights,
+} from '@/app/_actions/facebook_insights/actions'
+import { merge_old_and_new_regionInsightsByDate } from '@/app/api/cron/insights/helpers'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+export const maxDuration = 300
+
+type UserRow = {
+  id: string
+  facebook_insights: Array<{
+    insights: Json
+    post_id: string
+    shares: number
+    total_reactions: number
+    last_synced_at: string
+    created_at: string
+  }>
+  facebook_posts: { post_id: string } | null
+}
+
+type JobResult =
+  | { userId: string; status: 'skipped:no-postid' | 'skipped:cooldown' }
+  | { userId: string; status: 'ok:insert' | 'ok:update' }
+  | {
+      userId: string
+      status: 'error:insert' | 'error:update' | 'error:exception'
+      message?: string
+    }
 
 const isAuthorizedCron = (req: NextRequest) => {
   const auth = req.headers.get('authorization')
@@ -27,28 +45,6 @@ const isAuthorizedCron = (req: NextRequest) => {
     !!process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`
   )
 }
-
-type UserRow = {
-  id: string
-  facebook_insights2: Array<{
-    insights: Json
-    post_id: string
-    shares: number
-    last_synced_at: string
-    created_at: string
-  }>
-  facebook_posts: {
-    post_id: string
-  } | null
-}
-
-type JobResult =
-  | { userId: string; status: 'skipped:no-postid' }
-  | { userId: string; status: 'ok:insert' | 'ok:update' | 'ok:shares-only' }
-  | {
-      userId: string
-      status: 'error:insert' | 'error:update' | 'error:exception'
-    }
 
 const runWithConcurrency = async <T, R>(
   items: T[],
@@ -68,6 +64,10 @@ const runWithConcurrency = async <T, R>(
   return Promise.all(results)
 }
 
+// Soft time guard to exit before platform timeout
+const timeExceeded = (startedMs: number, softMs = 250_000) =>
+  Date.now() - startedMs >= softMs
+
 export const GET = async (req: NextRequest) => {
   try {
     if (!isAuthorizedCron(req)) {
@@ -75,72 +75,109 @@ export const GET = async (req: NextRequest) => {
     }
 
     const supabase = await createAdmin()
+    const started = Date.now()
 
-    const now = new Date()
-    const yesterdayIso = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1)
+    // ---- Tunables (no query params) ----
+    const SCAN_PAGE_SIZE = 400 // users fetched per scan page
+    const PROCESS_LIMIT = 80 // max users processed per invocation
+    const WORKER_CONCURRENCY = 3 // parallel workers within this invocation
+    const SYNC_COOLDOWN_MINUTES = Number(
+      process.env.FB_SYNC_COOLDOWN_MINUTES ?? 120
+    )
+
+    const cooldownCutoffISO = new Date(
+      Date.now() - SYNC_COOLDOWN_MINUTES * 60_000
     ).toISOString()
 
-    // 1) Fetch ALL users that have at least one insights row (no .lt filter)
-    const { data: users, error: usersErr } = await supabase
-      .from('users')
-      .select('id,facebook_insights2(*),facebook_posts(post_id)')
-
-    if (usersErr) {
-      return NextResponse.json(
-        {
-          ok: false as const,
-          error: 'select-users',
-          details: usersErr.message,
-          processed: 0,
-          results: [] as JobResult[],
-        },
-        { status: 500 }
-      )
-    }
-
-    if (!users || users.length === 0) {
-      return NextResponse.json({
-        ok: true as const,
-        processed: 0,
-        results: [],
-        note: 'No users to process.',
+    // Cache page access token once per run
+    let pageAccessToken: string | null = null
+    try {
+      const { data } = await util_fb_pageToken({
+        pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
       })
+      pageAccessToken = data
+    } catch {
+      pageAccessToken = null
     }
 
-    const processUser = async (user: UserRow): Promise<JobResult> => {
-      // inside processUser, before calling shares/reactions
-      let pageAccessToken: string | null = null
-      try {
-        const { data } = await util_fb_pageToken({
-          pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-        })
-        pageAccessToken = data
-      } catch {
-        pageAccessToken = null
+    let offset = 0
+    let processed = 0
+    const allResults: JobResult[] = []
+
+    while (!timeExceeded(started) && processed < PROCESS_LIMIT) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id,facebook_insights(*),facebook_posts(post_id)')
+        .range(offset, offset + SCAN_PAGE_SIZE - 1)
+
+      if (error) {
+        return NextResponse.json(
+          {
+            ok: false as const,
+            error: 'select-users',
+            details: error.message,
+            processed,
+            results: allResults,
+          },
+          { status: 500 }
+        )
       }
 
-      try {
-        if (!user.facebook_posts?.post_id) {
-          return { userId: user.id, status: 'skipped:no-postid' }
-        }
-        const post_id = user.facebook_posts.post_id
+      const users = (data ?? []) as unknown as UserRow[]
+      if (!users.length) break
 
-        // pick latest insights row for this user
-        const rows = Array.isArray(user.facebook_insights2)
-          ? user.facebook_insights2
+      // Pick candidates:
+      // - must have post_id
+      // - AND (no insights yet OR latest.last_synced_at < cooldownCutoffISO)
+      const candidates: UserRow[] = []
+      for (const u of users) {
+        if (!u.facebook_posts?.post_id) {
+          allResults.push({ userId: u.id, status: 'skipped:no-postid' })
+          continue
+        }
+        const rows = Array.isArray(u.facebook_insights)
+          ? u.facebook_insights
           : []
-        // ensure we pick the newest by last_synced_at (fallback: created_at)
+        if (rows.length === 0) {
+          candidates.push(u) // needs init
+          continue
+        }
         rows.sort((a, b) => {
           const A = a.last_synced_at || a.created_at || ''
           const B = b.last_synced_at || b.created_at || ''
           return A < B ? 1 : A > B ? -1 : 0
         })
         const latest = rows[0]
-        if (!latest) {
-          // treat as "no existing": init
+        if (!latest || (latest.last_synced_at ?? '') < cooldownCutoffISO) {
+          candidates.push(u) // stale beyond cooldown
+        } else {
+          allResults.push({ userId: u.id, status: 'skipped:cooldown' })
+        }
+      }
 
-          // shares + total reactions IN PARALLEL
+      if (!candidates.length) {
+        offset += SCAN_PAGE_SIZE
+        continue
+      }
+
+      const toProcess = candidates.slice(
+        0,
+        Math.max(0, PROCESS_LIMIT - processed)
+      )
+
+      const worker = async (user: UserRow): Promise<JobResult> => {
+        try {
+          if (timeExceeded(started)) {
+            return {
+              userId: user.id,
+              status: 'error:exception',
+              message: 'time-budget-exceeded',
+            }
+          }
+
+          const post_id = user.facebook_posts!.post_id
+
+          // Shares + reactions (best-effort)
           let shares = 0
           let total_reactions = 0
           try {
@@ -149,108 +186,92 @@ export const GET = async (req: NextRequest) => {
                 util_fb_shares({ postID: post_id, pageAccessToken }),
                 util_fb_reactions_total(post_id),
               ])
-              const { count } = sharesRes
-              const { totalReactions } = reactionsRes
-              shares = Number.isFinite(count) ? count : 0
-              total_reactions = totalReactions
+              shares = sharesRes.count ?? 0
+              total_reactions = reactionsRes.totalReactions ?? 0
             }
           } catch {
             shares = 0
             total_reactions = 0
           }
 
-          const init = await util_fb_reachByRegion_multiAds({
-            endAnchor: '37mon',
+          const rows = Array.isArray(user.facebook_insights)
+            ? user.facebook_insights
+            : []
+          rows.sort((a, b) => {
+            const A = a.last_synced_at || a.created_at || ''
+            const B = b.last_synced_at || b.created_at || ''
+            return A < B ? 1 : A > B ? -1 : 0
+          })
+          const latest = rows[0]
+
+          if (!latest) {
+            // Initialize once → 37 months until yesterday
+            const init = await util_fb_reachByRegion_multiAds({
+              endAnchor: '37mon',
+              post_id,
+            })
+            const { error } = await supa_insert_facebook_insights({
+              user_id: user.id,
+              insights: init,
+              post_id,
+              shares,
+              total_reactions,
+              last_synced_at: new Date().toISOString(), // UTC
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:insert' : 'ok:insert',
+              ...(error ? { message: String(error) } : {}),
+            }
+          }
+
+          // Merge existing with today's partial
+          const existingInsights = latest.insights
+          const fresh = await util_fb_reachByRegion_multiAds({
+            endAnchor: 'today',
             post_id,
           })
-          const { error } = await supa_insert_facebook_insights2({
-            user_id: user.id,
-            insights: init,
+          const merged = merge_old_and_new_regionInsightsByDate(
+            existingInsights as any,
+            fresh
+          )
+          const { error } = await supa_update_facebook_insights({
+            insights: merged,
             post_id,
             shares,
             total_reactions,
-            last_synced_at: util_formatDateToUTCString(
-              new Date(init.timeRangeRequested.until)
-            ),
+            last_synced_at: new Date().toISOString(), // UTC
           })
           return {
             userId: user.id,
-            status: error ? 'error:insert' : 'ok:insert',
+            status: error ? 'error:update' : 'ok:update',
+            ...(error ? { message: String(error) } : {}),
           }
-        }
-
-        // We have an existing row
-        const existingInsights =
-          latest.insights as unknown as I_Region_Insight_Types
-
-        // Always refresh SHARES + TOTAL REACTIONS every run (in parallel)
-        let shares = 0
-        let total_reactions = 0
-        try {
-          if (pageAccessToken) {
-            const [sharesRes, reactionsRes] = await Promise.all([
-              util_fb_shares({ postID: post_id, pageAccessToken }),
-              util_fb_reactions_total(post_id),
-            ])
-            const { count } = sharesRes
-            const { totalReactions } = reactionsRes
-            total_reactions = totalReactions
-            shares = Number.isFinite(count) ? count : 0
-          }
-        } catch {
-          shares = 0
-          total_reactions = 0
-        }
-
-        // Decide if we also need heavy INSIGHTS update
-        const needInsightsUpdate =
-          new Date(latest.last_synced_at) < new Date(yesterdayIso)
-
-        if (!needInsightsUpdate) {
-          // Shares-only write (keep insights + last_synced_at unchanged)
-          const { error } = await supa_update_facebook_insights2({
-            insights: existingInsights,
-            post_id,
-            shares, // new shares
-            total_reactions,
-            last_synced_at: latest.last_synced_at, // unchanged
-          })
+        } catch (e: any) {
           return {
             userId: user.id,
-            status: error ? 'error:update' : 'ok:shares-only',
+            status: 'error:exception',
+            message: e?.message ?? String(e),
           }
         }
-
-        // Heavy update (yesterday window)
-        const fresh = await util_fb_reachByRegion_multiAds({
-          post_id,
-          endAnchor: 'yesterday',
-        })
-        const merged = merge_old_and_new_insights(existingInsights, fresh)
-
-        const { error } = await supa_update_facebook_insights2({
-          insights: merged,
-          post_id,
-          shares, // also persist new shares
-          total_reactions,
-          last_synced_at: util_formatDateToUTCString(
-            new Date(fresh.timeRangeApplied.until)
-          ),
-        })
-        return { userId: user.id, status: error ? 'error:update' : 'ok:update' }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
-        return { userId: user.id, status: 'error:exception' }
       }
-    }
 
-    const CONCURRENCY = 4
-    const results = await runWithConcurrency(users, CONCURRENCY, processUser)
+      const pageResults = await runWithConcurrency(
+        toProcess,
+        WORKER_CONCURRENCY,
+        worker
+      )
+      allResults.push(...pageResults)
+      processed += pageResults.length
+
+      offset += SCAN_PAGE_SIZE
+    }
 
     return NextResponse.json({
       ok: true as const,
-      processed: results.length,
-      results,
+      processed,
+      results: allResults,
+      note: `Cooldown=${SYNC_COOLDOWN_MINUTES}m. Users updated at most once per ${SYNC_COOLDOWN_MINUTES} minutes.`,
     })
   } catch (err: any) {
     return NextResponse.json(

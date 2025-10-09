@@ -6,15 +6,17 @@ import getAnalyticsCountryPathTotal, {
   I_CountryPathTotalFormat,
 } from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
-import { I_Region_Insight_Types } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
+import { RegionInsightByDate } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
+import { mergeRowsByRegion } from './helper'
 
 type Params = Promise<{ user_id: string }>
 
 const preparePaidInsights = (
-  facebookAdData?: I_Region_Insight_Types
+  facebookAdData?: RegionInsightByDate
 ): I_CountryPathTotalFormat[] => {
-  return facebookAdData
-    ? facebookAdData.rows.map((item) => {
+  const rows = facebookAdData ? mergeRowsByRegion(facebookAdData) : []
+  const mergedRows = !!rows.length
+    ? rows.map((item) => {
         const { cl_reach, cl_region, cl_impressions } = item
         return {
           cl_region,
@@ -28,6 +30,7 @@ const preparePaidInsights = (
         }
       })
     : []
+  return mergedRows
 }
 
 const MapSlot = async (props: { params: Params }) => {
@@ -42,9 +45,9 @@ const MapSlot = async (props: { params: Params }) => {
     selectedUser.recipients && (selectedUser.recipients[0].recipient as unknown)
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
-  const FBInsights = !!selectedUser.facebook_insights2?.length
-    ? (selectedUser.facebook_insights2[0]
-        .insights as unknown as I_Region_Insight_Types)
+  const FBInsights = !!selectedUser.facebook_insights?.length
+    ? (selectedUser.facebook_insights[0]
+        .insights as unknown as RegionInsightByDate)
     : undefined
 
   const analytics = selectedUser.google_analytics?.analytics as unknown as
