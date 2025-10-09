@@ -2,19 +2,19 @@
   "crons": [
     {
       "path": "/api/cron/reconcile",
-      "schedule": "*/3 * * * *"
+      "schedule": "*/2 * * * *"
     },
     {
       "path": "/api/cron/insights",
-      "schedule": "*/3 * * * *"
+      "schedule": "*/2 * * * *"
     },
     {
       "path": "/api/cron/ga",
-      "schedule": "*/3 * * * *"
+      "schedule": "*/2 * * * *"
     },
     {
       "path": "/api/cron/recipients",
-      "schedule": "*/3 * * * *"
+      "schedule": "*/2 * * * *"
     }
   ]
 }
