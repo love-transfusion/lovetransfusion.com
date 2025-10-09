@@ -124,6 +124,51 @@ export type Database = {
           },
         ]
       }
+      facebook_insights2: {
+        Row: {
+          created_at: string
+          insights: Json
+          last_synced_at: string
+          post_id: string
+          shares: number
+          total_reactions: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          insights?: Json
+          last_synced_at?: string
+          post_id: string
+          shares?: number
+          total_reactions?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          insights?: Json
+          last_synced_at?: string
+          post_id?: string
+          shares?: number
+          total_reactions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_insights2_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "facebook_posts"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "facebook_insights2_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facebook_pages: {
         Row: {
           connected_by_user_id: string

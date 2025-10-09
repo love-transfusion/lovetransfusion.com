@@ -32,7 +32,7 @@ type UserRow = {
 
 type JobResult =
   | { userId: string; status: 'skipped:no-postid' | 'skipped:cooldown' }
-  | { userId: string; status: 'ok:insert' | 'ok:update' }
+  | { userId: string; status: 'ok:insert' | 'ok:update' | 'ok:shares-only' }
   | {
       userId: string
       status: 'error:insert' | 'error:update' | 'error:exception'
@@ -64,7 +64,6 @@ const runWithConcurrency = async <T, R>(
   return Promise.all(results)
 }
 
-// Soft time guard to exit before platform timeout
 const timeExceeded = (startedMs: number, softMs = 250_000) =>
   Date.now() - startedMs >= softMs
 
@@ -77,17 +76,15 @@ export const GET = async (req: NextRequest) => {
     const supabase = await createAdmin()
     const started = Date.now()
 
-    // ---- Tunables (no query params) ----
-    const SCAN_PAGE_SIZE = 400 // users fetched per scan page
-    const PROCESS_LIMIT = 80 // max users processed per invocation
-    const WORKER_CONCURRENCY = 3 // parallel workers within this invocation
+    const SCAN_PAGE_SIZE = 400
+    const PROCESS_LIMIT = 80
+    const WORKER_CONCURRENCY = 3
     const SYNC_COOLDOWN_MINUTES = 2
 
     const cooldownCutoffISO = new Date(
       Date.now() - SYNC_COOLDOWN_MINUTES * 60_000
     ).toISOString()
 
-    // Cache page access token once per run
     let pageAccessToken: string | null = null
     try {
       const { data } = await util_fb_pageToken({
@@ -124,9 +121,6 @@ export const GET = async (req: NextRequest) => {
       const users = (data ?? []) as unknown as UserRow[]
       if (!users.length) break
 
-      // Pick candidates:
-      // - must have post_id
-      // - AND (no insights yet OR latest.last_synced_at < cooldownCutoffISO)
       const candidates: UserRow[] = []
       for (const u of users) {
         if (!u.facebook_posts?.post_id) {
@@ -137,7 +131,7 @@ export const GET = async (req: NextRequest) => {
           ? u.facebook_insights
           : []
         if (rows.length === 0) {
-          candidates.push(u) // needs init
+          candidates.push(u)
           continue
         }
         rows.sort((a, b) => {
@@ -147,7 +141,7 @@ export const GET = async (req: NextRequest) => {
         })
         const latest = rows[0]
         if (!latest || (latest.last_synced_at ?? '') < cooldownCutoffISO) {
-          candidates.push(u) // stale beyond cooldown
+          candidates.push(u)
         } else {
           allResults.push({ userId: u.id, status: 'skipped:cooldown' })
         }
@@ -203,7 +197,7 @@ export const GET = async (req: NextRequest) => {
           const latest = rows[0]
 
           if (!latest) {
-            // Initialize once → 37 months until yesterday
+            // Initialize → 37 months
             const init = await util_fb_reachByRegion_multiAds({
               endAnchor: '37mon',
               post_id,
@@ -214,7 +208,7 @@ export const GET = async (req: NextRequest) => {
               post_id,
               shares,
               total_reactions,
-              last_synced_at: new Date().toISOString(), // UTC
+              last_synced_at: new Date().toISOString(),
             })
             return {
               userId: user.id,
@@ -223,27 +217,49 @@ export const GET = async (req: NextRequest) => {
             }
           }
 
-          // Merge existing with today's partial
+          // Always update shares & reactions
           const existingInsights = latest.insights
+
+          // Fetch today's insights
           const fresh = await util_fb_reachByRegion_multiAds({
             endAnchor: 'today',
             post_id,
           })
-          const merged = merge_old_and_new_regionInsightsByDate(
-            existingInsights as any,
-            fresh
-          )
-          const { error } = await supa_update_facebook_insights({
-            insights: merged,
-            post_id,
-            shares,
-            total_reactions,
-            last_synced_at: new Date().toISOString(), // UTC
-          })
-          return {
-            userId: user.id,
-            status: error ? 'error:update' : 'ok:update',
-            ...(error ? { message: String(error) } : {}),
+
+          // Check if insights changed (e.g., new date bucket or updated today)
+          const hasNewInsights = fresh.days?.length > 0
+
+          if (hasNewInsights) {
+            // Merge + update everything (including last_synced_at)
+            const merged = merge_old_and_new_regionInsightsByDate(
+              existingInsights as any,
+              fresh
+            )
+            const { error } = await supa_update_facebook_insights({
+              insights: merged,
+              post_id,
+              shares,
+              total_reactions,
+              last_synced_at: new Date().toISOString(), // only update when new insights exist
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:update' : 'ok:update',
+              ...(error ? { message: String(error) } : {}),
+            }
+          } else {
+            // Update shares/reactions only (no last_synced_at update)
+            const { error } = await supa_update_facebook_insights({
+              insights: existingInsights,
+              post_id,
+              shares,
+              total_reactions,
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:update' : 'ok:shares-only',
+              ...(error ? { message: String(error) } : {}),
+            }
           }
         } catch (e: any) {
           return {
@@ -261,7 +277,6 @@ export const GET = async (req: NextRequest) => {
       )
       allResults.push(...pageResults)
       processed += pageResults.length
-
       offset += SCAN_PAGE_SIZE
     }
 
