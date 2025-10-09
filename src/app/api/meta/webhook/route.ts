@@ -243,19 +243,13 @@ export async function POST(req: NextRequest) {
             ? new Date(entry.time * 1000).toISOString()
             : createdISO
 
-        const realFromId = v.from?.id ?? null
-        const isPageComment = realFromId === page_id
-        const realFromName = isPageComment
-          ? 'Love Transfusion' // or keep v.from?.name for flexibility
-          : v.from?.name ?? null
-
         const base = {
-          comment_id: v.co as string,
+          comment_id: v.comment_id as string,
           post_id: v.post_id as string,
           parent_id: (v.parent_id as string) ?? null,
           message: (v.message as string) ?? null,
-          from_id: realFromId,
-          from_name: realFromName,
+          from_id: v.from?.id ?? null,
+          from_name: v.from?.name ?? null,
           from_picture_url: null as string | null, // will be enriched below
           created_time: createdISO,
           like_count: (v.like_count as number) ?? null,
