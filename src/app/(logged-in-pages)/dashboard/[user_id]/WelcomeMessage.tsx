@@ -25,6 +25,8 @@ const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
     }
     localStorage.removeItem(localName)
   }, [])
+
+  console.log({ selectedUser })
   return (
     <>
       {isOpen && (
@@ -60,7 +62,7 @@ const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
                   }
                 >
                   Welcome to Your Love Transfusion Dashboard{' '}
-                  {selectedUser.first_name}!
+                  {selectedUser.recipient_name}!
                 </p>
                 <p className={'leading-[28px] mt-[22px]'}>
                   We have begun raising awareness about your story, and, as you

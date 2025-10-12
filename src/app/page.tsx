@@ -36,7 +36,7 @@ const Homepage = async () => {
           </p>
           <p
             className={
-              'font-acumin-variable-90 font-medium text-[17px] md:text-xl text-[#999] text-center mt-2'
+              'font-acumin-variable-90 font-medium text-[17px] md:text-xl text-[#999] text-center'
             }
           >
             A Conduit for Expressions of Love and Support

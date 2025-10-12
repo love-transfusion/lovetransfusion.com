@@ -13,7 +13,7 @@ const LoginPage = () => {
           >
             Welcome To Love Transfusion!
           </p>
-          <p className={'text-lg md:text-xl font-acumin-variable-90 font-semibold text-[#999] mt-[3px]'}>
+          <p className={'text-lg md:text-xl font-acumin-variable-90 text-[#999] mt-[3px]'}>
             Log into your account...
           </p>
         </div>
