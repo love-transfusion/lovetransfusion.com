@@ -79,7 +79,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
           extraCssText:
             'max-width: 236px; white-space: normal; word-wrap: break-word; border-top: 10px solid #2F8EDD; padding: 5px 14px; color: #000',
           position: function (point: [any, any], params: any, dom: { offsetWidth: number; offsetHeight: number }, rect: any, size: { viewSize: any[] }) {
-            // console.log({ point, params, dom, rect, size })
+            console.log({ point, params, dom, rect, size })
             const [x, y] = point
             const tipW = dom?.offsetWidth || 236
             const tipH = dom?.offsetHeight || 72

@@ -95,21 +95,6 @@ const Messages = ({
                             className="object-cover"
                           />
                         )}
-                        {/* {(item.type === 'facebook' ||
-                          item.type === 'instagram') && (
-                          <Image
-                            src={
-                              item.profile_picture
-                                ? item.profile_picture
-                                : anonymousImg
-                            }
-                            alt="Profile picture of adley"
-                            quality={100}
-                            fill
-                            className="object-cover"
-                          />
-                        )} */}
-
                         {(item.type === 'facebook' ||
                           item.type === 'instagram') && (
                           <Image
@@ -118,9 +103,8 @@ const Messages = ({
                               `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
                             }
                             alt="Profile picture of engager"
-                            className=""
-                            width={54}
-                            height={54}
+                            width={64}
+                            height={64}
                             onError={(e) => {
                               e.currentTarget.src = `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/images/user.webp`
                             }}
