@@ -159,8 +159,8 @@ export async function POST(req: NextRequest) {
       like_count: number | null
       comment_count: number | null
       permalink_url: string | null
-      is_hidden: boolean
-      is_deleted: boolean
+      // is_hidden: boolean
+      // is_deleted: boolean
       is_edited: boolean
       raw: any
       updated_at: string // keep this
@@ -350,8 +350,6 @@ export async function POST(req: NextRequest) {
         const rowWithCreated = {
           ...base,
           created_time: createdISO,
-          is_hidden: false,
-          is_deleted: false,
           is_edited: isEdited,
           updated_at: isEdited ? eventISO : createdISO,
         }
