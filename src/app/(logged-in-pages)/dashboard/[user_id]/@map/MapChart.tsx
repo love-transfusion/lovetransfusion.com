@@ -78,6 +78,30 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
           borderColor: '#2F8EDD',
           extraCssText:
             'max-width: 236px; white-space: normal; word-wrap: break-word; border-top: 10px solid #2F8EDD; padding: 5px 14px; color: #000',
+          position: function (point: [any, any], params: any, dom: { offsetWidth: number; offsetHeight: number }, rect: any, size: { viewSize: any[] }) {
+            // console.log({ point, params, dom, rect, size })
+            const [x, y] = point
+            const tipW = dom?.offsetWidth || 236
+            const tipH = dom?.offsetHeight || 72
+            const viewW = size.viewSize[0]
+            const offsetY = 16 // distance above the symbol
+
+            // Position horizontally centered above the point
+            let left = x - tipW / 2
+            let top = y - tipH - offsetY
+
+            // ✅ Clamp horizontally within viewport
+            left = Math.max(8, Math.min(left, viewW - tipW - 8))
+
+            // ✅ Allow vertical overflow (don’t clamp top)
+            // If you prefer always above, keep top as-is
+            // If it goes beyond top of viewport, move it below instead:
+            if (top < 0) {
+              top = y + offsetY // place below the symbol if too high
+            }
+
+            return [left, top]
+          },
           formatter: (params: {
             name: string
             value?: GeoPoint['value']
