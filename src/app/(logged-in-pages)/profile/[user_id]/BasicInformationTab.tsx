@@ -131,7 +131,7 @@ const BasicInformation = ({
       <form className={'flex flex-col gap-6'} onSubmit={handleSubmit(onSubmit)}>
         <div className={'flex flex-col gap-1'}>
           <label className="text-[#999]" htmlFor="email">
-            {`Recipient's name *`}
+            {`Recipient's name:`}
           </label>
           <Input
             clPlaceholder="Enter the recipient's name *"
@@ -144,7 +144,13 @@ const BasicInformation = ({
         </div>
         <div className={'flex flex-col gap-1'}>
           <label className="text-[#999]" htmlFor="Password">
-            Full Name *
+            {`Recipient's Birthdate:`}
+          </label>
+          <Input {...register('birthday')} clPlaceholder="" type="date" />
+        </div>
+        <div className={'flex flex-col gap-1'}>
+          <label className="text-[#999]" htmlFor="Password">
+            {`Account Holder's Name:`}
           </label>
           <Input
             clPlaceholder="Enter your name *"
@@ -157,7 +163,7 @@ const BasicInformation = ({
         </div>
         <div className={'flex flex-col gap-1'}>
           <label className="text-[#999]" htmlFor="Password">
-            Email address *
+            {`Account Holder's Email:`}
           </label>
           <Input
             disabled={true}
@@ -173,12 +179,6 @@ const BasicInformation = ({
             className="text-neutral-400 pointer-events-none"
             clErrorMessage={errors.fullName?.message}
           />
-        </div>
-        <div className={'flex flex-col gap-1'}>
-          <label className="text-[#999]" htmlFor="Password">
-            Birthday *
-          </label>
-          <Input {...register('birthday')} clPlaceholder="" type="date" />
         </div>
 
         <Button
