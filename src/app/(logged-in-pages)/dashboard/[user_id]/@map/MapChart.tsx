@@ -77,11 +77,16 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
           padding: 0,
           borderColor: '#2F8EDD',
           extraCssText:
-            'max-width: 236px; white-space: normal; word-wrap: break-word; border-top: 10px solid #2F8EDD; padding: 5px 14px; color: #000',
-          position: function (point: [any, any], params: any, dom: { offsetWidth: number; offsetHeight: number }, rect: any, size: { viewSize: any[] }) {
-            console.log({ point, params, dom, rect, size })
+            'max-width: 266px; white-space: normal; word-wrap: break-word; border-top: 10px solid #2F8EDD; padding: 5px 14px; color: #000',
+          position: function (
+            point: [any, any],
+            params: any,
+            dom: { offsetWidth: number; offsetHeight: number },
+            rect: any,
+            size: { viewSize: any[] }
+          ) {
             const [x, y] = point
-            const tipW = dom?.offsetWidth || 236
+            const tipW = dom?.offsetWidth || 266
             const tipH = dom?.offsetHeight || 72
             const viewW = size.viewSize[0]
             const offsetY = 16 // distance above the symbol
@@ -107,28 +112,39 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
             value?: GeoPoint['value']
             seriesName: string
           }) => {
-            if (Array.isArray(params.value) && params.value[3] === 'Facebook') {
-              // const [, , views, hugs, messages] = params.value
+            if (Array.isArray(params.value)) {
               const [, , views] = params.value
+              const peopleText = views > 1 ? 'people' : 'person'
+
+              let message
+              switch (params.value[3]) {
+                case 'Facebook':
+                  message = `Your story has been seen by <strong>${views}</strong> people in <strong>${params.name}</strong>`
+                  break
+                case 'Website':
+                  message = `<strong>${views}</strong> ${peopleText} in <strong>${params.name}</strong> visited your Love Transfusion page.`
+                default:
+                  break
+              }
+
+              const iconSVG = `
+      <svg width="20" height="20" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#clip0_1185_1864)">
+          <path
+            d="M12.5033 11.8538C14.2078 11.8538 15.5914 10.3833 15.5914 8.57193C15.5914 6.76053 14.2078 5.29003 12.5033 5.29003C10.7989 5.29003 9.41529 6.76053 9.41529 8.57193C9.41529 10.3833 10.7989 11.8538 12.5033 11.8538ZM13.6062 12.6626H11.3938C9.06771 12.6626 7.1828 14.5475 7.1828 16.8736V20.9576C10.6786 21.519 14.3147 21.519 17.8105 20.9576V16.8736C17.8105 14.5475 15.9256 12.6626 13.5995 12.6626H13.6062ZM20.1366 10.7576H18.1113C16.8747 10.7576 15.7786 11.3391 15.07 12.2415C17.0352 12.8631 18.4656 14.7079 18.4656 16.8736V18.7451C20.3237 18.7852 22.1819 18.6582 24 18.3641V14.6144C24 12.4821 22.2688 10.7509 20.1366 10.7509V10.7576ZM19.1206 10.0157C20.6847 10.0157 21.9547 8.6655 21.9547 7.00785C21.9547 5.35019 20.6847 4 19.1206 4C17.5565 4 16.2865 5.35019 16.2865 7.00785C16.2865 8.6655 17.5565 10.0157 19.1206 10.0157ZM5.8794 10.0157C7.44348 10.0157 8.71346 8.6655 8.71346 7.00785C8.71346 5.35019 7.44348 4 5.8794 4C4.31532 4 3.03865 5.35019 3.03865 7.00785C3.03865 8.6655 4.30863 10.0157 5.87271 10.0157H5.8794ZM9.92996 12.2415C9.22145 11.3391 8.12525 10.7576 6.8887 10.7576H4.86341C2.73118 10.7576 1 12.4888 1 14.621V18.3708C2.81808 18.6649 4.68294 18.7919 6.53444 18.7518V16.8803C6.53444 14.7079 7.96484 12.8698 9.92996 12.2482V12.2415Z"
+            fill="#fff"
+          />
+        </g>
+        <defs>
+          <clipPath id="clip0_1185_1864">
+            <rect width="23" height="17.3787" fill="white" transform="translate(1 4)" />
+          </clipPath>
+        </defs>
+      </svg>
+    `
               return `
-              <div>
-              <p>Your story has been seen by <strong>${Number(
-                views
-              )}</strong> people in <strong>${params.name}</strong></p>
-              </div>
-                `
-            } else if (
-              Array.isArray(params.value) &&
-              params.value[3] === 'Website'
-            ) {
-              const [, , views] = params.value
-              return `
-              <div>
-              <p><strong>${views}</strong> ${
-                views > 1 ? 'people' : 'person'
-              } in <strong>${
-                params.name
-              }</strong> visited your Love Transfusion page.</p>
+              <div style="display: flex; gap: 8px;"> <div style="min-width: 30px; min-height: 30px; max-width: 30px; max-height: 30px; padding: 4px; background-color: #2F8FDD; display: flex; justify-content: center; align-items: center; border-radius: 100px;">${iconSVG}</div>
+              <p>${message}</p>
               </div>
                 `
             } else {
