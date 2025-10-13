@@ -58,12 +58,12 @@ const MessageSlot = async (props: MessageSlot_Types) => {
       | undefined)
 
   const formattedFBComments: I_Comments[] =
-    FBComments?.map((item) => {
+    FBComments?.filter((item) => item.message)?.map((item) => {
       return {
         type: 'facebook',
         id: item.comment_id,
         name: item.from_name ?? 'Someone Who Cares',
-        message: item.message ?? 'Empty',
+        message: item.message,
         created_at: item.created_time,
         profile_picture: item.from_picture_url,
       }

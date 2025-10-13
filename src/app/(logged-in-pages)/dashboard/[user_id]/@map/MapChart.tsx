@@ -15,9 +15,8 @@ interface Props {
   user_id: string
   prepared_analytics: I_CountryPathTotalFormat[]
 }
-type I_Parameters = [number, number, number, number, number] // [lon, lat, views, hugs, messages]
 
-const defaultPoint = [
+const defaultPoint: I_CountryPathTotalFormat[] = [
   {
     cl_city: 'Ashburn',
     cl_region: 'Virginia',
@@ -26,6 +25,7 @@ const defaultPoint = [
     clViews: 1,
     clHugs: 0,
     clMessages: 0,
+    cl_source: 'Website',
   },
 ]
 
@@ -74,21 +74,39 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       setOption({
         tooltip: {
           trigger: 'item',
-          borderColor: '#5470C6',
+          padding: 0,
+          borderColor: '#2F8EDD',
+          extraCssText:
+            'max-width: 236px; white-space: normal; word-wrap: break-word; border-top: 10px solid #2F8EDD; padding: 5px 14px; color: #000',
           formatter: (params: {
             name: string
-            value?: I_Parameters
+            value?: GeoPoint['value']
             seriesName: string
           }) => {
-            if (Array.isArray(params.value)) {
+            if (Array.isArray(params.value) && params.value[3] === 'Facebook') {
               // const [, , views, hugs, messages] = params.value
               const [, , views] = params.value
               return `
-                <strong>${params.name}</strong><br/>
-                views: ${views}<br/>
+              <div>
+              <p>Your story has been seen by <strong>${Number(
+                views
+              )}</strong> people in <strong>${params.name}</strong></p>
+              </div>
                 `
-              // hugs: ${hugs}<br/>
-              // messages: ${messages}
+            } else if (
+              Array.isArray(params.value) &&
+              params.value[3] === 'Website'
+            ) {
+              const [, , views] = params.value
+              return `
+              <div>
+              <p><strong>${views}</strong> ${
+                views > 1 ? 'people' : 'person'
+              } in <strong>${
+                params.name
+              }</strong> visited your Love Transfusion page.</p>
+              </div>
+                `
             } else {
               return `<strong>${params.name}</strong><br/>No data`
             }

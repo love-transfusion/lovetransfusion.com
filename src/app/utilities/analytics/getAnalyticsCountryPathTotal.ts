@@ -1,6 +1,7 @@
 'use server'
 
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
+import { MapSource } from './mapAnalyticsToGeoPoints'
 
 export interface I_CountryPathTotalFormat {
   cl_region: string
@@ -10,6 +11,7 @@ export interface I_CountryPathTotalFormat {
   clViews: number
   clMessages: number
   clHugs: number
+  cl_source: MapSource
 }
 
 type I_getAnalyticsCountryPathTotal = {
@@ -25,24 +27,19 @@ const getAnalyticsCountryPathTotal = async ({
     (clGoogleAnalytics &&
       clGoogleAnalytics.rows &&
       clGoogleAnalytics.rows.map((row) => {
-        const cl_city =
-          (row.dimensionValues && row.dimensionValues[1].value) ?? ''
-        const cl_country_code =
-          (row.dimensionValues && row.dimensionValues[4].value) ?? ''
-        const cl_country =
-          (row.dimensionValues && row.dimensionValues[3].value) ?? ''
-        const cl_region =
-          (row.dimensionValues && row.dimensionValues[2].value) ?? ''
-        const clViews =
-          (row.metricValues && parseInt(row.metricValues[0].value!)) ?? 0
         return {
-          cl_city,
-          cl_region,
-          cl_country,
-          cl_country_code,
-          clViews,
+          cl_city: (row.dimensionValues && row.dimensionValues[1].value) ?? '',
+          cl_region:
+            (row.dimensionValues && row.dimensionValues[2].value) ?? '',
+          cl_country:
+            (row.dimensionValues && row.dimensionValues[3].value) ?? '',
+          cl_country_code:
+            (row.dimensionValues && row.dimensionValues[4].value) ?? '',
+          clViews:
+            (row.metricValues && parseInt(row.metricValues[0].value!)) ?? 0,
           clHugs: 0,
           clMessages: 0,
+          cl_source: 'Website',
         }
       })) ??
     []
@@ -55,7 +52,7 @@ const getAnalyticsCountryPathTotal = async ({
     isHug?: boolean
     isComments?: boolean
     locArray: I_supaorg_hug[] | I_supaorg_comments[]
-  }) => {
+  }): I_CountryPathTotalFormat[] => {
     const grouped: { [city: string]: I_orgLocation[] } = {}
 
     locArray.forEach((locObj: I_supaorg_hug | I_supaorg_comments) => {
@@ -67,7 +64,7 @@ const getAnalyticsCountryPathTotal = async ({
         grouped[key].push(locObj.location)
       }
     })
-    const formattedArray = Object.entries(grouped).map((item) => {
+    return Object.entries(grouped).map((item) => {
       return {
         cl_city: item[0],
         cl_country: item[1][0]?.country ?? '(not set)',
@@ -76,12 +73,12 @@ const getAnalyticsCountryPathTotal = async ({
         clViews: 0,
         clMessages: isComments ? item[1].length : 0,
         clHugs: isHug ? item[1].length : 0,
+        cl_source: 'Website',
       }
     })
-    return formattedArray
   }
 
-  const hugs = filterOrgLocationsAccordingToType({
+  const hugs: I_CountryPathTotalFormat[] = filterOrgLocationsAccordingToType({
     isHug: true,
     locArray: clRecipient.hugs,
   })

@@ -26,7 +26,6 @@ const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
     localStorage.removeItem(localName)
   }, [])
 
-  console.log({ selectedUser })
   return (
     <>
       {isOpen && (

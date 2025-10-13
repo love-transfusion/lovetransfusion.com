@@ -11,11 +11,13 @@ type LocationEntry = {
   lng: number
 }
 
+export type MapSource = 'Facebook' | 'Website'
+
 const geoDataset = rawCities as Record<string, LocationEntry>
 
 export type GeoPoint = {
   name: string
-  value: [number, number, number, number, number] // [lng, lat, views, hugs, messages]
+  value: [number, number, number, MapSource, number] // [lng, lat, views, Source, messages]
 }
 
 const normalizeLocationKey = (str: string) =>
@@ -82,7 +84,6 @@ export const mapAnalyticsToGeoPoints = async (
   analytics: I_CountryPathTotalFormat[]
 ): Promise<GeoPoint[]> => {
   const resultMap = new Map<string, GeoPoint>()
-
   for (const record of analytics) {
     const rawCityName = record.cl_city || ''
     const rawRegionName = record.cl_region || ''
@@ -126,12 +127,12 @@ export const mapAnalyticsToGeoPoints = async (
     if (resultMap.has(coordKey)) {
       const existing = resultMap.get(coordKey)!
       existing.value[2] += record.clViews
-      existing.value[3] += record.clHugs
+      existing.value[3] = record.cl_source
       existing.value[4] += record.clMessages
     } else {
       resultMap.set(coordKey, {
         name: displayName,
-        value: [lng, lat, record.clViews, record.clHugs, record.clMessages],
+        value: [lng, lat, record.clViews, record.cl_source, record.clMessages],
       })
     }
   }

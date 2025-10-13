@@ -11,11 +11,11 @@ import { mergeRowsByRegion } from './helper'
 
 type Params = Promise<{ user_id: string }>
 
-const preparePaidInsights = (
+const preparedFacebookInsights = (
   facebookAdData?: RegionInsightByDate
 ): I_CountryPathTotalFormat[] => {
   const rows = facebookAdData ? mergeRowsByRegion(facebookAdData) : []
-  const mergedRows = !!rows.length
+  return !!rows.length
     ? rows.map((item) => {
         const { cl_reach, cl_region, cl_impressions } = item
         return {
@@ -27,10 +27,10 @@ const preparePaidInsights = (
           cl_country_code: item.cl_country_code,
           clHugs: 0, // make this dynamic if needed
           clMessages: 0, // make this dynamic if needed
+          cl_source: 'Facebook',
         }
       })
     : []
-  return mergedRows
 }
 
 const MapSlot = async (props: { params: Params }) => {
@@ -59,7 +59,7 @@ const MapSlot = async (props: { params: Params }) => {
     clRecipient: selectedRecipient,
   })
 
-  const paidInsights = preparePaidInsights(FBInsights)
+  const paidInsights = preparedFacebookInsights(FBInsights)
   return (
     <div className="relative">
       <MapChart
