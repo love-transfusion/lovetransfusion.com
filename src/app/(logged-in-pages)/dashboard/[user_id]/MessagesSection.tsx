@@ -119,6 +119,11 @@ const MessagesSection = ({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
+
+  useEffect(() => {
+    setcomments([...clComments, ...formattedPrayers])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clComments, recipient_prays])
   return (
     <div
       className={
