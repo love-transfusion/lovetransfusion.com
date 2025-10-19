@@ -312,16 +312,19 @@ export type Database = {
       recipient_prays: {
         Row: {
           created_at: string
+          location: Json | null
           prayer_id: string | null
           recipient_id: string
         }
         Insert: {
           created_at?: string
+          location?: Json | null
           prayer_id?: string | null
           recipient_id: string
         }
         Update: {
           created_at?: string
+          location?: Json | null
           prayer_id?: string | null
           recipient_id?: string
         }

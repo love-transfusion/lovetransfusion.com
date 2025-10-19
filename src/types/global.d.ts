@@ -77,6 +77,14 @@ declare global {
   type I_supa_facebook_posts_row =
     DB['public']['Tables']['facebook_posts']['Row']
 
+  // recipient_prays table
+  type I_supa_recipient_prays_insert =
+    DB['public']['Tables']['recipient_prays']['Insert']
+  type I_supa_recipient_prays_update =
+    DB['public']['Tables']['recipient_prays']['Update']
+  type I_supa_recipient_prays_row =
+    DB['public']['Tables']['recipient_prays']['Row']
+
   // profile_pictures table
   type I_supa_profile_pictures_insert =
     DB['public']['Tables']['profile_pictures']['Insert']
@@ -185,6 +193,14 @@ declare global {
     orgDB['public']['Tables']['recipients_profile_pictures']['Update']
   type I_supaOrg_recipients_profile_pictures_row =
     orgDB['public']['Tables']['recipients_profile_pictures']['Row']
+
+  // prayer_recipients_prays table
+  type I_supaOrg_prayer_recipients_prays_insert =
+    orgDB['public']['Tables']['prayer_recipients_prays']['Insert']
+  type I_supaOrg_prayer_recipients_prays_update =
+    orgDB['public']['Tables']['prayer_recipients_prays']['Update']
+  type I_supaOrg_prayer_recipients_prays_row =
+    orgDB['public']['Tables']['prayer_recipients_prays']['Row']
 
   interface I_supaorg_hug extends I_unextended_supaorg_hug {
     location: I_orgLocation | null

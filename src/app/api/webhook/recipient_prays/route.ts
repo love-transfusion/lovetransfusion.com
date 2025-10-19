@@ -39,7 +39,17 @@ export async function POST(request: NextRequest) {
     if (type === 'INSERT') {
       console.log('📝 Processing INSERT event for recipient_prays')
       const supabase = await createAdmin()
-      const { error } = await supabase.from('recipient_prays').insert(record)
+      const thisRecord = record as I_supaOrg_prayer_recipients_prays_row
+
+      const data: I_supa_recipient_prays_insert = {
+        prayer_id: thisRecord.owner_id,
+        created_at: thisRecord.created_at,
+        recipient_id: thisRecord.post_id,
+        location: thisRecord.location,
+      }
+
+      const { error } = await supabase.from('recipient_prays').insert(data)
+
       if (error) {
         console.error('❌ Supabase insert error:', error.message)
         throw new Error(error.message)
