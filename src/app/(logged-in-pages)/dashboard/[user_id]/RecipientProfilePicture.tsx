@@ -1,11 +1,11 @@
 import Image, { ImageProps } from 'next/image'
 import React from 'react'
 import brandLogo from '@/app/images/homepage/brand-logo.svg'
-import { I_UserWithProfilePicture } from '../../profile/[user_id]/ProfileForm'
+import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
 
 interface RecipientProfilePictureProps extends Omit<ImageProps, 'src' | 'alt'> {
   recipientObj: I_supaorg_recipient_hugs_counters_comments
-  selectedUser: I_UserWithProfilePicture | null
+  selectedUser: I_supa_select_user_Response_Types
 }
 
 const RecipientProfilePicture = ({
@@ -30,7 +30,7 @@ const RecipientProfilePicture = ({
           src={
             selectedUser?.profile_pictures?.storage_path
               ? `${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL}${profile_pictures?.bucket_name}/${profile_pictures?.storage_path}`
-              : `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObj.profile_picture.fullPath}`
+              : `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${recipientObj.recipients_profile_pictures.bucket_name}/${recipientObj.recipients_profile_pictures.storage_path}`
           }
           blurDataURL={blurDataURL}
           placeholder={blurDataURL ? 'blur' : undefined}

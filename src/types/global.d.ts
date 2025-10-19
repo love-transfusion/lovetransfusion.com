@@ -235,6 +235,7 @@ declare global {
       hugs: I_supaorg_hug[]
       recipient_counters: I_supaOrg_recipient_counters_row | null
       comments: I_supaorg_comments[]
+      recipients_profile_pictures: I_supaOrg_recipients_profile_pictures_row
     }
 
   // Org Enums

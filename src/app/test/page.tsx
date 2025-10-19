@@ -1,13 +1,12 @@
-import React from 'react'
-import { supa_select_orgRecipients } from '../_actions/orgRecipients/actions'
+// app/prayer-notify/page.tsx
+import Notify from './Notify'
 
-const page = async () => {
-const recipients = await supa_select_orgRecipients()
+const Page = () => {
   return (
-    <div>
-      <pre>{JSON.stringify(recipients, null, 2)}</pre>
-    </div>
+    <>
+      <Notify />
+    </>
   )
 }
 
-export default page
+export default Page
