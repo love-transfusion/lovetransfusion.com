@@ -598,6 +598,7 @@ export type Database = {
           recipient: string | null
           recipient_id: string | null
           source: string | null
+          test_status: boolean
         }
         Insert: {
           amount: number
@@ -611,6 +612,7 @@ export type Database = {
           recipient?: string | null
           recipient_id?: string | null
           source?: string | null
+          test_status?: boolean
         }
         Update: {
           amount?: number
@@ -624,6 +626,7 @@ export type Database = {
           recipient?: string | null
           recipient_id?: string | null
           source?: string | null
+          test_status?: boolean
         }
         Relationships: []
       }
@@ -905,6 +908,45 @@ export type Database = {
         }
         Relationships: []
       }
+      prayer_recipients_prays: {
+        Row: {
+          created_at: string
+          id: string
+          location: Json | null
+          owner_id: string | null
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: Json | null
+          owner_id?: string | null
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: Json | null
+          owner_id?: string | null
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_recipients_prays_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prayer_recipients_prays_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_gallery: {
         Row: {
           blurDataURL: string | null
@@ -1006,7 +1048,13 @@ export type Database = {
         Row: {
           according_to_paragraph: string | null
           according_to_paragraph_2: Json | null
+          age: number
           category: string
+          church_city: string | null
+          church_contact_name: string | null
+          church_email: string | null
+          church_name: string | null
+          church_state: string | null
           condition: string | null
           created_at: string
           email: string
@@ -1014,13 +1062,17 @@ export type Database = {
           first_name: string
           gender: Database["public"]["Enums"]["gender"] | null
           id: string
+          is_archived: boolean
+          is_private: boolean
+          is_upgrade_complete: boolean
+          journey_updates: Json
           journey_updates_2: Json | null
           learn_more_text: string | null
           learn_more_url: string | null
           more_ways_to_support: Json | null
           more_ways_to_support____: Json | null
           opengraph: Json | null
-          otherCategories: Json | null
+          otherCategories: Json
           otherPages: string | null
           package_image: Json | null
           page_status: Database["public"]["Enums"]["page_status"]
@@ -1028,6 +1080,7 @@ export type Database = {
           path_url: string | null
           poster_image: Json | null
           profile_picture: Json | null
+          recipient_template: Database["public"]["Enums"]["recipient_template"]
           recipientInterests: string | null
           recipientSituation: string | null
           relationship: string
@@ -1045,7 +1098,13 @@ export type Database = {
         Insert: {
           according_to_paragraph?: string | null
           according_to_paragraph_2?: Json | null
+          age?: number
           category?: string
+          church_city?: string | null
+          church_contact_name?: string | null
+          church_email?: string | null
+          church_name?: string | null
+          church_state?: string | null
           condition?: string | null
           created_at?: string
           email: string
@@ -1053,13 +1112,17 @@ export type Database = {
           first_name: string
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          is_archived?: boolean
+          is_private?: boolean
+          is_upgrade_complete?: boolean
+          journey_updates?: Json
           journey_updates_2?: Json | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
           more_ways_to_support____?: Json | null
           opengraph?: Json | null
-          otherCategories?: Json | null
+          otherCategories?: Json
           otherPages?: string | null
           package_image?: Json | null
           page_status?: Database["public"]["Enums"]["page_status"]
@@ -1067,6 +1130,7 @@ export type Database = {
           path_url?: string | null
           poster_image?: Json | null
           profile_picture?: Json | null
+          recipient_template?: Database["public"]["Enums"]["recipient_template"]
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship: string
@@ -1083,7 +1147,13 @@ export type Database = {
         Update: {
           according_to_paragraph?: string | null
           according_to_paragraph_2?: Json | null
+          age?: number
           category?: string
+          church_city?: string | null
+          church_contact_name?: string | null
+          church_email?: string | null
+          church_name?: string | null
+          church_state?: string | null
           condition?: string | null
           created_at?: string
           email?: string
@@ -1091,13 +1161,17 @@ export type Database = {
           first_name?: string
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          is_archived?: boolean
+          is_private?: boolean
+          is_upgrade_complete?: boolean
+          journey_updates?: Json
           journey_updates_2?: Json | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
           more_ways_to_support____?: Json | null
           opengraph?: Json | null
-          otherCategories?: Json | null
+          otherCategories?: Json
           otherPages?: string | null
           package_image?: Json | null
           page_status?: Database["public"]["Enums"]["page_status"]
@@ -1105,6 +1179,7 @@ export type Database = {
           path_url?: string | null
           poster_image?: Json | null
           profile_picture?: Json | null
+          recipient_template?: Database["public"]["Enums"]["recipient_template"]
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship?: string
@@ -1122,25 +1197,25 @@ export type Database = {
       }
       recipients_profile_pictures: {
         Row: {
-          blur_data_url: string | null
-          bucket_name: string | null
+          blur_data_url: string
+          bucket_name: string
           created_at: string | null
           id: string
-          storage_path: string | null
+          storage_path: string
         }
         Insert: {
-          blur_data_url?: string | null
-          bucket_name?: string | null
+          blur_data_url: string
+          bucket_name?: string
           created_at?: string | null
           id: string
-          storage_path?: string | null
+          storage_path: string
         }
         Update: {
-          blur_data_url?: string | null
-          bucket_name?: string | null
+          blur_data_url?: string
+          bucket_name?: string
           created_at?: string | null
           id?: string
-          storage_path?: string | null
+          storage_path?: string
         }
         Relationships: [
           {
@@ -1182,6 +1257,21 @@ export type Database = {
           id?: string
           landing_page_url?: string
           referrer?: string | null
+        }
+        Relationships: []
+      }
+      user_countdown_timer: {
+        Row: {
+          last_sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          last_sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          last_sent_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1354,32 +1444,29 @@ export type Database = {
       users_stripe_subscriptions: {
         Row: {
           created_at: string
-          customer_id: string | null
+          customer_id: string
           id: string
           owner_email: string
           owner_id: string | null
-          price_id: string | null
-          product_id: string | null
+          price_id: string
           subscription_id: string
         }
         Insert: {
           created_at?: string
-          customer_id?: string | null
+          customer_id: string
           id?: string
           owner_email: string
           owner_id?: string | null
-          price_id?: string | null
-          product_id?: string | null
+          price_id: string
           subscription_id: string
         }
         Update: {
           created_at?: string
-          customer_id?: string | null
+          customer_id?: string
           id?: string
           owner_email?: string
           owner_id?: string | null
-          price_id?: string | null
-          product_id?: string | null
+          price_id?: string
           subscription_id?: string
         }
         Relationships: [
@@ -1395,33 +1482,30 @@ export type Database = {
       users_stripe_subscriptions_test: {
         Row: {
           created_at: string
-          customer_id: string | null
+          customer_id: string
           id: string
           owner_email: string
           owner_id: string | null
-          price_id: string | null
-          product_id: string | null
-          subscription_id: string | null
+          price_id: string
+          subscription_id: string
         }
         Insert: {
           created_at?: string
-          customer_id?: string | null
+          customer_id: string
           id?: string
           owner_email: string
           owner_id?: string | null
-          price_id?: string | null
-          product_id?: string | null
-          subscription_id?: string | null
+          price_id: string
+          subscription_id: string
         }
         Update: {
           created_at?: string
-          customer_id?: string | null
+          customer_id?: string
           id?: string
           owner_email?: string
           owner_id?: string | null
-          price_id?: string | null
-          product_id?: string | null
-          subscription_id?: string | null
+          price_id?: string
+          subscription_id?: string
         }
         Relationships: [
           {
@@ -1480,6 +1564,7 @@ export type Database = {
       page_status: "draft" | "published"
       post_status: "approved" | "rejected" | "pending"
       post_type: "recipient-support" | "community-support-request"
+      recipient_template: "original" | "church"
       recipient_type: "child" | "adult" | "family"
       role: "admin" | "super_admin" | "user"
     }
@@ -1617,6 +1702,7 @@ export const Constants = {
       page_status: ["draft", "published"],
       post_status: ["approved", "rejected", "pending"],
       post_type: ["recipient-support", "community-support-request"],
+      recipient_template: ["original", "church"],
       recipient_type: ["child", "adult", "family"],
       role: ["admin", "super_admin", "user"],
     },

@@ -212,7 +212,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                                   item.isPresentInLTOrg &&
                                   !item.hasCreatedAccount &&
                                   'published'}
-                                {!item.isPresentInLTOrg && 'deleted'}
+                                {!item.isPresentInLTOrg && 'deleted/draft'}
                               </p>
                             </div>
                           </td>
