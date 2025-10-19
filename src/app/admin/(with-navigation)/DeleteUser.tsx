@@ -1,6 +1,6 @@
 'use client'
 import { supa_admin_delete_auth_user } from '@/app/_actions/admin/actions'
-import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+import { I_supa_select_user_Response_Types_withCommentsCount } from '@/app/_actions/users/actions'
 import Button from '@/app/components/Button/Button'
 import Icon_trash from '@/app/components/icons/Icon_trash'
 import usePopup from '@/app/hooks/usePopup'
@@ -8,9 +8,9 @@ import React, { useState } from 'react'
 
 const DeleteUser = ({
   user,
-  recipient
+  recipient,
 }: {
-  user: I_supa_select_user_Response_Types | null | undefined
+  user?: I_supa_select_user_Response_Types_withCommentsCount | null
   recipient: I_supaOrg_recipients_row
 }) => {
   const { clIsOpen, clTogglePopup, Popup } = usePopup()
@@ -46,8 +46,8 @@ const DeleteUser = ({
                 'font-acumin-variable-68 text-3xl font-bold mx-auto w-[290px] text-left'
               }
             >
-              Are you sure you want to delete{' '}
-              {`${recipient.first_name}'s`} account?
+              Are you sure you want to delete {`${recipient.first_name}'s`}{' '}
+              account?
             </p>
             <ul className="list-disc pl-5 mt-3 text-[17px]">
               <li>{`The user's profile information`}</li>

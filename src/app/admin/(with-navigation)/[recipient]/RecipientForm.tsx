@@ -75,9 +75,9 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
     recipient_id?: string
   }): Promise<boolean> => {
     const { fb_post_id, recipient_id } = opt
-    
+
     if (!recipient_id) return false
-    
+
     if (fb_post_id) {
       const { data: fbDataExists } = await supa_select_facebook_posts(
         fb_post_id,
@@ -305,27 +305,52 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
               {...register('pinteresetURL')}
             />
           </div>
-          <div className={'flex gap-4 w-full'}>
-            <Image
-              src={lovetransfusion}
-              quality={100}
-              alt="Love Transfusion Logo"
-              className="max-h-[42px] min-w-[42px]"
-            />
-            <Input
-              disabled
-              clPlaceholder="Type URL"
-              className="placeholder:text-neutral-400 border-neutral-400 py-2"
-              clVariant="input2"
-              defaultValue={
-                recipientObject.path_url
-                  ? `https://www.lovetransfusion.org/${recipientObject.path_url}`
-                  : ''
-              }
-              clContainerClassName="w-full text-neutral-400"
-              // {...register('websiteURL')}
-            />
-          </div>
+          {!recipientObject.is_private && (
+            <div className={'flex gap-4 w-full'}>
+              <Image
+                src={lovetransfusion}
+                quality={100}
+                alt="Love Transfusion Logo"
+                className="max-h-[42px] min-w-[42px]"
+              />
+              <Input
+                disabled
+                clPlaceholder="Type URL"
+                className="placeholder:text-neutral-400 border-neutral-400 py-2"
+                clVariant="input2"
+                defaultValue={
+                  recipientObject.path_url
+                    ? `https://www.lovetransfusion.org/${recipientObject.path_url}`
+                    : ''
+                }
+                clContainerClassName="w-full text-neutral-400"
+                // {...register('websiteURL')}
+              />
+            </div>
+          )}
+          {recipientObject.recipient_template === 'church' && (
+            <div className={'flex gap-4 w-full'}>
+              <Image
+                src={lovetransfusion}
+                quality={100}
+                alt="Love Transfusion Logo"
+                className="max-h-[42px] min-w-[42px]"
+              />
+              <Input
+                disabled
+                clPlaceholder="Type URL"
+                className="placeholder:text-neutral-400 border-neutral-400 py-2"
+                clVariant="input2"
+                defaultValue={
+                  recipientObject.path_url
+                    ? `https://www.lovetransfusion.org/c/${recipientObject.path_url}`
+                    : ''
+                }
+                clContainerClassName="w-full text-neutral-400"
+                // {...register('websiteURL')}
+              />
+            </div>
+          )}
         </div>
 
         {/* <FBAdIDs
