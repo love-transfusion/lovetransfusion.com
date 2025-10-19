@@ -312,18 +312,21 @@ export type Database = {
       recipient_prays: {
         Row: {
           created_at: string
+          id: string
           location: Json | null
           prayer_id: string | null
           recipient_id: string
         }
         Insert: {
           created_at?: string
+          id?: string
           location?: Json | null
           prayer_id?: string | null
           recipient_id: string
         }
         Update: {
           created_at?: string
+          id?: string
           location?: Json | null
           prayer_id?: string | null
           recipient_id?: string
@@ -332,8 +335,8 @@ export type Database = {
           {
             foreignKeyName: "recipient_prays_recipient_id_fkey"
             columns: ["recipient_id"]
-            isOneToOne: true
-            referencedRelation: "recipients"
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

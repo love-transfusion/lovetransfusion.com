@@ -23,6 +23,12 @@ const utilityStore = create(
         state.fbError = data
       })
     },
+    isBellActive: false,
+    setisBellActive: (data) => {
+      set((state) => {
+        state.isBellActive = data
+      })
+    },
   }))
 )
 

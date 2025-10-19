@@ -22,7 +22,10 @@ export interface I_Comments_Website {
   id: string
   message: string | null
   created_at: string
-  profile_picture_website: I_supaorg_public_profiles | null
+  profile_picture_website: Pick<
+    I_supaorg_public_profiles,
+    'profile_picture'
+  > | null
 }
 
 // Union type

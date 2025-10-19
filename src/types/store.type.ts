@@ -24,6 +24,8 @@ export interface I_Store_Utility {
   setuserInStore: (data: I_user | null) => void
   fbError: string | null
   setfbError: (data: string | null) => void
+  isBellActive: boolean
+  setisBellActive: (data: boolean) => void
 }
 
 // Tooltips Store ----------------------

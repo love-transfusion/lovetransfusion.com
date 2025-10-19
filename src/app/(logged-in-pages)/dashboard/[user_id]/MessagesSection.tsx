@@ -6,6 +6,10 @@ import useToggle from '@/app/hooks/useToggle'
 import { useEffect, useState } from 'react'
 import { I_Comments } from '@/types/Comments.types'
 import { I_supa_select_user_Response_Types } from '@/app/_actions/users/actions'
+import useAudio from '@/app/hooks/useAudio'
+import { createClient } from '@/app/config/supabase/supabaseClient'
+import { useStore } from 'zustand'
+import utilityStore from '@/app/utilities/store/utilityStore'
 
 interface I_MessagesSection {
   clComments: I_Comments[]
@@ -14,6 +18,7 @@ interface I_MessagesSection {
   clCurrentPage: string
   clCount: number
   clLimit: number
+  recipient_prays: I_supa_recipient_prays_row[]
 }
 
 const MessagesSection = ({
@@ -23,14 +28,93 @@ const MessagesSection = ({
   clCount,
   clCurrentPage,
   clLimit,
+  recipient_prays,
 }: I_MessagesSection) => {
+  const { setisBellActive, isBellActive } = useStore(utilityStore)
+  const { clPlay } = useAudio('/audio/church-bell.mp3', 1000)
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
-  const [comments, setcomments] = useState<I_Comments[]>(clComments)
+
+  const formattedPrayers: I_Comments[] = recipient_prays.map((item) => {
+    return {
+      type: 'website',
+      created_at: item.created_at,
+      id: item.id,
+      message: 'Praying for you🙏',
+      name: 'Someone Who Cares',
+      profile_picture_website: {
+        profile_picture: null,
+      },
+    }
+  })
+
+  const [comments, setcomments] = useState<I_Comments[]>([
+    ...clComments,
+    ...formattedPrayers,
+  ])
+
+  const handleInsert = (prayerRow: I_supaOrg_prayer_recipients_prays_row) => {
+    setcomments((prev) => {
+      return [
+        ...prev,
+        {
+          type: 'website',
+          created_at: prayerRow.created_at,
+          id: prayerRow.id,
+          message: 'Praying for you🙏',
+          name: 'Someone Who Cares',
+          profile_picture_website: {
+            profile_picture: null,
+          },
+        },
+      ]
+    })
+    clPlay()
+    setisBellActive(true)
+  }
 
   useEffect(() => {
-    setcomments(clComments)
-  }, [clComments])
+    if (!isBellActive) return
+    const timeout = setTimeout(() => {
+      setisBellActive(false)
+    }, 4000)
+
+    return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBellActive])
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined
+
+    const init = async () => {
+      const supabase = await createClient()
+
+      const channel = supabase
+        .channel('recipient_prays')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'recipient_prays',
+            filter: `recipient_id=eq.${clUser_id}`,
+          },
+          (payload) => {
+            // Play tone when a new prayer is inserted
+            const prayerRow =
+              payload.new as I_supaOrg_prayer_recipients_prays_row
+            handleInsert(prayerRow)
+          }
+        )
+        .subscribe()
+
+      cleanup = () => supabase.removeChannel(channel)
+    }
+
+    void init()
+    return () => cleanup?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clPlay])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })

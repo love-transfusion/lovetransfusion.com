@@ -31,6 +31,7 @@ export interface I_supa_select_user_Response_Types extends I_supa_users_row {
   facebook_posts: I_supa_facebook_posts_row | null
   facebook_insights?: I_supa_facebook_insights_row[]
   google_analytics?: I_supa_google_analytics_row | null
+  recipient_prays: I_supa_recipient_prays_row[]
 }
 
 export const supa_select_user = async (
@@ -45,7 +46,7 @@ export const supa_select_user = async (
   const { data, error } = await supabase
     .from('users')
     .select(
-      '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)'
+      '*, recipient_prays(*), profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)'
     )
     .eq('id', user_id)
     .single()

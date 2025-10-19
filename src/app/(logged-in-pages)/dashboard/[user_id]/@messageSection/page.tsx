@@ -101,6 +101,8 @@ const MessageSlot = async (props: MessageSlot_Types) => {
     }),
     selectedUser.receipients_deleted_messages
   )
+
+  const recipient_prays = selectedUser.recipient_prays
   return (
     <>
       <MessagesSection
@@ -110,6 +112,7 @@ const MessageSlot = async (props: MessageSlot_Types) => {
         clCount={count}
         clCurrentPage={page.toString()}
         clLimit={clLimit}
+        recipient_prays={recipient_prays}
       />
     </>
   )

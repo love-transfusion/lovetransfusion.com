@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import dots from './images/Dots.svg'
 import doubleHeart from './images/Double Heart.svg'
 import NavigationMenu from './NavigationMenu'
@@ -12,16 +12,10 @@ import MobileDashboardMenu from './MobileDashboardMenu'
 import ltLogo from '@/app/images/main-logo.png'
 import { notFound } from 'next/navigation'
 
-// interface I_MembersLayout
-
 export const maxDuration = 60
 
-const UserIDLayout = async ({
-  children,
-}: {
-  children: React.ReactNode
-  params: Promise<{ user_id: string }>
-}) => {
+const UserIDLayout = async (props: { children: ReactNode }) => {
+  const { children } = props
   const user = await getCurrentUser()
   if (!user) notFound()
   const isadmin = isAdmin({ clRole: user.role })
