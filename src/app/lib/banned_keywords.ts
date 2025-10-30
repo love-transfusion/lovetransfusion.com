@@ -41,14 +41,41 @@ export const BANNED_KEYWORDS = [
   'palestine','hepatitis','aids','jude','chimio','lying','rump',
 ]
 
-// Put near your imports
+// Normalization helper
 const normalize = (s?: string | null) =>
   (s ?? '')
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, ''); // strip accents
+    .replace(/[\u0300-\u036f]/g, '') // strip accents
+    .replace(/\s+/g, ' ') // collapse spaces
+    .trim();
 
-export const containsBanned = (text: string, list: string[]) => {
+/**
+ * Checks if the text contains any banned keyword or phrase.
+ * Uses whole-word matching when possible.
+ */
+export const containsBanned = (text: string, list: string[]): boolean => {
   const t = normalize(text);
-  return list.some((w) => t.includes(normalize(w)));
+  if (!t) return false;
+
+  return list.some((word) => {
+    const w = normalize(word);
+    if (!w) return false;
+
+    // For emoji, symbols, or phrases with spaces/punctuation, do a direct includes check
+    const needsExactBoundary = /^[a-z0-9]+$/.test(w);
+
+    if (needsExactBoundary) {
+      // Match as a whole word using word boundaries
+      const regex = new RegExp(`\\b${escapeRegExp(w)}\\b`, 'i');
+      return regex.test(t);
+    } else {
+      // Fallback for emojis, symbols, and multi-word phrases
+      return t.includes(w);
+    }
+  });
 };
+
+// Escape regex special characters for safe usage
+const escapeRegExp = (str: string) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
