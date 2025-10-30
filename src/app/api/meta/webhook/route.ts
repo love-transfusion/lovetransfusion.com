@@ -10,7 +10,7 @@ import {
 // ✅ ADDED: use your profile-picture util
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
-import { findBanned } from '@/app/lib/banned_keywords'
+import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
 
 // Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'
@@ -264,28 +264,6 @@ export async function POST(req: NextRequest) {
           raw: v ?? {},
         }
 
-        let effectiveMessage = base.message ?? ''
-
-        if (v.verb === 'edited' && !v.message) {
-          try {
-            const { data: token } = await util_fb_pageToken({
-              pageId: page_id,
-              systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-            })
-            if (token) {
-              const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
-              const r = await fetch(
-                `https://graph.facebook.com/${VERSION}/${base.comment_id}?fields=message`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              )
-              const j = await r.json()
-              if (typeof j?.message === 'string') effectiveMessage = j.message
-            }
-          } catch (e: any) {
-            console.warn('EDIT_FETCH_MESSAGE_FAIL', base.comment_id, e?.message)
-          }
-        }
-
         // Track from_ids by page for later avatar enrichment
         if (base.from_id) {
           if (!pageToFromIds.has(page_id)) pageToFromIds.set(page_id, new Set())
@@ -373,14 +351,12 @@ export async function POST(req: NextRequest) {
         if (isEdited) edits++
         else adds++
 
-        const matched = findBanned(effectiveMessage)
         const rowWithCreated = {
           ...base,
-          message: effectiveMessage,
           created_time: createdISO,
           is_edited: isEdited,
           updated_at: isEdited ? eventISO : createdISO,
-          is_hidden: !!matched,
+          is_hidden: containsBanned(base.message ?? '', BANNED_KEYWORDS),
         }
 
         batchedRows.push(rowWithCreated)
@@ -486,6 +462,7 @@ export async function POST(req: NextRequest) {
     // ===== NEW: Hidden-flag sync for auto-moderated comments =====
     if (pageToCommentIds.size > 0) {
       console.time('HIDDEN_FLAG_SYNC')
+      let totalHidden = 0
 
       // small helper: chunk an array
       const chunkArr = <T>(arr: T[], size: number) =>
@@ -516,7 +493,6 @@ export async function POST(req: NextRequest) {
         // Query Graph for is_hidden (fetch per id for reliability)
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []
-        const unhideToMark: string[] = []
 
         for (const group of chunkArr(commentIds, 50)) {
           const requests = group.map((cid) =>
@@ -532,50 +508,33 @@ export async function POST(req: NextRequest) {
           )
 
           const results = await Promise.all(requests)
-
-          // results: Array<{ cid: string; is_hidden: boolean }>
-          const cleanIds = results.filter((r) => !r.is_hidden).map((r) => r.cid)
-          if (cleanIds.length) {
-            // Pull the current messages from DB and re-check against your matcher
-            const { data: rows, error: selErr } = await supabase
-              .from('facebook_comments')
-              .select('comment_id,message')
-              .in('comment_id', cleanIds)
-
-            if (!selErr && rows?.length) {
-              for (const row of rows) {
-                const matched = findBanned(row.message ?? '')
-                if (!matched) unhideToMark.push(row.comment_id)
-              }
-            } else if (selErr) {
-              console.error('HIDDEN_FLAG_SYNC: select failed', {
-                message: selErr.message,
-                details: (selErr as any).details,
-                hint: (selErr as any).hint,
-                code: (selErr as any).code,
-              })
-            }
-          }
-
           for (const r of results) if (r.is_hidden) hiddenToMark.push(r.cid)
         }
 
         if (hiddenToMark.length) {
-          await supabase
+          totalHidden += hiddenToMark.length
+
+          // One efficient DB update; leaves unrelated rows untouched
+          const { error: upErr } = await supabase
             .from('facebook_comments')
             .update({ is_hidden: true })
             .in('comment_id', hiddenToMark)
-        }
 
-        if (unhideToMark.length) {
-          await supabase
-            .from('facebook_comments')
-            .update({ is_hidden: false /*, moderation_reason: null */ })
-            .in('comment_id', unhideToMark)
+          if (upErr) {
+            console.error('HIDDEN_FLAG_SYNC: update failed', {
+              page_id,
+              count: hiddenToMark.length,
+              message: upErr.message,
+              details: (upErr as any).details,
+              hint: (upErr as any).hint,
+              code: (upErr as any).code,
+            })
+          }
         }
       }
 
       console.timeEnd('HIDDEN_FLAG_SYNC')
+      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden })
     }
 
     console.timeEnd('WEBHOOK_TOTAL')

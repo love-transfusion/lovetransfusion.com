@@ -41,27 +41,14 @@ export const BANNED_KEYWORDS = [
   'palestine','hepatitis','aids','jude','chimio','lying','rump',
 ]
 
+// Put near your imports
 const normalize = (s?: string | null) =>
   (s ?? '')
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replace(/[\u0300-\u036f]/g, ''); // strip accents
 
-const isAlphaWord = (s: string) => /^[a-z]+$/i.test(s);
-
-// Build regex only for alphabetic words (word-boundary), keep substring for others
-const compileMatcher = (kw: string) => {
-  const n = normalize(kw);
-  if (isAlphaWord(n)) return { type: 'regex' as const, test: (t: string) => new RegExp(`\\b${n}\\b`, 'i').test(t) };
-  return { type: 'substr' as const, test: (t: string) => t.includes(n) };
-};
-
-const MATCHERS = BANNED_KEYWORDS.map(k => ({ raw: k, ...compileMatcher(k) }));
-
-export const findBanned = (text: string): string | null => {
+export const containsBanned = (text: string, list: string[]) => {
   const t = normalize(text);
-  for (const m of MATCHERS) {
-    if (m.test(t)) return m.raw; // return the first keyword that matched
-  }
-  return null;
+  return list.some((w) => t.includes(normalize(w)));
 };
