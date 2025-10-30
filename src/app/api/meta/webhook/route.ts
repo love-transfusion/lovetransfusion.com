@@ -486,7 +486,6 @@ export async function POST(req: NextRequest) {
     // ===== NEW: Hidden-flag sync for auto-moderated comments =====
     if (pageToCommentIds.size > 0) {
       console.time('HIDDEN_FLAG_SYNC')
-      let totalHidden = 0
 
       // small helper: chunk an array
       const chunkArr = <T>(arr: T[], size: number) =>
@@ -533,41 +532,50 @@ export async function POST(req: NextRequest) {
           )
 
           const results = await Promise.all(requests)
+
+          // results: Array<{ cid: string; is_hidden: boolean }>
+          const cleanIds = results.filter((r) => !r.is_hidden).map((r) => r.cid)
+          if (cleanIds.length) {
+            // Pull the current messages from DB and re-check against your matcher
+            const { data: rows, error: selErr } = await supabase
+              .from('facebook_comments')
+              .select('comment_id,message')
+              .in('comment_id', cleanIds)
+
+            if (!selErr && rows?.length) {
+              for (const row of rows) {
+                const matched = findBanned(row.message ?? '')
+                if (!matched) unhideToMark.push(row.comment_id)
+              }
+            } else if (selErr) {
+              console.error('HIDDEN_FLAG_SYNC: select failed', {
+                message: selErr.message,
+                details: (selErr as any).details,
+                hint: (selErr as any).hint,
+                code: (selErr as any).code,
+              })
+            }
+          }
+
           for (const r of results) if (r.is_hidden) hiddenToMark.push(r.cid)
         }
 
         if (hiddenToMark.length) {
-          totalHidden += hiddenToMark.length
-
-          // One efficient DB update; leaves unrelated rows untouched
-          const { error: upErr } = await supabase
+          await supabase
             .from('facebook_comments')
             .update({ is_hidden: true })
             .in('comment_id', hiddenToMark)
-
-          if (upErr) {
-            console.error('HIDDEN_FLAG_SYNC: update failed', {
-              page_id,
-              count: hiddenToMark.length,
-              message: upErr.message,
-              details: (upErr as any).details,
-              hint: (upErr as any).hint,
-              code: (upErr as any).code,
-            })
-          }
         }
+
         if (unhideToMark.length) {
           await supabase
             .from('facebook_comments')
-            .update({
-              is_hidden: false /* optionally moderation_reason: null */,
-            })
+            .update({ is_hidden: false /*, moderation_reason: null */ })
             .in('comment_id', unhideToMark)
         }
       }
 
       console.timeEnd('HIDDEN_FLAG_SYNC')
-      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden })
     }
 
     console.timeEnd('WEBHOOK_TOTAL')
