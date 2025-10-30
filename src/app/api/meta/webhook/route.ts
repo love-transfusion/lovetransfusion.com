@@ -159,8 +159,6 @@ export async function POST(req: NextRequest) {
       like_count: number | null
       comment_count: number | null
       permalink_url: string | null
-      // is_hidden: boolean
-      // is_deleted: boolean
       is_edited: boolean
       raw: any
       updated_at: string // keep this
@@ -169,6 +167,7 @@ export async function POST(req: NextRequest) {
     // ✅ ADDED (local maps for avatar enrichment by page)
     const pageToFromIds = new Map<string, Set<string>>() // page_id -> set(from_id)
     const commentToPage = new Map<string, string>() // comment_id -> page_id
+    const pageToCommentIds = new Map<string, Set<string>>()
 
     const entries = Array.isArray(body?.entry) ? body.entry : []
     const pageIds: string[] = Array.from(
@@ -271,6 +270,10 @@ export async function POST(req: NextRequest) {
         }
         // Map this comment to its page
         commentToPage.set(base.comment_id, page_id)
+
+        if (!pageToCommentIds.has(page_id))
+          pageToCommentIds.set(page_id, new Set())
+        pageToCommentIds.get(page_id)!.add(base.comment_id)
 
         // Ensure the post exists/updated once per request
         if (!touchedPosts.has(base.post_id) && !failedPosts.has(base.post_id)) {
@@ -458,6 +461,84 @@ export async function POST(req: NextRequest) {
         }
       }
       console.timeEnd('COMMENTS_BULK_UPSERT')
+    }
+
+    // ===== NEW: Hidden-flag sync for auto-moderated comments =====
+    if (pageToCommentIds.size > 0) {
+      console.time('HIDDEN_FLAG_SYNC')
+      let totalHidden = 0
+
+      // small helper: chunk an array
+      const chunkArr = <T>(arr: T[], size: number) =>
+        Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+          arr.slice(i * size, i * size + size)
+        )
+
+      for (const [page_id, idSet] of pageToCommentIds.entries()) {
+        const commentIds = Array.from(idSet)
+        if (!commentIds.length) continue
+
+        // Resolve a PAGE ACCESS TOKEN using your existing util
+        let pageAccessToken: string | null = null
+        try {
+          const { data } = await util_fb_pageToken({
+            pageId: page_id,
+            systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
+          })
+          pageAccessToken = data
+        } catch (e: any) {
+          console.error('HIDDEN_FLAG_SYNC: page token error', {
+            page_id,
+            message: e?.message,
+          })
+        }
+        if (!pageAccessToken) continue
+
+        // Query Graph for is_hidden (fetch per id for reliability)
+        const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
+        const hiddenToMark: string[] = []
+
+        for (const group of chunkArr(commentIds, 50)) {
+          const requests = group.map((cid) =>
+            fetch(
+              `https://graph.facebook.com/${VERSION}/${cid}?fields=is_hidden`,
+              {
+                headers: { Authorization: `Bearer ${pageAccessToken}` },
+              }
+            )
+              .then((r) => r.json())
+              .then((j) => ({ cid, is_hidden: !!j?.is_hidden }))
+              .catch((e) => ({ cid, is_hidden: false, err: e }))
+          )
+
+          const results = await Promise.all(requests)
+          for (const r of results) if (r.is_hidden) hiddenToMark.push(r.cid)
+        }
+
+        if (hiddenToMark.length) {
+          totalHidden += hiddenToMark.length
+
+          // One efficient DB update; leaves unrelated rows untouched
+          const { error: upErr } = await supabase
+            .from('facebook_comments')
+            .update({ is_hidden: true })
+            .in('comment_id', hiddenToMark)
+
+          if (upErr) {
+            console.error('HIDDEN_FLAG_SYNC: update failed', {
+              page_id,
+              count: hiddenToMark.length,
+              message: upErr.message,
+              details: (upErr as any).details,
+              hint: (upErr as any).hint,
+              code: (upErr as any).code,
+            })
+          }
+        }
+      }
+
+      console.timeEnd('HIDDEN_FLAG_SYNC')
+      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden })
     }
 
     console.timeEnd('WEBHOOK_TOTAL')
