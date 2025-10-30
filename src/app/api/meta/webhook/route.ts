@@ -536,7 +536,6 @@ export async function POST(req: NextRequest) {
     // ===== Hidden-flag sync against Graph (unchanged)
     if (pageToCommentIds.size > 0) {
       console.time('HIDDEN_FLAG_SYNC')
-      let totalHidden = 0
 
       const chunkArr = <T>(arr: T[], size: number) =>
         Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
@@ -583,27 +582,30 @@ export async function POST(req: NextRequest) {
         }
 
         if (hiddenToMark.length) {
-          totalHidden += hiddenToMark.length
-          const { error: upErr } = await supabase
+          const { data: existing } = await supabase
             .from('facebook_comments')
-            .update({ is_hidden: true })
+            .select('comment_id, is_hidden')
             .in('comment_id', hiddenToMark)
 
-          if (upErr) {
-            console.error('HIDDEN_FLAG_SYNC: update failed', {
-              page_id,
-              count: hiddenToMark.length,
-              message: upErr.message,
-              details: (upErr as any).details,
-              hint: (upErr as any).hint,
-              code: (upErr as any).code,
-            })
+          const stillHiddenIds = (existing ?? [])
+            .filter((e) => e.is_hidden === false) // locally considered clean
+            .map((e) => e.comment_id)
+
+          // Only re-hide those that are still locally hidden
+          const toUpdate = hiddenToMark.filter(
+            (id) => !stillHiddenIds.includes(id)
+          )
+
+          if (toUpdate.length) {
+            await supabase
+              .from('facebook_comments')
+              .update({ is_hidden: true })
+              .in('comment_id', toUpdate)
           }
         }
       }
 
       console.timeEnd('HIDDEN_FLAG_SYNC')
-      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden })
     }
 
     console.timeEnd('WEBHOOK_TOTAL')
