@@ -40,3 +40,15 @@ export const BANNED_KEYWORDS = [
   'musk','vance','starve','manuka','live','okundo','hub','lol','oil','vaccine','vaccines','oils','isreal',
   'palestine','hepatitis','aids','jude','chimio','lying','rump',
 ]
+
+// Put near your imports
+const normalize = (s?: string | null) =>
+  (s ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, ''); // strip accents
+
+export const containsBanned = (text: string, list: string[]) => {
+  const t = normalize(text);
+  return list.some((w) => t.includes(normalize(w)));
+};
