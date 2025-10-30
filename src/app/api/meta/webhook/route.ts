@@ -10,7 +10,7 @@ import {
 // ✅ ADDED: use your profile-picture util
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
-import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
+import { findBanned } from '@/app/lib/banned_keywords'
 
 // Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'
@@ -264,6 +264,28 @@ export async function POST(req: NextRequest) {
           raw: v ?? {},
         }
 
+        let effectiveMessage = base.message ?? ''
+
+        if (v.verb === 'edited' && !v.message) {
+          try {
+            const { data: token } = await util_fb_pageToken({
+              pageId: page_id,
+              systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
+            })
+            if (token) {
+              const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
+              const r = await fetch(
+                `https://graph.facebook.com/${VERSION}/${base.comment_id}?fields=message`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              )
+              const j = await r.json()
+              if (typeof j?.message === 'string') effectiveMessage = j.message
+            }
+          } catch (e: any) {
+            console.warn('EDIT_FETCH_MESSAGE_FAIL', base.comment_id, e?.message)
+          }
+        }
+
         // Track from_ids by page for later avatar enrichment
         if (base.from_id) {
           if (!pageToFromIds.has(page_id)) pageToFromIds.set(page_id, new Set())
@@ -351,12 +373,14 @@ export async function POST(req: NextRequest) {
         if (isEdited) edits++
         else adds++
 
+        const matched = findBanned(effectiveMessage)
         const rowWithCreated = {
           ...base,
+          message: effectiveMessage,
           created_time: createdISO,
           is_edited: isEdited,
           updated_at: isEdited ? eventISO : createdISO,
-          is_hidden: containsBanned(base.message ?? '', BANNED_KEYWORDS),
+          is_hidden: !!matched,
         }
 
         batchedRows.push(rowWithCreated)
@@ -493,6 +517,7 @@ export async function POST(req: NextRequest) {
         // Query Graph for is_hidden (fetch per id for reliability)
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []
+        const unhideToMark: string[] = []
 
         for (const group of chunkArr(commentIds, 50)) {
           const requests = group.map((cid) =>
@@ -530,6 +555,14 @@ export async function POST(req: NextRequest) {
               code: (upErr as any).code,
             })
           }
+        }
+        if (unhideToMark.length) {
+          await supabase
+            .from('facebook_comments')
+            .update({
+              is_hidden: false /* optionally moderation_reason: null */,
+            })
+            .in('comment_id', unhideToMark)
         }
       }
 
