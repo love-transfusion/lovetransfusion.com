@@ -265,6 +265,32 @@ export async function POST(req: NextRequest) {
           raw: v ?? {},
         }
 
+        if (v.verb === 'edited' && !v.message) {
+          // Try to fetch current message for edits missing message field
+          try {
+            const version = process.env.NEXT_PUBLIC_GRAPH_VERSION!
+            const tokenRes = await util_fb_pageToken({
+              pageId: page_id,
+              systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
+            })
+            const token = tokenRes.data
+            if (token) {
+              const resp = await fetch(
+                `https://graph.facebook.com/${version}/${v.comment_id}?fields=message`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              )
+              const json = await resp.json()
+              if (json?.message)
+                commentIdToMsgLower.set(
+                  v.comment_id,
+                  json.message.toLowerCase()
+                )
+            }
+          } catch (e: any) {
+            console.warn('EDIT_FETCH_FAIL', v.comment_id, e?.message)
+          }
+        }
+
         const msgLower = (base.message ?? '').toLowerCase()
         if (msgLower) commentIdToMsgLower.set(base.comment_id, msgLower)
 
@@ -390,13 +416,7 @@ export async function POST(req: NextRequest) {
           updated_at: isEdited ? eventISO : createdISO,
         }
 
-        if (isEdited) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { created_time, ...rowWithoutCreated } = rowWithCreated
-          batchedRows.push(rowWithoutCreated)
-        } else {
-          batchedRows.push(rowWithCreated)
-        }
+        batchedRows.push(rowWithCreated)
       }
     }
     console.timeEnd('PROCESS_ENTRIES')
