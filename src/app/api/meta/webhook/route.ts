@@ -10,6 +10,7 @@ import {
 // ✅ ADDED: use your profile-picture util
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
+import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
 
 // Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'
@@ -168,6 +169,7 @@ export async function POST(req: NextRequest) {
     const pageToFromIds = new Map<string, Set<string>>() // page_id -> set(from_id)
     const commentToPage = new Map<string, string>() // comment_id -> page_id
     const pageToCommentIds = new Map<string, Set<string>>()
+    const commentIdToMsgLower = new Map<string, string>()
 
     const entries = Array.isArray(body?.entry) ? body.entry : []
     const pageIds: string[] = Array.from(
@@ -261,6 +263,37 @@ export async function POST(req: NextRequest) {
           comment_count: (v.comment_count as number) ?? null,
           permalink_url: (v.permalink_url as string) ?? null,
           raw: v ?? {},
+        }
+
+        const msgLower = (base.message ?? '').toLowerCase()
+        if (msgLower) commentIdToMsgLower.set(base.comment_id, msgLower)
+
+        // ✅ AUTO-HIDE FILTER for banned words/phrases
+        // ✅ AUTO-HIDE FILTER for banned words/phrases
+        if (base.message) {
+          const containsBanned = BANNED_KEYWORDS.some((word) =>
+            msgLower.includes(word)
+          )
+          if (containsBanned) {
+            console.info('Filtered comment auto-hidden (keyword match)', {
+              comment_id: base.comment_id,
+              matched: true,
+            })
+
+            await supabase.from('facebook_comments').upsert(
+              {
+                comment_id: base.comment_id,
+                post_id: base.post_id,
+                message: base.message,
+                is_hidden: true,
+                raw: v,
+                updated_at: new Date().toISOString(),
+              } as any,
+              { onConflict: 'comment_id' }
+            )
+
+            continue
+          }
         }
 
         // Track from_ids by page for later avatar enrichment
@@ -464,11 +497,12 @@ export async function POST(req: NextRequest) {
     }
 
     // ===== NEW: Hidden-flag sync for auto-moderated comments =====
+    // ===== NEW: Hidden-flag sync for auto-moderated comments (with unhide on edits) =====
     if (pageToCommentIds.size > 0) {
       console.time('HIDDEN_FLAG_SYNC')
       let totalHidden = 0
+      let totalUnhidden = 0
 
-      // small helper: chunk an array
       const chunkArr = <T>(arr: T[], size: number) =>
         Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
           arr.slice(i * size, i * size + size)
@@ -478,7 +512,7 @@ export async function POST(req: NextRequest) {
         const commentIds = Array.from(idSet)
         if (!commentIds.length) continue
 
-        // Resolve a PAGE ACCESS TOKEN using your existing util
+        // Resolve a PAGE ACCESS TOKEN
         let pageAccessToken: string | null = null
         try {
           const { data } = await util_fb_pageToken({
@@ -494,9 +528,9 @@ export async function POST(req: NextRequest) {
         }
         if (!pageAccessToken) continue
 
-        // Query Graph for is_hidden (fetch per id for reliability)
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []
+        const unhideToMark: string[] = []
 
         for (const group of chunkArr(commentIds, 50)) {
           const requests = group.map((cid) =>
@@ -512,20 +546,29 @@ export async function POST(req: NextRequest) {
           )
 
           const results = await Promise.all(requests)
-          for (const r of results) if (r.is_hidden) hiddenToMark.push(r.cid)
+          for (const r of results) {
+            const latestMsgLower = commentIdToMsgLower.get(r.cid) ?? ''
+            const containsBanned = latestMsgLower
+              ? BANNED_KEYWORDS.some((w) => latestMsgLower.includes(w))
+              : false
+
+            if (r.is_hidden || containsBanned) {
+              hiddenToMark.push(r.cid)
+            } else {
+              // Not hidden by FB and no banned terms → unhide locally
+              unhideToMark.push(r.cid)
+            }
+          }
         }
 
         if (hiddenToMark.length) {
           totalHidden += hiddenToMark.length
-
-          // One efficient DB update; leaves unrelated rows untouched
           const { error: upErr } = await supabase
             .from('facebook_comments')
             .update({ is_hidden: true })
             .in('comment_id', hiddenToMark)
-
           if (upErr) {
-            console.error('HIDDEN_FLAG_SYNC: update failed', {
+            console.error('HIDDEN_FLAG_SYNC: update failed (hide)', {
               page_id,
               count: hiddenToMark.length,
               message: upErr.message,
@@ -535,10 +578,28 @@ export async function POST(req: NextRequest) {
             })
           }
         }
+
+        if (unhideToMark.length) {
+          totalUnhidden += unhideToMark.length
+          const { error: upErr2 } = await supabase
+            .from('facebook_comments')
+            .update({ is_hidden: false })
+            .in('comment_id', unhideToMark)
+          if (upErr2) {
+            console.error('HIDDEN_FLAG_SYNC: update failed (unhide)', {
+              page_id,
+              count: unhideToMark.length,
+              message: upErr2.message,
+              details: (upErr2 as any).details,
+              hint: (upErr2 as any).hint,
+              code: (upErr2 as any).code,
+            })
+          }
+        }
       }
 
       console.timeEnd('HIDDEN_FLAG_SYNC')
-      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden })
+      console.info('HIDDEN_FLAG_SYNC: done', { totalHidden, totalUnhidden })
     }
 
     console.timeEnd('WEBHOOK_TOTAL')

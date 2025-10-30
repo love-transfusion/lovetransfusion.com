@@ -6,6 +6,7 @@ import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
+import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 
@@ -476,6 +477,12 @@ async function reconcilePost(
             ? new Date(rawCreated * 1000).toISOString()
             : new Date(rawCreated).toISOString()
 
+        // ✅ Keyword-ban filter (lowercase match, includes emojis & phrases)
+        const msgLower = (c.message ?? '').toLowerCase()
+        const containsBanned =
+          msgLower.length > 0 &&
+          BANNED_KEYWORDS.some((w) => msgLower.includes(w))
+
         return {
           comment_id: c.id,
           post_id: post.post_id,
@@ -488,7 +495,9 @@ async function reconcilePost(
           like_count: (c as any).like_count ?? null,
           comment_count: (c as any).comment_count ?? null,
           permalink_url: (c as any).permalink_url ?? null,
-          is_hidden: false,
+          // ⛔️ Do NOT send is_hidden: false for clean comments.
+          //    Only set is_hidden when you intend to force it true.
+          ...(containsBanned ? { is_hidden: true } : {}),
           is_deleted: false,
           raw: c as any,
           updated_at: new Date().toISOString(),
