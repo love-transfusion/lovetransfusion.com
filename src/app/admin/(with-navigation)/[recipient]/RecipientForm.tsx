@@ -174,7 +174,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
       const { data, error } = await supa_admin_create_account({
         id: recipientObject.id,
         email: recipientObject.email,
-        parent_name: recipientObject.parent_name!,
+        parent_name: (recipientObject.parent_name || '').split(' ')[0],
         recipient_name: recipientObject.first_name!,
         recipient_id: recipientObject.id,
       })
