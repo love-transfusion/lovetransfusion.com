@@ -220,7 +220,10 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             />
           </div>
           <MostRecentEngagementContainer user_id={user_id}>
-            <MostRecentEngagements allEngagements={allEngagements} />
+            <MostRecentEngagements
+              allEngagements={allEngagements}
+              user_id={user_id}
+            />
           </MostRecentEngagementContainer>
         </div>
       </div>
