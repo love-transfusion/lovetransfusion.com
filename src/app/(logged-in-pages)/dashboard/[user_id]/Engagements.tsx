@@ -105,7 +105,7 @@ const Engagements = ({ allEngagements, user_id }: Props) => {
               animate="animate"
               exit="exit"
               className={
-                'relative flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] text-base bg-[#EEF6FC] first:bg-white first:scale-105 first:px-[23] first:shadow-[0px_0px_15px_0px_#2FABDD40] first:z-50 first:border-t first:border-primary first:rounded-[4px] first:font-semibold'
+                'relative flex gap-2 justify-between px-4 py-[7px] min-w-[9px] min-h-[9px] text-base bg-[#EEF6FC] first:bg-white first:scale-105 first:px-[23] first:shadow-[0px_0px_15px_0px_#2FABDD40] first:z-10 first:border-t first:border-primary first:rounded-[4px] first:font-semibold'
               }
             >
               <div className="flex items-center gap-3">

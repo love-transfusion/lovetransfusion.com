@@ -18,7 +18,7 @@ const MostRecentEngagements = ({
     >
       <div
         className={
-          'h-[150px] w-full  bg-gradient-to-b from-white/0 from-[0%] via-white/40 via-[70%] to-white/100 to-[90%] -left-2 absolute -bottom-4'
+          'h-[150px] w-full  bg-gradient-to-b from-white/0 from-[0%] via-white/40 via-[70%] to-white/100 to-[90%] -left-2 absolute -bottom-4 z-10'
         }
       />
       <p
