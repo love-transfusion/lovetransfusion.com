@@ -293,6 +293,21 @@ const PrivacyPage = () => {
               .
             </p>
           </div>
+          <div className={'flex flex-col gap-1'}>
+            <p className={'text-primary font-semibold'}>
+              Aggregated Engagement Data from Meta and Website Activity
+            </p>
+            <p className={''}>
+              We collect aggregated view counts of sponsored (boosted) posts and
+              website page visits showing geographic location at the U.S. state
+              level (or city level when available). We do not collect or display
+              individual user names, Facebook profile IDs, or detailed
+              geographical coordinates. We use this data solely to show
+              recipients how many people have seen their story. We retain data
+              for up to 12 months and then either delete or further anonymize
+              it.
+            </p>
+          </div>
         </div>
       </div>
     </div>
