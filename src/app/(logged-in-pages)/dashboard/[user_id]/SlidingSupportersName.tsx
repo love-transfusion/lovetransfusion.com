@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import Icon_heart from '@/app/components/icons/Icon_heart'
 import { I_Comments } from '@/types/Comments.types'
@@ -50,7 +51,7 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
               key={item.id}
               className={'flex gap-2 items-center text-primary px-6'}
             >
-              {profilePicture ? (
+              {/* {profilePicture ? (
                 <Image
                   src={profilePicture ?? anonymous}
                   quality={100}
@@ -67,35 +68,12 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
                 <div className="bg-primary-200 w-[25px] h-[25px] rounded-full flex items-center justify-center">
                   <Icon_heart className="size-[14px] mt-[2px]" />
                 </div>
-              )}
+              )} */}
+              <Icon_heart />
               <p className="w-fit text-nowrap text-sm">{item.name}</p>
             </div>
           )
         })}
-        {/* <div className={'flex gap-2 items-center text-primary px-6'}>
-          <Icon_heart className="size-[14px]" />
-          <p className="w-[200px] text-nowrap text-sm">
-            Someone Who Cares - Philippines
-          </p>
-        </div>
-        <div className={'flex gap-2 items-center text-primary px-6'}>
-          <Icon_heart className="size-[14px]" />
-          <p className="w-[200px] text-nowrap text-sm">
-            Someone Who Cares - Philippines
-          </p>
-        </div>
-        <div className={'flex gap-2 items-center text-primary px-6'}>
-          <Icon_heart className="size-[14px]" />
-          <p className="w-[200px] text-nowrap text-sm">
-            Someone Who Cares - Philippines
-          </p>
-        </div>
-        <div className={'flex gap-2 items-center text-primary px-6'}>
-          <Icon_heart className="size-[14px]" />
-          <p className="w-[200px] text-nowrap text-sm">
-            Someone Who Cares - Philippines
-          </p>
-        </div> */}
       </Marquee>
     </div>
   )

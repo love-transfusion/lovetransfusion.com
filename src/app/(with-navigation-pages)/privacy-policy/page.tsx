@@ -38,7 +38,7 @@ const PrivacyPage = () => {
               App:
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <p className={'text-primary font-semibold'}>
               a. Personal Information
             </p>
@@ -49,7 +49,7 @@ const PrivacyPage = () => {
               and any other information you provide.
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <p className={'text-primary font-semibold'}>
               b. Information About Recipients
             </p>
@@ -61,7 +61,7 @@ const PrivacyPage = () => {
               submitting any such information.
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <p className={'text-primary font-semibold'}>c. Usage Data</p>
             <p className={''}>
               We automatically collect information about how you use the App,
@@ -78,7 +78,7 @@ const PrivacyPage = () => {
               We may use the information we collect for the following purposes:
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <ul className="space-y-2 pl-2">
               <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
                 <span className="text-primary font-semibold">
@@ -132,7 +132,7 @@ const PrivacyPage = () => {
               following circumstances:
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <ul className="space-y-2 pl-2">
               <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
                 <span className="text-primary font-semibold">
@@ -178,7 +178,7 @@ const PrivacyPage = () => {
               You have the following choices regarding your information:
             </p>
           </div>
-          <div className={'flex flex-col gap-1'}>
+          <div className={'flex flex-col gap-1 ml-4 md:ml-6'}>
             <ul className="space-y-2 pl-2">
               <li className="before:content-['■'] before:text-primary before:absolute before:-left-[10px] before:text-[8px] before:top-[6px] relative">
                 <span className="text-primary font-semibold">
