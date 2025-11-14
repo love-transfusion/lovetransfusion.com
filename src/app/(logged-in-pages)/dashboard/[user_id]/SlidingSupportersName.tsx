@@ -6,6 +6,7 @@ import React from 'react'
 import Marquee from 'react-fast-marquee'
 import anonymous from '@/app/(logged-in-pages)/dashboard/[user_id]/images/user.webp'
 import Image from 'next/image'
+import heart from './images/sroll-heart.svg'
 
 interface I_SlidingSupportersName {
   allEngagements: I_Comments[]
@@ -69,7 +70,14 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
                   <Icon_heart className="size-[14px] mt-[2px]" />
                 </div>
               )} */}
-              <Icon_heart />
+              {/* <Icon_heart /> */}
+              <Image
+                src={heart}
+                alt="Heart"
+                quality={100}
+                width={24}
+                height={24}
+              />
               <p className="w-fit text-nowrap text-sm">{item.name}</p>
             </div>
           )
