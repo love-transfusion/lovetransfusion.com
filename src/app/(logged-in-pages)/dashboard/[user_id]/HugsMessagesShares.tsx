@@ -81,7 +81,7 @@ const HugsMessagesShares = ({ recipient, fbData }: I_HugsMessagesShares) => {
                 'rounded-lg text-white ring-[1px] ring-primary-300 text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
               }
             >
-              {total + totalFacebookData}
+              {(total + totalFacebookData).toLocaleString()}
             </p>
           </div>
         </div>
@@ -100,7 +100,7 @@ const HugsMessagesShares = ({ recipient, fbData }: I_HugsMessagesShares) => {
                 'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
               }
             >
-              {totalHugs + fbData.total_reactions}
+              {(totalHugs + fbData.total_reactions).toLocaleString()}
             </p>
           </div>
         </Tooltip>
@@ -120,7 +120,7 @@ const HugsMessagesShares = ({ recipient, fbData }: I_HugsMessagesShares) => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalComments + fbData.total_comments}
+            {(totalComments + fbData.total_comments).toLocaleString()}
           </p>
         </div>
       </div>
@@ -139,7 +139,7 @@ const HugsMessagesShares = ({ recipient, fbData }: I_HugsMessagesShares) => {
               'rounded-lg bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white text-xl 2xl:text-[26px] pt-[10px] 2xl:pt-[6px] pb-[9px] 2xl:pb-[5px] px-3 font-acuminProSemibold leading-tight min-w-[123px]'
             }
           >
-            {totalShares + fbData.total_shares}
+            {(totalShares + fbData.total_shares).toLocaleString()}
           </p>
         </div>
       </div>

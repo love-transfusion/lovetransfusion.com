@@ -103,23 +103,23 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         }
       })
 
-  // const formattedWebsiteHugs: I_Comments[] | null = selectedRecipient.hugs.map(
-  //   (item) => {
-  //     return {
-  //       type: 'website',
-  //       id: item.id,
-  //       name:
-  //         (item.public_profiles?.full_name &&
-  //           item.public_profiles?.full_name) ||
-  //         (item.public_profiles?.first_name &&
-  //           `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`) ||
-  //         'Someone Who Cares',
-  //       message: 'Empty',
-  //       created_at: item.created_at,
-  //       profile_picture_website: item.public_profiles,
-  //     }
-  //   }
-  // )
+  const formattedWebsiteHugs: I_Comments[] | null = selectedRecipient.hugs.map(
+    (item) => {
+      return {
+        type: 'website',
+        id: item.id,
+        name:
+          (item.public_profiles?.full_name &&
+            item.public_profiles?.full_name) ||
+          (item.public_profiles?.first_name &&
+            `${item.public_profiles?.first_name} ${item.public_profiles?.last_name}`) ||
+          'Someone Who Cares',
+        message: 'Empty',
+        created_at: item.created_at,
+        profile_picture_website: item.public_profiles,
+      }
+    }
+  )
 
   const facebook_insights = !!selectedUser.facebook_insights?.length
     ? selectedUser.facebook_insights[0]
@@ -129,7 +129,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     [
       ...formattedFBComments,
       ...(formattedWebsiteComments ?? []),
-      // ...(formattedWebsiteHugs ?? []),
+      ...(formattedWebsiteHugs ?? []),
     ],
     selectedUser.receipients_deleted_messages
   )
