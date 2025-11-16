@@ -29,14 +29,14 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-variable-68 font-bold text-balance text-[28px] md:text-[35px] text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight'
+              'font-acumin-variable-68 font-bold text-balance text-4xl md:text-5xl text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight pb-2'
             }
           >
-            Connecting People Who Hurt With Those Who Care
+            Love. Mobilized
           </p>
           <p
             className={
-              'font-acumin-variable-90 font-medium text-[17px] md:text-xl text-[#999] text-center'
+              'font-acumin-variable-90 font-medium text-[17px] md:text-xl text-[#999] text-center text-pretty'
             }
           >
             A Conduit for Expressions of Love and Support
