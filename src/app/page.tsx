@@ -32,7 +32,7 @@ const Homepage = async () => {
               'font-acumin-variable-68 font-bold text-balance text-4xl md:text-5xl text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight pb-2'
             }
           >
-            Love. Mobilized
+            Love. Mobilized.
           </p>
           <p
             className={
