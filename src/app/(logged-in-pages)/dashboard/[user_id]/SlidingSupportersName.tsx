@@ -6,7 +6,7 @@ import React from 'react'
 import Marquee from 'react-fast-marquee'
 import anonymous from '@/app/(logged-in-pages)/dashboard/[user_id]/images/user.webp'
 import Image from 'next/image'
-import heart from './images/sroll-heart.svg'
+import heart from './images/scroll-heart.svg'
 
 interface I_SlidingSupportersName {
   allEngagements: I_Comments[]
@@ -18,7 +18,7 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
     const dateB = new Date(b.created_at).getTime()
     return dateB - dateA
   })
-
+  console.log({ combinedEngagements })
   return (
     <div className={'flex items-center min-h-8 bg-[#E5F4FA]'}>
       <Marquee speed={50} autoFill={true}>
