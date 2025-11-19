@@ -43,7 +43,7 @@ const Homepage = async () => {
           </p>
           <div
             className={
-              'flex flex-col lg:flex-row gap-[54px] items-center lg:items-start w-full mx-auto max-w-[940px] mt-8 md:mt-[61px]'
+              'flex flex-col lg:flex-row gap-[54px] items-center lg:items-start w-full mx-auto max-w-[940px] mt-5 md:mt-[49px]'
             }
           >
             <div
@@ -54,7 +54,7 @@ const Homepage = async () => {
               <WistiaPlayer videoId={'ow4kttqlhy'} containerStyle="shadow-lg" />
             </div>
             <div
-              className={'flex flex-col max-w-[235px] mx-auto md:mx-[unset]'}
+              className={'flex flex-col max-w-[235px] lg:pt-3 mx-auto md:mx-[unset]'}
             >
               <div className={'relative mt-[1px] w-fit mx-auto'}>
                 <Image
