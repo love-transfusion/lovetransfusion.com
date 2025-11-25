@@ -30,6 +30,8 @@ const defaultPoint: I_CountryPathTotalFormat[] = [
 ]
 
 const MapChart = ({ user_id, prepared_analytics }: Props) => {
+  const [analytics, setanalytics] =
+    useState<I_CountryPathTotalFormat[]>(prepared_analytics)
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -46,7 +48,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       const worldJson = await res.json()
       registerMap('world', worldJson)
 
-      const combinedAnalytics = [...prepared_analytics, ...defaultPoint]
+      const combinedAnalytics = [...analytics, ...defaultPoint]
 
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
@@ -57,18 +59,29 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       setMappedData(mapped)
 
       // 🧠 Calculate min/max
-      const totals = mapped.map((d) => d.value[2])
-      const minTotal = Math.min(...totals)
-      const maxTotal = Math.max(...totals)
+      // const totals = mapped.map((d) => d.value[2])
+      // const minTotal = Math.min(...totals)
+      // const maxTotal = Math.max(...totals)
+
+      // const calculateSymbolSize = (val: any[]) => {
+      //   const total = val[2]
+      //   const minSize = 4
+      //   const maxSize = 22
+
+      //   if (maxTotal === minTotal) return (minSize + maxSize) / 2
+      //   const normalized = (total - minTotal) / (maxTotal - minTotal)
+      //   return minSize + normalized * (maxSize - minSize)
+      // }
 
       const calculateSymbolSize = (val: any[]) => {
         const total = val[2]
-        const minSize = 4
-        const maxSize = 22
 
-        if (maxTotal === minTotal) return (minSize + maxSize) / 2
-        const normalized = (total - minTotal) / (maxTotal - minTotal)
-        return minSize + normalized * (maxSize - minSize)
+        if (total <= 5) return 3
+        if (total <= 99) return 5
+        if (total <= 999) return 9
+        if (total <= 4999) return 14
+        if (total <= 9999) return 18
+        return 22 // 10,000+
       }
 
       setOption({
@@ -189,6 +202,10 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
     loadMap()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    setanalytics(prepared_analytics)
+  }, [prepared_analytics])
 
   return (
     <>
