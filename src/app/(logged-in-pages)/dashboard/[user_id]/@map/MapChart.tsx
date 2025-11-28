@@ -10,6 +10,7 @@ import {
 import { I_CountryPathTotalFormat } from '@/app/utilities/analytics/getAnalyticsCountryPathTotal'
 import LoadingComponent from '@/app/components/Loading'
 import MapControls from './MapControls'
+import useDeviceSize from '@/app/hooks/useDeviceSize'
 
 interface Props {
   user_id: string
@@ -35,6 +36,7 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
   const [option, setOption] = useState<any>({ series: [] })
   const [mappedData, setMappedData] = useState<GeoPoint[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const { clWindowWidth } = useDeviceSize()
 
   const chartRef = useRef<any>(null)
 
@@ -58,30 +60,23 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
       const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages)
       setMappedData(mapped)
 
-      // 🧠 Calculate min/max
-      // const totals = mapped.map((d) => d.value[2])
-      // const minTotal = Math.min(...totals)
-      // const maxTotal = Math.max(...totals)
-
-      // const calculateSymbolSize = (val: any[]) => {
-      //   const total = val[2]
-      //   const minSize = 4
-      //   const maxSize = 22
-
-      //   if (maxTotal === minTotal) return (minSize + maxSize) / 2
-      //   const normalized = (total - minTotal) / (maxTotal - minTotal)
-      //   return minSize + normalized * (maxSize - minSize)
-      // }
-
       const calculateSymbolSize = (val: any[]) => {
         const total = val[2]
-
-        if (total <= 5) return 3
-        if (total <= 99) return 5
-        if (total <= 999) return 9
-        if (total <= 4999) return 14
-        if (total <= 9999) return 18
-        return 22 // 10,000+
+        if (clWindowWidth > 768) {
+          if (total <= 5) return 2
+          if (total <= 99) return 3
+          if (total <= 999) return 4
+          if (total <= 4999) return 6
+          if (total <= 9999) return 8
+          return 10 // 10,000+
+        } else {
+          if (total <= 5) return 1
+          if (total <= 99) return 2
+          if (total <= 999) return 3
+          if (total <= 4999) return 4
+          if (total <= 9999) return 5
+          return 6 // 10,000+
+        }
       }
 
       setOption({
@@ -198,10 +193,11 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
 
       setLoading(false)
     }
-
-    loadMap()
+    if (clWindowWidth) {
+      loadMap()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [clWindowWidth])
 
   useEffect(() => {
     setanalytics(prepared_analytics)

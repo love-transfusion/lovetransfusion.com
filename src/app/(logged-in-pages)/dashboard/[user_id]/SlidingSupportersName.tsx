@@ -18,7 +18,6 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
     const dateB = new Date(b.created_at).getTime()
     return dateB - dateA
   })
-  console.log({ combinedEngagements })
   return (
     <div className={'flex items-center min-h-8 bg-[#E5F4FA]'}>
       <Marquee speed={50} autoFill={true}>
