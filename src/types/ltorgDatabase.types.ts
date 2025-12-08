@@ -1112,8 +1112,7 @@ export type Database = {
           recipientInterests: string | null
           recipientSituation: string | null
           relationship: string
-          sec_one_paragraph: string | null
-          sec_one_paragraph_2: Json | null
+          sec_one_paragraph: Json | null
           soc_post_facebook: string | null
           soc_post_instagram: string | null
           soc_post_pinterest: string | null
@@ -1164,8 +1163,7 @@ export type Database = {
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship: string
-          sec_one_paragraph?: string | null
-          sec_one_paragraph_2?: Json | null
+          sec_one_paragraph?: Json | null
           soc_post_facebook?: string | null
           soc_post_instagram?: string | null
           soc_post_pinterest?: string | null
@@ -1215,8 +1213,7 @@ export type Database = {
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship?: string
-          sec_one_paragraph?: string | null
-          sec_one_paragraph_2?: Json | null
+          sec_one_paragraph?: Json | null
           soc_post_facebook?: string | null
           soc_post_instagram?: string | null
           soc_post_pinterest?: string | null
@@ -1307,57 +1304,13 @@ export type Database = {
         }
         Relationships: []
       }
-      user_profile_pictures: {
-        Row: {
-          blurDataURL: string | null
-          created_at: string
-          fullPath: string | null
-          id: string
-          owner_id: string | null
-          path: string | null
-        }
-        Insert: {
-          blurDataURL?: string | null
-          created_at?: string
-          fullPath?: string | null
-          id: string
-          owner_id?: string | null
-          path?: string | null
-        }
-        Update: {
-          blurDataURL?: string | null
-          created_at?: string
-          fullPath?: string | null
-          id?: string
-          owner_id?: string | null
-          path?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_profile_pictures_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_profile_pictures_owner_id_fkey1"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       users: {
         Row: {
           avatar: string | null
           created_at: string
           display_name: string | null
           email: string | null
-          first_name_asdf: string | null
           id: string
-          last_name_asdf: string | null
           role: Database["public"]["Enums"]["role"]
         }
         Insert: {
@@ -1365,9 +1318,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
-          first_name_asdf?: string | null
           id: string
-          last_name_asdf?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Update: {
@@ -1375,9 +1326,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
-          first_name_asdf?: string | null
           id?: string
-          last_name_asdf?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []

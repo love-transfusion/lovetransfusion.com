@@ -32,8 +32,8 @@ const RecipientPage = async (props: { params: Params }) => {
   const unknown_recipientObject = recipientData.recipient as unknown
   const recipientObject = unknown_recipientObject as I_supaorg_recipient
 
-  const unknown_sec1 = recipientObject.sec_one_paragraph_2 as unknown
-  const sec_one_paragraph_2 = unknown_sec1 as Editor_Type
+  const sec_one_paragraph =
+    recipientObject.sec_one_paragraph as unknown as Editor_Type
 
   return (
     <div className="py-10 md:py-[64px] px-4 md:px-8 flex flex-col gap-5 bg-[#F3F4F6] min-h-full 2xl:min-h-[calc(100vh-85px)]">
@@ -123,7 +123,7 @@ const RecipientPage = async (props: { params: Params }) => {
           <div
             className={'recipient-content pr-0 md:pr-[50px] text-lg'}
             dangerouslySetInnerHTML={{
-              __html: sec_one_paragraph_2.HtmlContent,
+              __html: sec_one_paragraph.HtmlContent,
             }}
           />
         </div>
