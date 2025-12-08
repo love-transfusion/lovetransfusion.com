@@ -45,6 +45,10 @@ const MapSlot = async (props: { params: Params }) => {
     selectedUser.recipients && (selectedUser.recipients[0].recipient as unknown)
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
+  console.log({
+    selectedRecipientTemplate: selectedRecipient.recipient_template,
+  })
+
   const FBInsights = !!selectedUser.facebook_insights?.length
     ? (selectedUser.facebook_insights[0]
         .insights as unknown as RegionInsightByDate)
@@ -64,6 +68,7 @@ const MapSlot = async (props: { params: Params }) => {
     <div className="relative">
       <MapChart
         user_id={selectedUser.id}
+        recipient_template={selectedRecipient.recipient_template}
         prepared_analytics={[...analyticsWithCountryPathTotal, ...paidInsights]}
       />
       <MapTooltip user_id={user_id} />

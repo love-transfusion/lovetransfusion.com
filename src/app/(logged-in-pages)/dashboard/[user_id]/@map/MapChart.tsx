@@ -15,6 +15,7 @@ import useDeviceSize from '@/app/hooks/useDeviceSize'
 interface Props {
   user_id: string
   prepared_analytics: I_CountryPathTotalFormat[]
+  recipient_template: 'original' | 'church'
 }
 
 const defaultPoint: I_CountryPathTotalFormat[] = [
@@ -30,7 +31,11 @@ const defaultPoint: I_CountryPathTotalFormat[] = [
   },
 ]
 
-const MapChart = ({ user_id, prepared_analytics }: Props) => {
+const MapChart = ({
+  user_id,
+  prepared_analytics,
+  recipient_template,
+}: Props) => {
   const [analytics, setanalytics] =
     useState<I_CountryPathTotalFormat[]>(prepared_analytics)
   const [option, setOption] = useState<any>({ series: [] })
@@ -166,7 +171,10 @@ const MapChart = ({ user_id, prepared_analytics }: Props) => {
           zoom: 1.2,
           layoutSize: '100%',
           label: { show: false },
-          scaleLimit: { min: 1, max: 20 },
+          scaleLimit: {
+            min: 1,
+            max: recipient_template === 'church' ? 100 : 20,
+          },
           itemStyle: {
             areaColor: '#E2F2FA',
             borderWidth: 0.8,

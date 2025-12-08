@@ -1044,6 +1044,32 @@ export type Database = {
           },
         ]
       }
+      recipient_layout: {
+        Row: {
+          created_at: string
+          recipient_id: string
+          title_section_bg: Database["public"]["Enums"]["title_section_bg"]
+        }
+        Insert: {
+          created_at?: string
+          recipient_id: string
+          title_section_bg?: Database["public"]["Enums"]["title_section_bg"]
+        }
+        Update: {
+          created_at?: string
+          recipient_id?: string
+          title_section_bg?: Database["public"]["Enums"]["title_section_bg"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipient_layout_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: true
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipients: {
         Row: {
           according_to_paragraph: string | null
@@ -1062,11 +1088,13 @@ export type Database = {
           first_name: string
           gender: Database["public"]["Enums"]["gender"] | null
           id: string
+          in_memoriam: boolean
           is_archived: boolean
           is_private: boolean
           is_upgrade_complete: boolean
           journey_updates: Json
           journey_updates_2: Json | null
+          last_name: string | null
           learn_more_text: string | null
           learn_more_url: string | null
           more_ways_to_support: Json | null
@@ -1112,11 +1140,13 @@ export type Database = {
           first_name: string
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          in_memoriam?: boolean
           is_archived?: boolean
           is_private?: boolean
           is_upgrade_complete?: boolean
           journey_updates?: Json
           journey_updates_2?: Json | null
+          last_name?: string | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
@@ -1161,11 +1191,13 @@ export type Database = {
           first_name?: string
           gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
+          in_memoriam?: boolean
           is_archived?: boolean
           is_private?: boolean
           is_upgrade_complete?: boolean
           journey_updates?: Json
           journey_updates_2?: Json | null
+          last_name?: string | null
           learn_more_text?: string | null
           learn_more_url?: string | null
           more_ways_to_support?: Json | null
@@ -1323,9 +1355,9 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
-          first_name: string | null
+          first_name_asdf: string | null
           id: string
-          last_name: string | null
+          last_name_asdf: string | null
           role: Database["public"]["Enums"]["role"]
         }
         Insert: {
@@ -1333,9 +1365,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
-          first_name?: string | null
+          first_name_asdf?: string | null
           id: string
-          last_name?: string | null
+          last_name_asdf?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Update: {
@@ -1343,9 +1375,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
-          first_name?: string | null
+          first_name_asdf?: string | null
           id?: string
-          last_name?: string | null
+          last_name_asdf?: string | null
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
@@ -1528,7 +1560,9 @@ export type Database = {
       }
       first_name_parent_name_id_email: {
         Args: { "": Database["public"]["Tables"]["recipients"]["Row"] }
-        Returns: string
+        Returns: {
+          error: true
+        } & "the function public.first_name_parent_name_id_email with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
       }
       get_all_nested_comments: {
         Args: { input_path_url: string; input_user_id: string }
@@ -1546,10 +1580,7 @@ export type Database = {
           updated_at: string
         }[]
       }
-      get_user_id_by_email: {
-        Args: { email_input: string }
-        Returns: string
-      }
+      get_user_id_by_email: { Args: { email_input: string }; Returns: string }
       increment_likes_count: {
         Args: { comment_id: string }
         Returns: undefined
@@ -1567,6 +1598,7 @@ export type Database = {
       recipient_template: "original" | "church"
       recipient_type: "child" | "adult" | "family"
       role: "admin" | "super_admin" | "user"
+      title_section_bg: "gradient" | "hearts"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1705,6 +1737,7 @@ export const Constants = {
       recipient_template: ["original", "church"],
       recipient_type: ["child", "adult", "family"],
       role: ["admin", "super_admin", "user"],
+      title_section_bg: ["gradient", "hearts"],
     },
   },
 } as const
