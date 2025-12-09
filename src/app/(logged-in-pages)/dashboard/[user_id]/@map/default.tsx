@@ -45,10 +45,6 @@ const MapSlotDefault = async (props: { params: Params }) => {
     selectedUser.recipients && (selectedUser.recipients[0].recipient as unknown)
   const selectedRecipient = unknown_selectedRecipient as I_supaorg_recipient
 
-  console.log({
-    selectedRecipientTemplate: selectedRecipient.recipient_template,
-  })
-
   const FBInsights = !!selectedUser.facebook_insights?.length
     ? (selectedUser.facebook_insights[0]
         .insights as unknown as RegionInsightByDate)

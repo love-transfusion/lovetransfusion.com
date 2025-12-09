@@ -154,7 +154,7 @@ declare global {
 
   type I_supaorg_public_profiles =
     | orgDB['public']['Tables']['public_profiles']['Row'] & {
-        profile_picture: I_profile_picture | null
+        users_profile_pictures: I_supaOrg_users_profile_pictures_row | null
       }
 
   type I_orgLocation =
@@ -193,6 +193,14 @@ declare global {
     orgDB['public']['Tables']['recipients_profile_pictures']['Update']
   type I_supaOrg_recipients_profile_pictures_row =
     orgDB['public']['Tables']['recipients_profile_pictures']['Row']
+
+  // users_profile_pictures table
+  type I_supaOrg_users_profile_pictures_insert =
+    orgDB['public']['Tables']['users_profile_pictures']['Insert']
+  type I_supaOrg_users_profile_pictures_update =
+    orgDB['public']['Tables']['users_profile_pictures']['Update']
+  type I_supaOrg_users_profile_pictures_row =
+    orgDB['public']['Tables']['users_profile_pictures']['Row']
 
   // prayer_recipients_prays table
   type I_supaOrg_prayer_recipients_prays_insert =

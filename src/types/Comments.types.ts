@@ -24,7 +24,7 @@ export interface I_Comments_Website {
   created_at: string
   profile_picture_website: Pick<
     I_supaorg_public_profiles,
-    'profile_picture'
+    'users_profile_pictures'
   > | null
 }
 
