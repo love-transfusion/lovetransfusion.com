@@ -113,8 +113,8 @@ const Engagements = ({ allEngagements, user_id }: Props) => {
                   <Image
                     src={
                       item.profile_picture_website &&
-                      item.profile_picture_website.profile_picture?.fullPath
-                        ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture.fullPath}`
+                      item.profile_picture_website.users_profile_pictures
+                        ? `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.users_profile_pictures.bucket_name}/${item.profile_picture_website.users_profile_pictures.storage_path}`
                         : anonymous
                     }
                     alt="Profile picture of engager"

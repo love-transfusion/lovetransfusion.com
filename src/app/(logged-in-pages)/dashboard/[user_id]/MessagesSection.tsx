@@ -43,7 +43,7 @@ const MessagesSection = ({
       message: 'Praying for you🙏',
       name: 'Someone Who Cares',
       profile_picture_website: {
-        profile_picture: null,
+        users_profile_pictures: null,
       },
     }
   })
@@ -64,7 +64,7 @@ const MessagesSection = ({
           message: 'Praying for you🙏',
           name: 'Someone Who Cares',
           profile_picture_website: {
-            profile_picture: null,
+            users_profile_pictures: null,
           },
         },
       ]

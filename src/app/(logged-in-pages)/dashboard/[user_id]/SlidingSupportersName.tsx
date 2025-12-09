@@ -28,15 +28,15 @@ const SlidingSupportersName = ({ allEngagements }: I_SlidingSupportersName) => {
             case 'website':
               profilePicture =
                 item.type === 'website' &&
-                item.profile_picture_website?.profile_picture
+                item.profile_picture_website?.users_profile_pictures
                   ? (item.profile_picture_website
-                      .profile_picture as unknown as {
+                      .users_profile_pictures as unknown as {
                       blurDataURL: string
                       fullPath: string
                       id: string
                       path: string
                     }) &&
-                    `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.profile_picture.fullPath}`
+                    `${process.env.NEXT_PUBLIC_SUPABASE_ORG_STORAGE_URL}/${item.profile_picture_website.users_profile_pictures.bucket_name}/${item.profile_picture_website.users_profile_pictures.storage_path}`
                   : undefined
               break
             case 'facebook':
