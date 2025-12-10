@@ -19,7 +19,6 @@ type GARow = {
   // If you decide to store composite key (user_id, path), add: path?: string | null
 }
 
-
 export async function GET(req: NextRequest) {
   if (!isAuthorizedCron(req)) {
     return new NextResponse('Unauthorized', { status: 401 })
@@ -38,22 +37,31 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     )
   }
-  
+
   const filteredusers =
     oldUsers?.filter((item) => !!item.recipients.length) ?? []
 
-  const users = filteredusers
-    .map((user) => {
-      const unknown_recipient = user.recipients[0].recipient as unknown
-      const recipient = unknown_recipient as I_supaorg_recipient | undefined
-      const path_url = `/${recipient?.path_url}`
-      return { path_url, id: user.id }
-    })
+  const users = filteredusers.map((user) => {
+    const recipient = user.recipients[0].recipient as unknown as
+      | I_supaorg_recipient
+      | undefined
+    const paths = []
+    if (recipient?.path_url) {
+      // default path
+      paths.push(`/${recipient.path_url}`)
+
+      // extra /c/ path for church template
+      if (recipient.recipient_template === 'church') {
+        paths.push(`/c/${recipient.path_url}`)
+      }
+    }
+    return { paths, id: user.id }
+  })
 
   // Build tasks (skip users without a path if you only want page-level stats)
   const tasks = (users ?? [])
-    .filter((u) => typeof u.path_url === 'string' && u.path_url.length > 0)
-    .map((u) => ({ user_id: u.id as string, path: u.path_url as string }))
+    .filter((u) => u.paths.length > 0)
+    .map((u) => ({ user_id: u.id as string, paths: u.paths as string[] }))
 
   if (tasks.length === 0) {
     return NextResponse.json({ ok: true, tasks: 0, upserts: 0 })
@@ -67,7 +75,7 @@ export async function GET(req: NextRequest) {
       limit(async () => {
         // Fetch GA data for this specific path
         const ga = await ga_selectGoogleAnalyticsData({
-          clSpecificPath: t.path,
+          paths: t.paths,
         })
         const row: GARow = {
           user_id: t.user_id,
@@ -80,7 +88,7 @@ export async function GET(req: NextRequest) {
   )
 
   const rows: GARow[] = []
-  const errors: Array<{ user_id: string; path: string; error: string }> = []
+  const errors: Array<{ user_id: string; paths: string[]; error: string }> = []
 
   fetched.forEach((r, i) => {
     const t = tasks[i]
@@ -89,7 +97,7 @@ export async function GET(req: NextRequest) {
     } else {
       errors.push({
         user_id: t.user_id,
-        path: t.path,
+        paths: t.paths,
         error: (r as PromiseRejectedResult).reason?.message ?? 'fetch failed',
       })
     }

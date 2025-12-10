@@ -2,11 +2,12 @@
 import { google, analyticsdata_v1beta } from 'googleapis'
 
 interface I_googleAnalytics {
-  clSpecificPath: string
+  // pass ['/mary'] or ['/mary', '/c/mary']
+  paths?: string[]
 }
 
 export const ga_selectGoogleAnalyticsData = async ({
-  clSpecificPath,
+  paths,
 }: I_googleAnalytics) => {
   const ga_googleAuth = new google.auth.GoogleAuth({
     credentials: {
@@ -23,49 +24,49 @@ export const ga_selectGoogleAnalyticsData = async ({
     version: 'v1beta',
     auth: authClient,
   }) as analyticsdata_v1beta.Analyticsdata
-  let requestBody
 
-  if (clSpecificPath) {
+  // 🔹 Base request: SAME dimensions & metrics always
+  const baseRequest: analyticsdata_v1beta.Schema$RunReportRequest = {
+    dimensions: [
+      { name: 'pagePath' },
+      { name: 'city' },
+      { name: 'region' },
+      { name: 'country' },
+      { name: 'countryId' },
+    ],
+    metrics: [{ name: 'screenPageViews' }],
+    dateRanges: [
+      {
+        startDate: '2022-01-01',
+        endDate: 'today',
+      },
+    ],
+  }
+
+  let requestBody: analyticsdata_v1beta.Schema$RunReportRequest
+
+  if (paths && paths.length > 0) {
+    // 🔹 One request that can handle 1 or many paths
     requestBody = {
-      dimensions: [
-        { name: 'pagePath' },
-        { name: 'city' },
-        { name: 'region' },
-        { name: 'country' },
-        { name: 'countryId' },
-      ],
-      metrics: [{ name: 'screenPageViews' }],
-      dateRanges: [
-        {
-          startDate: '2022-01-01', // Replace with your actual earliest date or '2000-01-01'
-          endDate: 'today',
-        },
-      ],
+      ...baseRequest,
       dimensionFilter: {
         filter: {
           fieldName: 'pagePath',
-          stringFilter: {
-            matchType: 'EXACT',
-            value: clSpecificPath, // example: /benny
+          inListFilter: {
+            values: paths,
+            caseSensitive: false,
           },
         },
       },
     }
   } else {
-    requestBody = {
-      dimensions: [{ name: 'pagePath' }, { name: 'countryId' }],
-      metrics: [{ name: 'screenPageViews' }],
-      dateRanges: [
-        {
-          startDate: '2022-01-01', // Replace with your actual earliest date or '2000-01-01'
-          endDate: 'today',
-        },
-      ],
-    }
+    // Fallback: no path filter (all pages)
+    requestBody = baseRequest
   }
+
   const response = await analyticsDataClient.properties.runReport({
     property: `properties/${process.env.GOOGLE_PROPERTY}`,
-    requestBody: requestBody,
+    requestBody,
   })
   return response.data
 }
