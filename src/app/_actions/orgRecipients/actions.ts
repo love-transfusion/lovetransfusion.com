@@ -20,7 +20,7 @@ export const supa_select_orgRecipients = async (
     const {
       data: { data, error },
     } = await axios.post(
-      `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/recipients`,
+      `https://www.lovetransfusion.org/api/recipients`,
       { search },
       {
         headers: {
