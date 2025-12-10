@@ -75,7 +75,6 @@ export async function GET(req: NextRequest) {
   const fetched = await Promise.allSettled(
     tasks.map((t) =>
       limit(async () => {
-        // Fetch GA data for all paths for this user
         const ga = await ga_selectGoogleAnalyticsData({
           paths: t.paths,
         })
