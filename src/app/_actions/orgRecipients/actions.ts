@@ -20,7 +20,7 @@ export const supa_select_orgRecipients = async (
     const {
       data: { data, error },
     } = await axios.post(
-      'https://lovetransfusion-org-ts.vercel.app/api/recipients',
+      `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/recipients`,
       { search },
       {
         headers: {
