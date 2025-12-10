@@ -16,7 +16,6 @@ type GARow = {
   user_id: string
   analytics: any // jsonb
   last_synced_at: string
-  // If you decide to store composite key (user_id, path), add: path?: string | null
 }
 
 export async function GET(req: NextRequest) {
@@ -26,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createAdmin()
 
-  // 0) Load users with their path_url (used as clSpecificPath)
+  // 0) Load users with their path_url (used as GA pagePath filter)
   const { data: oldUsers, error: usersErr } = await supabase
     .from('users')
     .select('id, recipients(*)')
@@ -45,7 +44,9 @@ export async function GET(req: NextRequest) {
     const recipient = user.recipients[0].recipient as unknown as
       | I_supaorg_recipient
       | undefined
-    const paths = []
+
+    const paths: string[] = []
+
     if (recipient?.path_url) {
       // default path
       paths.push(`/${recipient.path_url}`)
@@ -55,13 +56,14 @@ export async function GET(req: NextRequest) {
         paths.push(`/c/${recipient.path_url}`)
       }
     }
-    return { paths, id: user.id }
+
+    return { paths, id: user.id as string }
   })
 
   // Build tasks (skip users without a path if you only want page-level stats)
   const tasks = (users ?? [])
     .filter((u) => u.paths.length > 0)
-    .map((u) => ({ user_id: u.id as string, paths: u.paths as string[] }))
+    .map((u) => ({ user_id: u.id, paths: u.paths }))
 
   if (tasks.length === 0) {
     return NextResponse.json({ ok: true, tasks: 0, upserts: 0 })
@@ -73,7 +75,7 @@ export async function GET(req: NextRequest) {
   const fetched = await Promise.allSettled(
     tasks.map((t) =>
       limit(async () => {
-        // Fetch GA data for this specific path
+        // Fetch GA data for all paths for this user
         const ga = await ga_selectGoogleAnalyticsData({
           paths: t.paths,
         })
