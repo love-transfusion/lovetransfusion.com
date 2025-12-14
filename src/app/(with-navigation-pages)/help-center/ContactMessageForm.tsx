@@ -3,12 +3,13 @@ import Button from '@/app/components/Button/Button'
 import Icon_right5 from '@/app/components/icons/Icon_right5'
 import Input from '@/app/components/inputs/basic-input/Input'
 import TextArea from '@/app/components/inputs/textarea/TextArea'
+import { useBotGuard } from '@/app/hooks/useBotGuard'
 import { ac_lists } from '@/app/lib/(activecampaign)/library/ac_lists'
 import { resendEmail_MessageConfirmation } from '@/app/lib/resend_email_templates/resendEmail_MessageConfirmation'
 import { ac_custom_create_contact } from '@/app/utilities/activeCampaignFunctions'
 import utilityStore from '@/app/utilities/store/utilityStore'
 import { util_getFirstAndLastName } from '@/app/utilities/util_getFirstNameAndLastName'
-import React from 'react'
+import React, { BaseSyntheticEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { twMerge } from 'tailwind-merge'
 import { useStore } from 'zustand'
@@ -25,6 +26,7 @@ interface I_contactForm {
 
 const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
   const { settoast } = useStore(utilityStore)
+  const { clIsBotFromEvent, ClBotFields } = useBotGuard()
   const {
     register,
     reset,
@@ -32,7 +34,10 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
     formState: { isSubmitting },
   } = useForm<I_contactForm>()
 
-  const onSubmit = async (rawData: I_contactForm) => {
+  const onSubmit = async (rawData: I_contactForm, e?: BaseSyntheticEvent) => {
+    if (clIsBotFromEvent(e)) {
+      return
+    }
     const { firstName, lastName } = util_getFirstAndLastName(rawData.name)
     const { error } = await ac_custom_create_contact({
       clListName: ac_lists.getList('COM Website Contacts').name,
@@ -89,6 +94,7 @@ const ContactMessageForm = ({ clContainerClassName }: I_ContactMessageForm) => {
             clRows={5}
           />
         </div>
+        <ClBotFields />
         <Button
           clDisabled={isSubmitting}
           clVariant="outlined"

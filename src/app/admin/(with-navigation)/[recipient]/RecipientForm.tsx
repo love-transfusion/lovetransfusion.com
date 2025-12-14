@@ -211,6 +211,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setisSubmitted(false)
   }, [isFacebookPostIdDirty])
   return (
