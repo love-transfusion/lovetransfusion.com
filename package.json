@@ -17,6 +17,7 @@
   "dependencies": {
     "@google-analytics/data": "^5.1.0",
     "@popperjs/core": "^2.11.8",
+    "@react-google-maps/api": "^2.20.7",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.2",
     "@types/nodemailer": "^6.4.17",

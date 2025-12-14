@@ -46,9 +46,9 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                 'flex 2xl:gap-[183px] items-center w-full justify-between 2xl:justify-normal'
               }
             >
-              <div className={'flex gap-[11px] items-center'}>
+              <div className={'flex gap-[11px] items-center w-full'}>
                 <MobileDashboardMenu clIsAdmin={isadmin} />
-                <div className="flex gap-[40px] xl:gap-8 2xl:gap-[90px]">
+                <div className="flex gap-[40px] xl:gap-8 2xl:gap-[90px] w-full items-center">
                   <p
                     className={
                       'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
@@ -56,38 +56,40 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                   >
                     DASHBOARD
                   </p>
-                  <Image
-                    src={dots}
-                    alt="dots"
-                    quality={100}
-                    width={20}
-                    height={32}
-                    className="hidden xl:block"
-                  />
-                  <div className={'hidden md:flex gap-[17px] ml-[5px]'}>
+                  <div className="w-full flex gap-[40px] xl:gap-8 2xl:gap-[90px] justify-between xl:pr-[3.7vw] 2xl:pr-20">
                     <Image
-                      src={doubleHeart}
+                      src={dots}
                       alt="dots"
                       quality={100}
-                      className="hidden lg:block"
+                      width={20}
+                      height={32}
+                      className="hidden xl:block"
                     />
-                    <p
-                      className={
-                        'font-acumin-variable-102 text-xl 2xl:text-[26px] text-nowrap hidden lg:block mt-[1px] font-light'
-                      }
-                    >
-                      Love Transfusion In Progress
-                    </p>
-                    <Image
-                      src={doubleHeart}
-                      className="hidden lg:block"
-                      alt="dots"
-                      quality={100}
-                    />
+                    <div className={'hidden md:flex gap-[17px] ml-[5px]'}>
+                      <Image
+                        src={doubleHeart}
+                        alt="dots"
+                        quality={100}
+                        className="hidden lg:block"
+                      />
+                      <p
+                        className={
+                          'font-acumin-variable-102 text-xl 2xl:text-[26px] text-nowrap hidden lg:block mt-[1px] font-light'
+                        }
+                      >
+                        Love Transfusion In Progress
+                      </p>
+                      <Image
+                        src={doubleHeart}
+                        className="hidden lg:block"
+                        alt="dots"
+                        quality={100}
+                      />
+                    </div>
+                    <RecipientName />
                   </div>
                 </div>
               </div>
-              <RecipientName />
             </div>
           </div>
           <div

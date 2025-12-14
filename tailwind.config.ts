@@ -56,6 +56,18 @@ module.exports = {
         },
       },
       keyframes: {
+        pulseRipple: {
+          '0%': { transform: 'scale(0.6)', opacity: '0.9' },
+
+          '70%': {
+            transform: 'scale(1.8)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'scale(1.8)',
+            opacity: '0',
+          },
+        },
         wobble: {
           '0%, 100%': { transform: 'translateX(0)' },
           '15%': { transform: 'translateX(-10px) rotate(-2deg)' },
@@ -111,6 +123,7 @@ module.exports = {
         'slide-down': 'slide-down 0.5s ease-out',
         'slide-in-right': 'slide-in-right 0.5s ease-out',
         'scale-in': 'scale-in 0.4s ease-out',
+        'pulse-ripple': 'pulseRipple 1.8s ease-out infinite',
         float: 'float 3s ease-in-out infinite',
       },
     },
