@@ -78,18 +78,14 @@ const useAudio = (src: string, rateLimitMs = 600) => {
   }
 
   const play = async () => {
-    console.log('playing audio, start')
     if (!audioRef.current) {
-      console.log('!audioRef.current')
       return
     }
     if (!isUnlocked) {
-      console.log('!isUnlocked')
       // Queue the play; will auto-play right after first user gesture
       pendingRef.current++
       return
     }
-    console.log('playing audio')
     await playNow()
   }
 
