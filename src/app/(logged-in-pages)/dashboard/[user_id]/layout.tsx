@@ -15,7 +15,10 @@ import { Metadata } from 'next'
 import { I_Comments } from '@/types/Comments.types'
 import { I_supaorg_recipient } from '@/app/_actions/orgRecipients/actions'
 import { supa_select_facebook_comments } from '@/app/_actions/facebook_comments/actions'
-import PrayerNotification from './PrayerNotification'
+import dynamic from 'next/dynamic'
+const PrayerNotification = dynamic(() => import('./PrayerNotification'), {
+  ssr: true,
+})
 
 interface I_userDashboardLayout {
   map: React.ReactNode
@@ -190,7 +193,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               className=" max-sm:hidden absolute top-[9px] xl:top-2 2xl:top-[9px] left-[64px] my-auto min-w-[260px] xl:min-w-[220px] 2xl:min-w-[260px]"
               priority
             />
-            <PrayerNotification />
+            {selectedRecipient.recipient_template === 'church' && (
+              <PrayerNotification />
+            )}
           </div>
         </div>
         <div
