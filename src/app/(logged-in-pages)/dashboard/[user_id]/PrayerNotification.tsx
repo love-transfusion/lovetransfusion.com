@@ -12,7 +12,7 @@ const PrayerNotification = () => {
   )
   return (
     <ClAnimationContainer>
-      {!isBellActive && (
+      {isBellActive && (
         <ClMotionDiv
           className="xl:mt-[220px] 2xl:mt-[260px] mx-auto"
           {...clAnimationStyles}
