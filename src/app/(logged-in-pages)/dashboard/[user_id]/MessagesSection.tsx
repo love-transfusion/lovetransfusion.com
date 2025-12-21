@@ -31,7 +31,7 @@ const MessagesSection = ({
   recipient_prays,
 }: I_MessagesSection) => {
   const { setisBellActive, isBellActive } = useStore(utilityStore)
-  const { clPlay } = useAudio('/audio/church-bell.mp3', 1000)
+  const { clPlay } = useAudio('/audio/ding-tone.mp3', 1000)
   const { clToggle: setshowMessages, clisToggled: showMessages } =
     useToggle(true)
 
