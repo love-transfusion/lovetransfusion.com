@@ -154,16 +154,21 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       >
         <div
           className={
-            'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-7 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4'
+            'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-7 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4 relative'
           }
         >
+          {selectedRecipient.recipient_template === 'church' && (
+            <div className="hidden md:block md:absolute md:top-4 md:-right-10 lg:top-2 lg:-right-12 xl:hidden">
+              <PrayerNotification />
+            </div>
+          )}
           <RecipientProfilePicture
             recipientObj={selectedRecipient}
             selectedUser={selectedUser}
             sizes="(min-width: 1441px) 190px, (min-width: 768px) 120px, 135px"
             priority
           />
-          <div className={'mt-2 text-left md:text-center -ml-[9px]'}>
+          <div className={'mt-2 text-left md:text-center -ml-[9px] relative'}>
             <p
               className={
                 'font-acumin-variable-90 text-[28px] md:text-[26px] text-primary capitalize font-semibold pt-1'
@@ -178,6 +183,11 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             >
               RECIPIENT
             </p>
+            {selectedRecipient.recipient_template === 'church' && (
+              <div className="absolute -top-8 -right-0 md:hidden">
+                <PrayerNotification />
+              </div>
+            )}
           </div>
           <div className={'hidden relative md:flex flex-col items-end h-fit'}>
             <TotalEngagements
@@ -194,7 +204,9 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               priority
             />
             {selectedRecipient.recipient_template === 'church' && (
-              <PrayerNotification />
+              <div className="hidden xl:block mx-auto lg:absolute -lg:top-10 lg:right-0 xl:static xl:top-[unset] xl:right-[unset] xl:mt-[220px] 2xl:mt-[260px]">
+                <PrayerNotification />
+              </div>
             )}
           </div>
         </div>

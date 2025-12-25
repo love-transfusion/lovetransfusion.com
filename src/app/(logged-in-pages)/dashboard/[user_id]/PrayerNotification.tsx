@@ -13,15 +13,12 @@ const PrayerNotification = () => {
   return (
     <ClAnimationContainer>
       {isBellActive && (
-        <ClMotionDiv
-          className="xl:mt-[220px] 2xl:mt-[260px] mx-auto"
-          {...clAnimationStyles}
-        >
+        <ClMotionDiv className="" {...clAnimationStyles}>
           <Image
             src={prayer_notification}
             quality={100}
             alt="prayer notification"
-            className="max-w-[100px]"
+            className="max-w-[65px] lg:max-w-[75px] xl:max-w-[100px]"
           />
         </ClMotionDiv>
       )}
