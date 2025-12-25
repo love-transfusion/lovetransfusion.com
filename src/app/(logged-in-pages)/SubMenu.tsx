@@ -18,12 +18,12 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
   return (
     <div
       className={
-        'mt-[49px] xl:mt-8 2xl:mt-[49px] flex flex-col items-start xl:items-center 2xl:items-start gap-[15px]'
+        'mt-[49px] xl:mt-8 2xl:mt-[49px] flex flex-col items-start gap-[15px]'
       }
     >
       <p
         className={
-          'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light text-left xl:text-center 2xl:text-left'
+          'text-[#DFEEFA8F] mb-[3px] tracking-[0.48px] font-light text-left'
         }
       >
         MAIN MENU
@@ -36,7 +36,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             }
           >
             <Icon_cog className="size-[36px] 2xl:-ml-1" strokeWidth={0.8} />
-            <p className={'ml-1 -mt-[1px] block xl:hidden 2xl:block'}>
+            <p className={'ml-1 -mt-[1px]'}>
               Manage Recipients
             </p>
           </div>
@@ -58,7 +58,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             quality={100}
             className="size-[28px]"
           />
-          <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Dashboard</p>
+          <p className={'-mt-[1px]'}>Dashboard</p>
         </div>
       </LinkCustom>
       <LinkCustom
@@ -76,7 +76,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             quality={100}
             className="size-[28px]"
           />
-          <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Profile</p>
+          <p className={'-mt-[1px]'}>Profile</p>
         </div>
       </LinkCustom>
       <LinkCustom href={'/privacy-policy'}>
@@ -91,7 +91,7 @@ const SubMenu = ({ clIsAdmin }: I_SubMenu) => {
             quality={100}
             className="size-[34px] px-[3px] -ml-[3px]"
           />
-          <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Privacy</p>
+          <p className={'-mt-[1px]'}>Privacy</p>
         </div>
       </LinkCustom>
     </div>

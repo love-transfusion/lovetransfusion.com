@@ -21,7 +21,7 @@ export const getFormattedDate = (): string => {
 const NavigationMenu = ({ clIsAdmin }: I_NavigationMenu) => {
   return (
     <div
-      className={'hidden xl:flex flex-col bg-black justify-start items-start'}
+      className={'hidden 2xl:flex flex-col bg-black justify-start items-start'}
     >
       <div className="h-full w-full">
         <div className={'bg-[#2F8EDD] h-[84px]'} />

@@ -19,7 +19,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
     <>
       <div
         className={
-          'mt-[54px] flex flex-col items-start xl:items-center 2xl:items-start gap-[15px]'
+          'mt-[54px] flex flex-col items-start gap-[15px]'
         }
       >
         <p
@@ -42,13 +42,13 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Help Center</p>
+            <p className={'-mt-[1px]'}>Help Center</p>
           </div>
         </Link>
       </div>
       <div
         className={
-          'mt-[54px] flex flex-col items-start xl:items-center 2xl:items-start gap-[15px]'
+          'mt-[54px] flex flex-col items-start gap-[15px]'
         }
       >
         <p
@@ -70,7 +70,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>About Us</p>
+            <p className={'-mt-[1px]'}>About Us</p>
           </div>
         </Link>
         <Link href={'/contact-us'}>
@@ -85,7 +85,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
               quality={100}
               className="size-[28px]"
             />
-            <p className={'-mt-[1px] block xl:hidden 2xl:block'}>Contact Us</p>
+            <p className={'-mt-[1px]'}>Contact Us</p>
           </div>
         </Link>
         <div
@@ -95,7 +95,7 @@ const SubMenuBottom = ({ clToggleDrawer, clIsAdmin }: SubMenuBottomTypes) => {
             src={mousePointer}
             alt="heart"
             quality={100}
-            className="size-[28px] block xl:hidden 2xl:block"
+            className="size-[28px]"
           />
           <SignoutContainerComponent>
             <p

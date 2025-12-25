@@ -23,7 +23,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
     <>
       <div
         className={
-          'grid grid-cols-1 xl:grid-cols-[95px_calc(100%-95px)] 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
+          'grid grid-cols-1 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
         }
       >
         <NavigationMenu clIsAdmin={isadmin} />

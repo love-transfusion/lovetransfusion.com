@@ -9,6 +9,7 @@ const loadFeatures = () =>
 
 interface I_clWidth {
   sm?: `${number}px` | `${number}%` | `${number}vw`
+  xl?: `${number}px` | `${number}%` | `${number}vw`
   bigScreens?: `${number}px` | `${number}%` | `${number}vw`
 }
 
@@ -78,6 +79,8 @@ const Drawer = ({
   useEffect(() => {
     if (clDeviceSize === 'sm' && clWidth?.sm) {
       setminWidth(clWidth.sm)
+    } else if (clDeviceSize === 'xl' && clWidth?.xl) {
+      setminWidth(clWidth.xl)
     } else if (clWidth?.bigScreens) {
       setminWidth(clWidth.bigScreens)
     }
