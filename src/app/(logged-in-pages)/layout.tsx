@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import dots from './images/Dots.svg'
-import doubleHeart from './images/Double Heart.svg'
+import doubleHeart from './images/lt-heartbeat.svg'
 import NavigationMenu from './NavigationMenu'
 import Image from 'next/image'
 import PublicFooter from '../components/this-website-only/footer/PublicFooter'
@@ -30,7 +30,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
         <div className="h-full flex flex-col w-full">
           <div
             className={
-              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#DFEEFA8F] max-sm:pt-2 max-sm:pb-[7px] md:min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex flex-col justify-center items-center gap-[6px] flex-wrap'
+              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-white max-sm:pt-2 max-sm:pb-[7px] md:min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex flex-col justify-center items-center gap-[6px] flex-wrap'
             }
           >
             <div className={'block md:hidden w-full mt-1'}>
@@ -70,7 +70,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                         src={doubleHeart}
                         alt="dots"
                         quality={100}
-                        className="hidden lg:block"
+                        className="hidden lg:block max-w-[134px]"
                       />
                       <p
                         className={
@@ -81,7 +81,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                       </p>
                       <Image
                         src={doubleHeart}
-                        className="hidden lg:block"
+                        className="hidden lg:block max-w-[134px]"
                         alt="dots"
                         quality={100}
                       />

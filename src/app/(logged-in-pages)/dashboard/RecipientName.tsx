@@ -1,6 +1,5 @@
 'use client'
 import utilityStore from '@/app/utilities/store/utilityStore'
-import React from 'react'
 import { useStore } from 'zustand'
 
 const RecipientName = () => {
@@ -10,7 +9,7 @@ const RecipientName = () => {
       {userInStore?.first_name ? (
         <div
           className={
-            'text-lg md:text-2xl text-[#ffffffad] flex gap-2 md:gap-[11px]'
+            'text-lg md:text-2xl text-white flex gap-2 md:gap-[11px]'
           }
         >
           <p className={'font-light font-acumin-variable-92'}>RECIPIENT:</p>
