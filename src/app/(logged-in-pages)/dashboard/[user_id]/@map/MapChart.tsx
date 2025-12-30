@@ -11,6 +11,7 @@ import { I_CountryPathTotalFormat } from '@/app/utilities/analytics/getAnalytics
 import LoadingComponent from '@/app/components/Loading'
 import MapControls from './MapControls'
 import useDeviceSize from '@/app/hooks/useDeviceSize'
+import TapToExploreMap from './TapToExploreMap'
 
 interface Props {
   user_id: string
@@ -44,6 +45,7 @@ const MapChart = ({
   const { clWindowWidth } = useDeviceSize()
 
   const chartRef = useRef<any>(null)
+  const intersectionRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const loadMap = async () => {
@@ -212,23 +214,29 @@ const MapChart = ({
   }, [prepared_analytics])
 
   return (
-    <>
+    <div>
       {loading ? (
         <div className="echarts-for-react text-center text-gray-500 py-10">
-          <LoadingComponent clLoadingText="Loading map..." />
+          <LoadingComponent
+            clLoadingText="Loading map..."
+            // clContainerClassName="bg-white"
+          />
         </div>
       ) : (
-        <div className="relative w-full">
-          <ReactECharts
-            ref={chartRef}
-            option={option}
-            style={{ width: '100%' }}
-          />
-          {/* Floating Controls */}
-          {user_id && <MapControls chartRef={chartRef} user_id={user_id} />}
-        </div>
+        <>
+          <TapToExploreMap intersectionRef={intersectionRef} />
+          <div className="relative w-full" ref={intersectionRef}>
+            <ReactECharts
+              ref={chartRef}
+              option={option}
+              style={{ width: '100%' }}
+            />
+            {/* Floating Controls */}
+            {user_id && <MapControls chartRef={chartRef} user_id={user_id} />}
+          </div>
+        </>
       )}
-    </>
+    </div>
   )
 }
 
