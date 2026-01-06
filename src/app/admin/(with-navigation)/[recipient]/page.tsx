@@ -45,12 +45,12 @@ const RecipientPage = async (props: { params: Params }) => {
       </div>
       <div
         className={
-          'flex px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 max-sm:pt-[120px] md:pl-[195px] lg:pl-[191px] text-white relative animate-slide-up'
+          'flex px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 pt-[120px] md:pt-[unset] md:pl-[195px] lg:pl-[191px] text-white relative animate-slide-up'
         }
       >
         <div
           className={
-            'h-[176px] w-[176px] z-50 absolute -top-[88px] left-0 right-0 max-sm:mx-auto md:top-0 md:bottom-0 md:my-auto md:left-2 lg:-left-[2px] md:right-[unset]'
+            'h-[176px] w-[176px] z-50 absolute -top-[88px] left-0 right-0 mx-auto md:mx-[unset] md:top-0 md:bottom-0 md:my-auto md:left-2 lg:-left-[2px] md:right-[unset]'
           }
         >
           <div
@@ -117,7 +117,7 @@ const RecipientPage = async (props: { params: Params }) => {
         >
           <p
             className={
-              'text-lg max-sm:max-w-[200px] md:text-xl font-bold bg-white px-2 absolute -top-7 md:-top-4 left-5'
+              'text-lg w-[200px] md:w-[unset] md:text-xl font-bold bg-white px-2 absolute -top-7 md:-top-4 left-5'
             }
           >{`Description of the Recipient's situation:`}</p>
           <div

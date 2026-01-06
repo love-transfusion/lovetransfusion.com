@@ -17,6 +17,8 @@ module.exports = {
     },
     extend: {
       screens: {
+        xs: '300px',
+        sm: '360px',
         '3xl': '1921px', // Add your custom breakpoint here
       },
       boxShadow: {

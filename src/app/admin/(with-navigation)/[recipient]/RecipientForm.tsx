@@ -365,7 +365,7 @@ const RecipientForm = ({ user, recipientObject }: RecipientForm) => {
           clType="submit"
           clDisabled={isLoading}
           clVariant="outlined"
-          className={`flex py-1 shadow-custom1 w-[259px] h-[46px] items-center pr-5 rounded-[4px] max-sm:w-full mt-[26px] ml-auto mb-[18px] ${
+          className={`flex py-1 shadow-custom1 h-[46px] items-center pr-5 rounded-[4px] w-full md:w-[259px] mt-[26px] ml-auto mb-[18px] ${
             isLoading && 'bg-neutral-300 hover:bg-neutral-300'
           }`}
         >

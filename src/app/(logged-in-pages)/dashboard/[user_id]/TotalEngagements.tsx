@@ -49,7 +49,7 @@ const TotalEngagements = ({
         clScrollTo_IDOrClass=".supporters-tooltip"
       >
         <div className={'text-white text-center'}>
-          <p className={'max-sm:text-[12px]'}>TOTAL</p>
+          <p className={'text-[12px] md:text-base'}>TOTAL</p>
           <p
             className={
               'font-acuminProSemibold text-sm md:text-2xl 2xl:text-[36px] leading-tight -mt-[2px]'

@@ -82,7 +82,7 @@ const Toast = ({ clCloseStyle }: I_CloseStyle) => {
               )}
             >
               <div
-                className={`relative flex flex-col justify-center min-w-[300px] max-w-[300px] min-h-14 text-[15px] py-2 px-4`}
+                className={`relative flex flex-col justify-center min-w-[270px] max-w-[270px] sm:min-w-[300px] sm:max-w-[300px] min-h-14 text-[15px] py-2 px-4`}
               >
                 {toast.clTitle && (
                   <p className={'font-bold'}>{toast.clTitle}</p>

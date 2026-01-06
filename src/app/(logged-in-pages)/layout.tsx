@@ -30,7 +30,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
         <div className="h-full flex flex-col w-full">
           <div
             className={
-              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#E9F5FE] max-sm:pt-2 max-sm:pb-[7px] md:min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex flex-col justify-center items-center gap-[6px] flex-wrap'
+              'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#E9F5FE] pt-2 pb-[7px] md:pt-[unset] md:pb-[unset] md:min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex flex-col justify-center items-center gap-[6px] flex-wrap'
             }
           >
             <div className={'block md:hidden w-full mt-1'}>
@@ -46,17 +46,17 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                 'flex 2xl:gap-[183px] items-center w-full justify-between 2xl:justify-normal'
               }
             >
-              <div className={'flex gap-[11px] items-center w-full'}>
+              <div className={'flex gap-1 sm:gap-[11px] items-center w-full'}>
                 <MobileDashboardMenu clIsAdmin={isadmin} />
-                <div className="flex gap-[40px] xl:gap-8 2xl:gap-[90px] w-full items-center">
+                <div className="flex gap-5 sm:gap-[40px] xl:gap-8 2xl:gap-[90px] w-full items-center">
                   <p
                     className={
-                      'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
+                      'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[2px] sm:tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
                     }
                   >
                     DASHBOARD
                   </p>
-                  <div className="w-full flex gap-[40px] xl:gap-8 2xl:gap-[90px] justify-between xl:pr-[3.7vw] 2xl:pr-20">
+                  <div className="w-full flex xl:gap-8 2xl:gap-[90px] justify-end md:justify-between xl:pr-[3.7vw] 2xl:pr-20">
                     <Image
                       src={dots}
                       alt="dots"

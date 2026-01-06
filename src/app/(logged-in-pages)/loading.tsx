@@ -17,7 +17,7 @@ const Loader = () => {
         >
           <div
             className={
-              'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center justify-center items-center max-sm:gap-5 min-w-[208px] max-w-[208px] w-full pt-4 xl:pt-[unset] max-sm:px-4'
+              'flex md:block flex-wrap justify-center items-center gap-5 min-w-[208px] max-w-[208px] w-full pt-4 xl:pt-[unset] px-4 md:px-[unset]'
             }
           >
             <div
@@ -68,7 +68,7 @@ const Loader = () => {
               </div>
             </div>
           </div>
-          <div className={'max-sm:w-full md:w-full xl:w-[unset]'}>
+          <div className={'w-full xl:w-[unset]'}>
             <div className={'xl:hidden'}>
               <div
                 className={

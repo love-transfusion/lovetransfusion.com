@@ -8,7 +8,7 @@ const FlowChartPage = async () => {
       <div className={'container md:px-6 lg:px-10 xl:px-0 '}>
         <p
           className={
-            'font-acumin-variable-68 font-bold text-balance text-[32px] md:text-4xl lg:text-5xl text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight'
+            'font-acumin-variable-68 font-bold text-balance text-[32px] md:text-4xl lg:text-5xl text-primary text-center max-w-[270px] md:max-w-[unset] mx-auto md:mx-[unset] leading-tight md:leading-[unset]'
           }
         >
           Connecting People Who Hurt With Those Who Care

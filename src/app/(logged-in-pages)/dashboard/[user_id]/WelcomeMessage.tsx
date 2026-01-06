@@ -21,6 +21,7 @@ const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
   useEffect(() => {
     const isInLocalStorage = !!localStorage.getItem(localName)
     if (isInLocalStorage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setisOpen(true)
     }
     localStorage.removeItem(localName)
@@ -52,7 +53,7 @@ const WelcomeMessage = ({ selectedUser }: Welcome_Message_Types) => {
               />
               <div
                 className={
-                  'px-5 md:px-[50px] max-sm:overflow-y-auto max-sm:h-[82vh]'
+                  'px-5 md:px-[50px] overflow-y-auto md:overflow-y-[unset] h-[82vh] md:h-[unset]'
                 }
               >
                 <p

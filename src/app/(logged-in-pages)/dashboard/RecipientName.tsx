@@ -9,11 +9,11 @@ const RecipientName = () => {
       {userInStore?.first_name ? (
         <div
           className={
-            'text-lg md:text-2xl flex gap-2 md:gap-[11px]'
+            'sm:text-lg md:text-2xl flex justify-end gap-2 md:gap-[11px]'
           }
         >
           <p className={'font-light font-acumin-variable-92'}>RECIPIENT:</p>
-          <p className="font-acumin-variable-96 -mt-[1px] font-light capitalize">
+          <p className="font-acumin-variable-96 -mt-[1px] font-light capitalize line-clamp-1">
             {userInStore.first_name}
           </p>
         </div>

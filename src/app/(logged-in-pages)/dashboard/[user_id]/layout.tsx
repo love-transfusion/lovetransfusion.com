@@ -154,7 +154,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       >
         <div
           className={
-            'max-sm:flex max-sm:justify-center max-sm:flex-wrap max-sm:items-center max-sm:gap-7 min-w-[208px] pt-4 xl:pt-[unset] max-sm:w-full max-sm:px-4 relative'
+            'flex md:block justify-center flex-wrap items-center gap-7 min-w-[208px] pt-4 xl:pt-[unset] w-full md:w-[unset] px-4 md:px-[unset] relative'
           }
         >
           {selectedRecipient.recipient_template === 'church' && (
@@ -200,7 +200,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
               src={arrow}
               alt="arrow"
               quality={100}
-              className=" max-sm:hidden absolute top-[9px] xl:top-2 2xl:top-[9px] left-[64px] my-auto min-w-[260px] xl:min-w-[220px] 2xl:min-w-[260px]"
+              className=" hidden md:block absolute top-[9px] xl:top-2 2xl:top-[9px] left-[64px] my-auto min-w-[260px] xl:min-w-[220px] 2xl:min-w-[260px]"
               priority
             />
             {selectedRecipient.recipient_template === 'church' && (
@@ -212,7 +212,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         </div>
         <div
           className={
-            'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full max-sm:pt-5 lg:pt-[10px] xl:pt-[26px]'
+            'w-full md:max-w-[445px] lg:max-w-[695px] xl:max-w-full pt-5 md:pt-[unset] lg:pt-[10px] xl:pt-[26px]'
           }
         >
           {map}
@@ -227,7 +227,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
             />
           </div>
         </div>
-        <div className={'mx-auto max-sm:w-full md:mt-10 xl:mt-0'}>
+        <div className={'mx-auto w-full md:w-[unset] md:mt-10 xl:mt-0'}>
           <div className={'xl:hidden'}>
             <HugsMessagesShares
               recipient={selectedRecipient}

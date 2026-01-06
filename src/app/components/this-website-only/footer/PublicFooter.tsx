@@ -47,7 +47,7 @@ const PublicFooter = () => {
             'flex flex-col lg:flex-row justify-between items-center mt-4 md:mt-10 gap-4'
           }
         >
-          <p className={''}>
+          <p className={'text-center lg:text-left'}>
             © 2010-{new Date().getFullYear()} Love Transfusion Inc. All Rights
             Reserved.
           </p>

@@ -29,7 +29,7 @@ const Homepage = async () => {
         <div className={'container md:px-6 lg:px-10 xl:px-0'}>
           <p
             className={
-              'font-acumin-variable-68 font-bold text-balance text-4xl md:text-5xl text-primary text-center max-sm:max-w-[270px] max-sm:mx-auto max-sm:leading-tight pb-2'
+              'font-acumin-variable-68 font-bold text-balance text-4xl md:text-5xl text-primary text-center max-w-[270px] md:max-w-[unset] mx-auto md:mx-[unset] leading-tight pb-2'
             }
           >
             Love. Mobilized.
@@ -54,7 +54,9 @@ const Homepage = async () => {
               <WistiaPlayer videoId={'ow4kttqlhy'} containerStyle="shadow-lg" />
             </div>
             <div
-              className={'flex flex-col max-w-[235px] lg:pt-3 mx-auto md:mx-[unset]'}
+              className={
+                'flex flex-col max-w-[235px] lg:pt-3 mx-auto md:mx-[unset]'
+              }
             >
               <div className={'relative mt-[1px] w-fit mx-auto'}>
                 <Image
@@ -63,7 +65,7 @@ const Homepage = async () => {
                   quality={100}
                   width={205}
                   height={206}
-                  className="rounded-full ring-[6px] border-[4px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-sm:max-w-[160px] min-w-[160px] md:min-w-[213px]"
+                  className="rounded-full ring-[6px] border-[4px] border-white ring-[#288CCC] drop-shadow-[0px_0px_18px_rgba(40,140,204,0.53)] max-w-[160px] md:max-w-[unset] min-w-[160px] md:min-w-[213px]"
                 />
                 <Image
                   src={brandLogo}
@@ -71,7 +73,7 @@ const Homepage = async () => {
                   width={67}
                   height={68}
                   quality={100}
-                  className="absolute ml-[2px] -bottom-[6px] -right-[6px] max-sm:max-w-[50px]"
+                  className="absolute ml-[2px] -bottom-[6px] -right-[6px] max-w-[50px] md:max-w-[unset]"
                 />
               </div>
               <p

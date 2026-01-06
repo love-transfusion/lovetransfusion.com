@@ -64,14 +64,14 @@ const MobilePublicNavigation = () => {
             <Link href={'/'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90 mb-2'
                 }
               >
                 <Image
                   src={dashboard}
                   alt="heart"
                   quality={100}
-                  className="size-[43px]"
+                  className="size-8"
                 />
                 <p className={'capitalize'}>home</p>
               </div>
@@ -79,14 +79,14 @@ const MobilePublicNavigation = () => {
             <Link href={'/privacy-policy'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90 mb-2'
                 }
               >
                 <Image
                   src={privacy}
                   alt="heart"
                   quality={100}
-                  className="size-[43px]"
+                  className="size-8"
                 />
                 <p className={'capitalize'}>privacy</p>
               </div>
@@ -99,14 +99,14 @@ const MobilePublicNavigation = () => {
             <Link href={'/help-center'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90 mb-2'
                 }
               >
                 <Image
                   src={helpCenter}
                   alt="heart"
                   quality={100}
-                  className="size-[43px]"
+                  className="size-8"
                 />
                 <p className={'capitalize'}>help center</p>
               </div>
@@ -119,14 +119,14 @@ const MobilePublicNavigation = () => {
             <Link href={'/about-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90 mb-2'
                 }
               >
                 <Image
                   src={aboutUsIcon}
                   alt="heart"
                   quality={100}
-                  className="size-[43px]"
+                  className="size-8"
                 />
                 <p className={'capitalize'}>about us</p>
               </div>
@@ -134,14 +134,14 @@ const MobilePublicNavigation = () => {
             <Link href={'/contact-us'}>
               <div
                 className={
-                  'flex gap-[7px] items-center text-xl font-acumin-variable-90'
+                  'flex gap-[7px] items-center text-xl font-acumin-variable-90 mb-2'
                 }
               >
                 <Image
                   src={messageIcon}
                   alt="heart"
                   quality={100}
-                  className="size-[43px]"
+                  className="size-8"
                 />
                 <p className={'capitalize'}>contact us</p>
               </div>
