@@ -81,7 +81,7 @@ export const resendEmail_MessageConfirmation = async (
           </tr>
           <tr>
             <td style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #999;">
-              © 2025 Love Transfusion. All rights reserved.
+              © 2026 Love Transfusion. All rights reserved.
             </td>
           </tr>
         </table>

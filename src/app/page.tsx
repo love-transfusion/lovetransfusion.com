@@ -12,6 +12,49 @@ import PublicFooter from './components/this-website-only/footer/PublicFooter'
 import Link from 'next/link'
 import { getCurrentUser } from './config/supabase/getCurrentUser'
 import { isAdmin } from './lib/adminCheck'
+import { Metadata } from 'next'
+
+const title = 'Emotional Support | Making The Journey Together'
+const description =
+  'In just seconds, you can send a powerful expression of love and support to someone who needs it most.'
+// const url = 'https://www.lovetransfusion.com'  // This should be present in other pages like /submit-story
+const siteName = 'Love Transfusion'
+const imageUrl = '/images/meta-images/Love Transfusion Share.png'
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://www.lovetransfusion.com'), // This should be only in app layout
+  title: {
+    default: title,
+    template: `%s | Love Transfusion`,
+  },
+  description,
+
+  // OpenGraph metadata
+  openGraph: {
+    title,
+    description,
+    siteName,
+    images: [
+      {
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+
+  // Twitter/X Card metadata
+  twitter: {
+    card: 'summary_large_image',
+    title: title,
+    description,
+    creator: '@LoveTransfusion',
+    images: [imageUrl],
+  },
+}
 
 const Homepage = async () => {
   const user = await getCurrentUser()
