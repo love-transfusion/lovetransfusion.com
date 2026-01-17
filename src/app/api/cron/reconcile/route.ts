@@ -8,12 +8,7 @@ import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
 
-// ✅ adjust this import to match where your Database type is exported
-import type { Database } from '@/types/database.types'
-
 type Admin = Awaited<ReturnType<typeof createAdmin>>
-type FbPostRow = Database['public']['Tables']['facebook_posts']['Row']
-type PostsSyncStatus = Database['public']['Enums']['posts_sync_status']
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -25,13 +20,9 @@ const RETRY_MAX = 10
 
 const NON_EXISTENT_MARKER = 'tombstoned: non-existent/off-surface'
 
-const STATUSES: PostsSyncStatus[] = ['idle', 'deferred', 'error']
-
 const isAuthorizedCron = (req: NextRequest) => {
-  const secret = process.env.CRON_SECRET
-  if (!secret) return false
   const auth = req.headers.get('authorization')
-  return auth === `Bearer ${secret}`
+  return auth === `Bearer ${process.env.CRON_SECRET}`
 }
 
 // --- small helpers for safe logging
@@ -44,37 +35,19 @@ const trim = (v: unknown, max = 500) => {
   }
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-const jitter = (ms: number) => Math.floor(ms * (0.75 + Math.random() * 0.5))
-
-const isRetryableHttpStatus = (status?: number) =>
-  status === 429 ||
-  status === 500 ||
-  status === 502 ||
-  status === 503 ||
-  status === 504
-
-// Pull status/message from many possible error shapes
-const extractErr = (e: any) => {
+// --- classify common Graph errors so we can tombstone "gone" posts
+function classifyGraphError(e: any) {
+  // ✅ handle raw string errors from util_fb_comments
   const msg: string =
     (typeof e === 'string' && e) ||
     e?.message ||
     e?.error?.message ||
     e?.response?.data?.error?.message ||
-    e?.response?.data?.message ||
     ''
-
-  const status: number | undefined =
-    e?.status ||
-    e?.response?.status ||
-    e?.response?.data?.error?.code || // sometimes "code" is not HTTP, but still useful
-    undefined
-
   const code =
     (typeof e === 'object' &&
       (e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code)) ||
     undefined
-
   const subcode =
     (typeof e === 'object' &&
       (e?.error_subcode ??
@@ -82,29 +55,17 @@ const extractErr = (e: any) => {
         e?.response?.data?.error?.error_subcode)) ||
     undefined
 
-  return { msg, status, code, subcode }
-}
-
-// --- classify common Graph errors so we can tombstone "gone" posts
-function classifyGraphError(e: any) {
-  const { msg, status, code, subcode } = extractErr(e)
-
+  // Typical patterns for "object does not exist / unsupported get request"
   const nonExistent =
     /does not exist|cannot be loaded|unsupported get request/i.test(msg) ||
     (code === 100 && (subcode === 33 || subcode === 24))
 
+  // Permission-y problems (keep as normal error → retryable/visible)
   const permission =
     /permissions|not authorized|requires.*access|(#200)/i.test(msg) ||
     code === 200
 
-  // retryable: rate limit / transient
-  const retryable =
-    isRetryableHttpStatus(status) ||
-    /rate limit|too many calls|reduce the amount of data|temporarily unavailable/i.test(
-      msg,
-    )
-
-  return { nonExistent, permission, retryable, msg, status, code, subcode }
+  return { nonExistent, permission, msg, code, subcode }
 }
 
 export async function GET(req: NextRequest) {
@@ -133,16 +94,16 @@ export async function GET(req: NextRequest) {
   // ---------- PICK_POSTS (NULL-safe filters) ----------
   console.time(span('PICK_POSTS'))
   const marker = `${NON_EXISTENT_MARKER}%`
-
-  const { data: postsRaw, error: postsErr } = await supabase
+  const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
     .select('*')
+    // include rows where last_error IS NULL OR NOT ILIKE marker
     .or(`last_error.is.null,last_error.not.ilike.${marker}`)
+    // include rows where retry_count IS NULL OR < RETRY_MAX
     .or(`retry_count.is.null,retry_count.lt.${RETRY_MAX}`)
-    .in('sync_status', STATUSES) // ✅ no `as any`
+    .in('sync_status', ['idle', 'deferred', 'error'] as any)
     .order('last_synced_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
-
   console.timeEnd(span('PICK_POSTS'))
 
   if (postsErr) {
@@ -150,76 +111,67 @@ export async function GET(req: NextRequest) {
     console.timeEnd(span('TOTAL'))
     return NextResponse.json(
       { ok: false, error: postsErr.message },
-      { status: 500 },
+      { status: 500 }
     )
   }
 
-  const posts: FbPostRow[] = postsRaw ?? [] // ✅ posts is now always an array
-
   console.info(span('PICK_POSTS_OK'), {
-    picked: posts.length,
-    postIds: posts.map((p) => p.post_id),
+    picked: posts?.length ?? 0,
+    postIds: (posts ?? []).map((p) => p.post_id),
   })
-
-  if (!posts.length) {
-    console.info(span('NO_WORK'))
-    console.timeEnd(span('TOTAL'))
-    return NextResponse.json({ ok: true, runId, picked: 0, synced: 0 })
-  }
 
   const limit = pLimit(CONCURRENCY)
 
-  // mark running
-  const ids = posts.map((p) => p.post_id)
-  console.time(span('MARK_RUNNING'))
-  const { error: updErr } = await supabase
-    .from('facebook_posts')
-    .update({ sync_status: 'running', last_error: null })
-    .in('post_id', ids)
-  console.timeEnd(span('MARK_RUNNING'))
-
-  if (updErr)
-    console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
-  else console.info(span('MARK_RUNNING_OK'), { ids })
+  if (posts?.length) {
+    const ids = posts.map((p) => p.post_id)
+    console.time(span('MARK_RUNNING'))
+    const { error: updErr } = await supabase
+      .from('facebook_posts')
+      .update({ sync_status: 'running', last_error: null })
+      .in('post_id', ids)
+    console.timeEnd(span('MARK_RUNNING'))
+    if (updErr) {
+      console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
+    } else {
+      console.info(span('MARK_RUNNING_OK'), { ids })
+    }
+  }
 
   console.time(span('PROCESS_ALL'))
   const results = await Promise.allSettled(
-    posts.map((p) => limit(() => reconcilePost(supabase, p, runId))),
+    (posts ?? []).map((p) =>
+      limit(() =>
+        reconcilePost(supabase, p as I_supa_facebook_posts_row, runId)
+      )
+    )
   )
   console.timeEnd(span('PROCESS_ALL'))
 
   const synced = results.filter(
-    (r) => r.status === 'fulfilled' && r.value === true,
+    (r) => r.status === 'fulfilled' && r.value === true
   ).length
-
   const failed = results.filter(
-    (r) => r.status === 'rejected' || r.value === false,
+    (r) => r.status === 'rejected' || r.value === false
   ).length
 
-  console.info(span('DONE'), { synced, failed, picked: posts.length })
+  console.info(span('DONE'), { synced, failed, picked: posts?.length ?? 0 })
   console.timeEnd(span('TOTAL'))
-
   return NextResponse.json({
     ok: true,
     runId,
-    picked: posts.length,
+    picked: posts?.length ?? 0,
     synced,
   })
 }
 
 // ---------- helpers ----------
 
-/**
- * Graph batch call for author info.
- * Adds retry/backoff on 429/5xx (important).
- */
 async function fetchCommentAuthorsByIds(
   commentIds: string[],
   pageAccessToken: string,
   size = 128,
   runId?: string,
-  postId?: string,
-  deadlineMs?: number,
+  postId?: string
 ): Promise<
   Record<
     string,
@@ -239,14 +191,13 @@ async function fetchCommentAuthorsByIds(
       picture_url: string | null
     }
   > = {}
-
-  const unique = Array.from(new Set(commentIds.filter(Boolean)))
-  if (!unique.length) {
+  if (!commentIds.length) {
     console.info(span('SKIP_EMPTY'))
     return out
   }
 
   const GRAPH_VER = process.env.NEXT_PUBLIC_GRAPH_VERSION!
+  const unique = Array.from(new Set(commentIds.filter(Boolean)))
   const chunkSize = 50
 
   console.info(span('START'), {
@@ -256,11 +207,6 @@ async function fetchCommentAuthorsByIds(
   })
 
   for (let i = 0; i < unique.length; i += chunkSize) {
-    if (deadlineMs && Date.now() > deadlineMs) {
-      console.warn(span('DEADLINE_STOP'), { atIndex: i })
-      break
-    }
-
     const chunk = unique.slice(i, i + chunkSize)
 
     const batch = chunk.map((id) => ({
@@ -268,88 +214,54 @@ async function fetchCommentAuthorsByIds(
       relative_url:
         `${encodeURIComponent(id)}?fields=` +
         encodeURIComponent(
-          `from{id,name,picture.height(${size}).width(${size}){url,is_silhouette}}`,
+          `from{id,name,picture.height(${size}).width(${size}){url,is_silhouette}}`
         ),
     }))
 
-    let attempt = 0
-    const maxAttempts = 4
-    let lastStatus: number | null = null
+    console.time(span(`BATCH_${i / chunkSize}_POST`))
+    const res = await fetch(`https://graph.facebook.com/${GRAPH_VER}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: pageAccessToken, batch }),
+    })
+    console.timeEnd(span(`BATCH_${i / chunkSize}_POST`))
 
-    while (attempt < maxAttempts) {
-      if (deadlineMs && Date.now() > deadlineMs) {
-        console.warn(span('DEADLINE_STOP_INNER'), { atIndex: i, attempt })
-        attempt = maxAttempts
-        break
-      }
-
-      console.time(span(`BATCH_${i / chunkSize}_POST_A${attempt}`))
-      const res = await fetch(`https://graph.facebook.com/${GRAPH_VER}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: pageAccessToken, batch }),
-      })
-      console.timeEnd(span(`BATCH_${i / chunkSize}_POST_A${attempt}`))
-
-      lastStatus = res.status
-
-      if (!res.ok) {
-        const text = await res.text()
-        const retryable = isRetryableHttpStatus(res.status)
-        console.warn(span('BATCH_HTTP_FAIL'), {
-          status: res.status,
-          retryable,
-          text: text?.slice(0, 250),
-        })
-
-        if (!retryable) break
-
-        const delay = jitter(500 * 2 ** attempt)
-        await sleep(delay)
-        attempt++
-        continue
-      }
-
-      const json = (await res.json()) as Array<{ code: number; body: string }>
-      let ok = 0
-      let err = 0
-      const samples: Array<{ id: string; body: any }> = []
-
-      json.forEach((item, idx) => {
-        try {
-          const body = JSON.parse(item.body)
-          if (samples.length < 3)
-            samples.push({ id: chunk[idx], body: body?.from ?? body })
-          if (item.code !== 200) {
-            err++
-            return
-          }
-          const f = body?.from
-          out[chunk[idx]] = {
-            from_id: f?.id ?? null,
-            from_name: f?.name ?? null,
-            picture_url: f?.picture?.data?.url ?? null,
-          }
-          ok++
-        } catch {
-          err++
-        }
-      })
-
-      console.info(span('BATCH_RESULT'), { index: i / chunkSize, ok, err })
-      if (samples.length) {
-        console.info(
-          span('BATCH_SAMPLE_BODIES'),
-          samples.map((s) => ({ id: s.id, body: trim(s.body, 400) })),
-        )
-      }
-
-      attempt = maxAttempts
-      break
+    if (!res.ok) {
+      const text = await res.text()
+      console.warn(span('BATCH_HTTP_FAIL'), { status: res.status, text })
+      continue
     }
 
-    if (lastStatus && isRetryableHttpStatus(lastStatus)) {
-      console.info(span('BATCH_STATUS_END'), { status: lastStatus })
+    const json = (await res.json()) as Array<{ code: number; body: string }>
+    let ok = 0
+    let err = 0
+    const samples: Array<{ id: string; body: any }> = [] // >>> DIAG
+    json.forEach((item, idx) => {
+      try {
+        const body = JSON.parse(item.body)
+        if (samples.length < 3)
+          samples.push({ id: chunk[idx], body: body?.from ?? body }) // >>> DIAG
+        if (item.code !== 200) {
+          err++
+          return
+        }
+        const f = body?.from
+        out[chunk[idx]] = {
+          from_id: f?.id ?? null,
+          from_name: f?.name ?? null,
+          picture_url: f?.picture?.data?.url ?? null,
+        }
+        ok++
+      } catch {
+        err++
+      }
+    })
+    console.info(span('BATCH_RESULT'), { index: i / chunkSize, ok, err })
+    if (samples.length) {
+      console.info(
+        span('BATCH_SAMPLE_BODIES'),
+        samples.map((s) => ({ id: s.id, body: trim(s.body, 400) }))
+      ) // >>> DIAG
     }
   }
 
@@ -359,14 +271,12 @@ async function fetchCommentAuthorsByIds(
 
 async function reconcilePost(
   supabase: Admin,
-  post: FbPostRow, // ✅ use typed row from Supabase
-  runId: string,
+  post: I_supa_facebook_posts_row,
+  runId: string
 ) {
   const postSpan = (s: string) => `[CRON ${runId}] [POST ${post.post_id}] ${s}`
-
   const startedAt = Date.now()
   const deadline = startedAt + PER_POST_BUDGET_MS
-
   console.info(postSpan('BEGIN'), {
     page_id: post.page_id,
     since: post.last_synced_at,
@@ -374,13 +284,11 @@ async function reconcilePost(
     budgetMs: PER_POST_BUDGET_MS,
   })
 
-  // 0) Resolve page token (IMPORTANT: pass systemToken if available)
+  // 0) Resolve page token
   console.time(postSpan('PAGE_TOKEN'))
-  const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
   const { data: pageToken, error: tokErr } = await util_fb_pageToken({
     pageId: post.page_id,
-    ...(systemToken ? { systemToken } : {}),
-  } as any)
+  })
   console.timeEnd(postSpan('PAGE_TOKEN'))
 
   if (!pageToken || tokErr) {
@@ -388,13 +296,12 @@ async function reconcilePost(
     await markPostError(
       supabase,
       post.post_id,
-      `page token retrieval failed: ${tokErr?.message ?? 'no token'}`,
+      `page token retrieval failed: ${tokErr?.message ?? 'no token'}`
     )
     return false
   } else {
-    console.info(postSpan('PAGE_TOKEN_OK'), {
-      tokenSuffix: pageToken.slice(-6),
-    })
+    const masked = pageToken.slice(-6)
+    console.info(postSpan('PAGE_TOKEN_OK'), { tokenSuffix: masked })
   }
 
   const since = post.last_synced_at ?? undefined
@@ -404,70 +311,29 @@ async function reconcilePost(
   const NEXT_PUBLIC_IDENTITY_ENABLED =
     (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
 
-  const canStillWork = () => Date.now() + 1500 < deadline // leave buffer
-
-  // small retry wrapper for util_fb_comments
-  const fetchCommentsWithRetry = async () => {
-    let attempt = 0
-    const maxAttempts = 4
-
-    while (attempt < maxAttempts) {
-      if (!canStillWork())
-        return { data: null, paging: null, error: 'deadline' }
-
-      const { data, paging, error } = await util_fb_comments({
-        postId: post.post_id,
-        pageAccessToken: pageToken,
-        order: 'chronological',
-        identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
-        ...(since ? { since } : {}),
-        ...(after ? { after } : {}),
-      })
-
-      if (!error) return { data, paging, error: null }
-
-      const { nonExistent, permission, retryable, msg, status, code, subcode } =
-        classifyGraphError(error)
-
-      console.error(postSpan('FETCH_ERR'), {
-        msg,
-        status,
-        code,
-        subcode,
-        retryable,
-      })
-
-      if (nonExistent || permission || !retryable) {
-        return { data: null, paging: null, error }
-      }
-
-      const delay = jitter(600 * 2 ** attempt)
-      console.warn(postSpan('FETCH_RETRY'), { attempt, delay })
-      await sleep(delay)
-      attempt++
-    }
-
-    return { data: null, paging: null, error: 'retry-exhausted' }
-  }
-
   do {
-    if (!canStillWork()) {
+    if (Date.now() > deadline) {
       console.warn(postSpan('BUDGET_EXCEEDED'), { after })
       await deferPost(supabase, post.post_id, after)
       return false
     }
 
     console.time(postSpan('FETCH_COMMENTS'))
-    const { data, paging, error } = await fetchCommentsWithRetry()
+    const { data, paging, error } = await util_fb_comments({
+      postId: post.post_id,
+      pageAccessToken: pageToken,
+      order: 'chronological',
+      identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
+      ...(since ? { since } : {}),
+      ...(after ? { after } : {}),
+    })
     console.timeEnd(postSpan('FETCH_COMMENTS'))
 
     if (error) {
-      const { nonExistent, permission } = classifyGraphError(error)
-
-      if (error === 'deadline') {
-        await deferPost(supabase, post.post_id, after)
-        return false
-      }
+      // classify and tombstone non-existent/off-surface posts
+      const { nonExistent, permission, msg, code, subcode } =
+        classifyGraphError(error)
+      console.error(postSpan('FETCH_ERR'), { error, msg, code, subcode })
 
       if (nonExistent) {
         console.warn(postSpan('TOMBSTONE'), {
@@ -476,6 +342,7 @@ async function reconcilePost(
         await supabase
           .from('facebook_posts')
           .update({
+            // keep status simple; exclude via last_error marker in PICK_POSTS
             sync_status: 'idle',
             next_cursor: null,
             retry_count: 0,
@@ -495,64 +362,74 @@ async function reconcilePost(
       return false
     }
 
+    // >>> DIAG
     if (data && data.length) {
-      // ---- avatars (wrap with retry)
+      const withFrom = data.filter((c) => !!c.from)
+      const withFromId = data.filter((c) => !!c.from?.id)
+      const withFromName = data.filter((c) => !!c.from?.name)
+      const withPic = data.filter((c) => !!(c as any).from?.picture?.data?.url)
+      const preview = data.slice(0, 5).map((c) => ({
+        id: c.id,
+        parent: c.parent?.id ?? null,
+        from: c.from
+          ? {
+              id: c.from.id ?? null,
+              name: c.from.name ?? null,
+              has_pic: !!(c as any).from?.picture?.data?.url,
+            }
+          : null,
+        msg_len: c.message?.length ?? 0,
+        created_time: c.created_time,
+      }))
+      console.info(postSpan('FETCH_OK_VERBOSE'), {
+        count: data.length,
+        stats: {
+          withFrom: withFrom.length,
+          withFromId: withFromId.length,
+          withFromName: withFromName.length,
+          withPicture: withPic.length,
+        },
+        preview,
+      })
+    } else {
+      console.info(postSpan('FETCH_OK'), {
+        count: data?.length ?? 0,
+        after_in: after,
+        next_after: (paging as any)?.cursors?.after ?? null,
+      })
+    }
+
+    if (data?.length) {
       let avatarMap: Record<
         string,
         { url: string | null; isSilhouette: boolean | null }
       > = {}
-
       try {
         const fromIds = Array.from(
-          new Set(
-            data
-              .map((c: any) => c.from?.id)
-              .filter((x: any): x is string => !!x),
-          ),
+          new Set(data.map((c) => c.from?.id).filter((x): x is string => !!x))
         )
-
         console.info(postSpan('AVATAR_IDS'), { uniqueFromIds: fromIds.length })
-
-        if (fromIds.length && canStillWork()) {
-          let attempt = 0
-          const maxAttempts = 4
-
-          while (attempt < maxAttempts) {
-            try {
-              console.time(postSpan(`AVATAR_ENRICH_A${attempt}`))
-              avatarMap = await util_fb_profile_picture({
-                clIDs: fromIds,
-                clAccessToken: pageToken,
-                clImageDimensions: 128,
-              })
-              console.timeEnd(postSpan(`AVATAR_ENRICH_A${attempt}`))
-              console.info(postSpan('AVATAR_DONE'), {
-                resolved: Object.keys(avatarMap).length,
-              })
-              break
-            } catch (e: any) {
-              const { msg, status } = extractErr(e)
-              const retryable =
-                isRetryableHttpStatus(status) || /rate limit/i.test(msg)
-              console.error(postSpan('AVATAR_FAIL'), {
-                status,
-                retryable,
-                msg: msg?.slice(0, 200),
-              })
-              if (!retryable) break
-              const delay = jitter(500 * 2 ** attempt)
-              await sleep(delay)
-              attempt++
-            }
-          }
+        if (fromIds.length) {
+          console.time(postSpan('AVATAR_ENRICH'))
+          avatarMap = await util_fb_profile_picture({
+            clIDs: fromIds,
+            clAccessToken: pageToken,
+            clImageDimensions: 128,
+          })
+          console.timeEnd(postSpan('AVATAR_ENRICH'))
+          console.info(postSpan('AVATAR_DONE'), {
+            resolved: Object.keys(avatarMap).length,
+          })
         }
       } catch (e: any) {
-        console.error(postSpan('AVATAR_FATAL'), {
+        console.error('avatar batch fetch failed', {
+          status: e?.response?.status,
           text: trim(e?.response?.data ?? e?.message, 700),
         })
+        console.info(postSpan('AVATAR_ENRICH'), 'skipped due to error')
       }
 
-      // ---- fallback author fetch (batched + retry, deadline-aware)
+      // Fallback author fetch
       let authorFallback: Record<
         string,
         {
@@ -561,25 +438,21 @@ async function reconcilePost(
           picture_url: string | null
         }
       > = {}
-
       try {
         const needsAuthor = data
-          .filter((c: any) => !(c.from?.id && c.from?.name))
-          .map((c: any) => c.id)
-
+          .filter((c) => !(c.from?.id && c.from?.name))
+          .map((c) => c.id)
         console.info(postSpan('FALLBACK_NEED'), { count: needsAuthor.length })
-
-        if (needsAuthor.length && canStillWork()) {
+        if (needsAuthor.length) {
           authorFallback = await fetchCommentAuthorsByIds(
             needsAuthor,
             pageToken,
             128,
             runId,
-            post.post_id,
-            deadline,
+            post.post_id
           )
           const resolvedNames = Object.values(authorFallback).filter(
-            (v) => !!v.from_name,
+            (v) => !!v.from_name
           ).length
           console.info(postSpan('FALLBACK_DONE'), {
             resolved: Object.keys(authorFallback).length,
@@ -590,12 +463,12 @@ async function reconcilePost(
         console.error(postSpan('FALLBACK_ERR'), { message: e?.message })
       }
 
-      const rows = data.map((c: any) => {
+      const rows: I_supa_facebook_comments_insert[] = data.map((c) => {
         const fromId = c.from?.id ?? authorFallback[c.id]?.from_id ?? null
         const fromName = c.from?.name ?? authorFallback[c.id]?.from_name ?? null
 
-        const apiPic = c?.from?.picture?.data?.url ?? null
-        const avatarPic = fromId ? (avatarMap[fromId]?.url ?? null) : null
+        const apiPic = (c as any)?.from?.picture?.data?.url ?? null
+        const avatarPic = fromId ? avatarMap[fromId]?.url ?? null : null
         const fallbackPic = authorFallback[c.id]?.picture_url ?? null
 
         const rawCreated = c.created_time as any
@@ -604,6 +477,7 @@ async function reconcilePost(
             ? new Date(rawCreated * 1000).toISOString()
             : new Date(rawCreated).toISOString()
 
+        // ✅ Keyword-ban filter (lowercase match, includes emojis & phrases)
         const msgLower = (c.message ?? '').toLowerCase()
         const containsBanned =
           msgLower.length > 0 &&
@@ -618,9 +492,11 @@ async function reconcilePost(
           from_name: fromName,
           from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
           created_time: createdISO,
-          like_count: c.like_count ?? (c as any).like_count ?? null,
-          comment_count: c.comment_count ?? (c as any).comment_count ?? null,
-          permalink_url: c.permalink_url ?? (c as any).permalink_url ?? null,
+          like_count: (c as any).like_count ?? null,
+          comment_count: (c as any).comment_count ?? null,
+          permalink_url: (c as any).permalink_url ?? null,
+          // ⛔️ Do NOT send is_hidden: false for clean comments.
+          //    Only set is_hidden when you intend to force it true.
           ...(containsBanned ? { is_hidden: true } : {}),
           is_deleted: false,
           raw: c as any,
@@ -628,26 +504,28 @@ async function reconcilePost(
         }
       })
 
+      const previewRows = rows.slice(0, 5).map((r) => ({
+        comment_id: r.comment_id,
+        from_id: r.from_id,
+        from_name: r.from_name,
+        has_pic: !!r.from_picture_url,
+      }))
+      const rowsWithName = rows.filter((r) => !!r.from_name).length
+      console.info(postSpan('ROWS_PREVIEW'), {
+        total: rows.length,
+        withFromName: rowsWithName,
+        preview: previewRows,
+      })
+
       // Upsert
       const chunkSize = 500
       console.time(postSpan('UPSERT'))
-
       for (let i = 0; i < rows.length; i += chunkSize) {
-        if (!canStillWork()) {
-          console.warn(postSpan('UPSERT_DEADLINE_DEFER'), {
-            atChunk: i / chunkSize,
-          })
-          await deferPost(supabase, post.post_id, after)
-          console.timeEnd(postSpan('UPSERT'))
-          return false
-        }
-
         const chunk = rows.slice(i, i + chunkSize)
         console.info(postSpan('UPSERT_CHUNK'), {
           index: i / chunkSize,
           size: chunk.length,
         })
-
         const { error: upErr } = await supabase
           .from('facebook_comments')
           .upsert(chunk as any, { onConflict: 'comment_id' } as any)
@@ -661,13 +539,12 @@ async function reconcilePost(
           await markPostError(
             supabase,
             post.post_id,
-            `comments upsert error: ${upErr.message}`,
+            `comments upsert error: ${upErr.message}`
           )
           console.timeEnd(postSpan('UPSERT'))
           return false
         }
       }
-
       console.timeEnd(postSpan('UPSERT'))
       console.info(postSpan('UPSERT_OK'), { total: rows.length })
     } else {
@@ -677,7 +554,6 @@ async function reconcilePost(
     const pagingAfter = (paging as any)?.cursors?.after
     after = pagingAfter
     console.info(postSpan('CURSOR_UPDATE'), { next_after: after ?? null })
-
     await supabase
       .from('facebook_posts')
       .update({ next_cursor: after ?? null })
@@ -704,19 +580,20 @@ async function reconcilePost(
     await markPostError(
       supabase,
       post.post_id,
-      `last_synced_at update failed: ${updErr.message}`,
+      `last_synced_at update failed: ${updErr.message}`
     )
-    return false
+  } else {
+    console.info(postSpan('END_OK'))
+    return true
   }
 
-  console.info(postSpan('END_OK'))
-  return true
+  return false
 }
 
 async function deferPost(
   supabase: Admin,
   post_id: string,
-  next_cursor?: string,
+  next_cursor?: string
 ) {
   console.warn(`[DEFER ${post_id}]`, { next_cursor: next_cursor ?? null })
   await supabase
@@ -732,11 +609,11 @@ async function deferPost(
 async function markPostError(
   supabase: Admin,
   post_id: string,
-  message: string,
+  message: string
 ) {
+  // ✅ cap runaway retries and optionally mark as idle after cap
   const current = await getCurrentRetry(supabase, post_id)
   const next = (current ?? 0) + 1
-
   await supabase
     .from('facebook_posts')
     .update({
@@ -752,13 +629,12 @@ async function markPostError(
 
 async function getCurrentRetry(
   supabase: Admin,
-  post_id: string,
+  post_id: string
 ): Promise<number> {
   const { data } = await supabase
     .from('facebook_posts')
     .select('retry_count')
     .eq('post_id', post_id)
     .maybeSingle()
-
   return data?.retry_count ?? 0
 }

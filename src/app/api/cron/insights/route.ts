@@ -1,8 +1,7 @@
-// app/api/cron/insights/route.ts
+// app/api/cron/sync-fb-insights/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
+import { Json } from '@/types/database.types'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_shares } from '@/app/utilities/facebook/util_fb_shares'
@@ -18,15 +17,24 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
+type UserRow = {
+  id: string
+  facebook_insights: Array<{
+    insights: Json
+    post_id: string
+    shares: number
+    total_reactions: number
+    last_synced_at: string
+    created_at: string
+  }>
+  facebook_posts: { post_id: string } | null
+}
+
 type JobResult =
+  | { userId: string; status: 'skipped:no-postid' | 'skipped:cooldown' }
+  | { userId: string; status: 'ok:insert' | 'ok:update' | 'ok:shares-only' }
   | {
-      postId: string
-      userId: string | null
-      status: 'skipped:cooldown' | 'ok:insert' | 'ok:update' | 'ok:shares-only'
-    }
-  | {
-      postId: string
-      userId: string | null
+      userId: string
       status: 'error:insert' | 'error:update' | 'error:exception'
       message?: string
     }
@@ -38,399 +46,254 @@ const isAuthorizedCron = (req: NextRequest) => {
   )
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-const jitter = (ms: number) => Math.floor(ms * (0.75 + Math.random() * 0.5))
-
-const timeExceeded = (startedMs: number, softMs = 250_000) =>
-  Date.now() - startedMs >= softMs
-
-export const createMinTimeLimiter = (minTimeMs: number) => {
-  let chain: Promise<unknown> = Promise.resolve()
-  let last = 0
-
-  const schedule = async <T>(fn: () => Promise<T>): Promise<T> => {
-    const run = chain.then(async () => {
-      const now = Date.now()
-      const wait = Math.max(0, minTimeMs - (now - last))
-      if (wait > 0) await sleep(wait)
-      last = Date.now()
-      return fn()
-    })
-
-    chain = run.catch(() => {})
-    return run as Promise<T>
-  }
-
-  return { schedule, minTimeMs }
-}
-
-const limiterLight = createMinTimeLimiter(250)
-const limiterHeavy = createMinTimeLimiter(900)
-
-// single-flight for heavy calls
-const createMutex = () => {
-  let lock: Promise<void> = Promise.resolve()
-  return {
-    run: async <T>(fn: () => Promise<T>) => {
-      const prev = lock
-      let release!: () => void
-      lock = new Promise<void>((r) => (release = r))
-      await prev
-      try {
-        return await fn()
-      } finally {
-        release()
-      }
-    },
-  }
-}
-const heavyMutex = createMutex()
-
-const isRateLimitError = (e: any) => {
-  const status = e?.status ?? e?.response?.status ?? undefined
-  const code =
-    e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code ?? undefined
-  const subcode =
-    e?.error_subcode ??
-    e?.error?.error_subcode ??
-    e?.response?.data?.error?.error_subcode ??
-    undefined
-  const msg: string =
-    e?.message ??
-    e?.error?.message ??
-    e?.response?.data?.error?.message ??
-    String(e ?? '')
-
-  const metaThrottleCodes = code === 4 || code === 17 || code === 32
-  const textThrottle =
-    /rate limit|too many calls|user request limit reached|please wait/i.test(
-      msg,
-    )
-  const http429 = status === 429
-
-  return {
-    ok: !!(http429 || metaThrottleCodes || textThrottle),
-    status,
-    code,
-    subcode,
-    msg,
-  }
-}
-
-const withRetry = async <T>(
-  label: string,
-  fn: () => Promise<T>,
-  opts: {
-    runId: string
-    postId?: string
-    userId?: string | null
-    retries?: number
-    baseDelayMs?: number
-    rateLimitExtraDelayMs?: number
-  },
-): Promise<T> => {
-  const retries = opts.retries ?? 4
-  const baseDelayMs = opts.baseDelayMs ?? 800
-  const rateLimitExtra = opts.rateLimitExtraDelayMs ?? 2500
-
-  let lastErr: any = null
-
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      return await fn()
-    } catch (e: any) {
-      lastErr = e
-      const rl = isRateLimitError(e)
-      const delay =
-        jitter(baseDelayMs * 2 ** attempt) + (rl.ok ? rateLimitExtra : 0)
-
-      console.warn(`[${label}] failed`, {
-        runId: opts.runId,
-        userId: opts.userId,
-        postId: opts.postId,
-        attempt,
-        willRetry: attempt < retries,
-        delay,
-        rateLimited: rl.ok,
-        status: rl.status,
-        code: rl.code,
-        subcode: rl.subcode,
-        message: rl.msg?.slice?.(0, 250) ?? rl.msg,
-      })
-
-      if (attempt >= retries) break
-      await sleep(delay)
-    }
-  }
-
-  throw lastErr
-}
-
 const runWithConcurrency = async <T, R>(
   items: T[],
   limit: number,
-  worker: (item: T, idx: number) => Promise<R>,
+  worker: (item: T, idx: number) => Promise<R>
 ): Promise<R[]> => {
   const executing = new Set<Promise<any>>()
   const results: Promise<R>[] = []
-
   for (let i = 0; i < items.length; i++) {
     const p = Promise.resolve().then(() => worker(items[i], i))
     results.push(p)
     executing.add(p)
-
     const done = () => executing.delete(p)
     p.then(done).catch(done)
-
     if (executing.size >= limit) await Promise.race(executing)
   }
-
   return Promise.all(results)
 }
 
+const timeExceeded = (startedMs: number, softMs = 250_000) =>
+  Date.now() - startedMs >= softMs
+
 export const GET = async (req: NextRequest) => {
-  const runId = crypto.randomUUID()
-
-  if (!isAuthorizedCron(req))
-    return new NextResponse('Unauthorized', { status: 401 })
-
-  const supabase = await createAdmin()
-  const started = Date.now()
-
-  const BATCH_SIZE = 60
-  const WORKER_CONCURRENCY = 2
-  const SYNC_COOLDOWN_MINUTES = 2
-
-  const cooldownCutoffISO = new Date(
-    Date.now() - SYNC_COOLDOWN_MINUTES * 60_000,
-  ).toISOString()
-
-  // Resolve page token once (for shares)
-  let pageAccessToken: string | null = null
   try {
-    const res = await withRetry(
-      'PAGE_TOKEN',
-      () =>
-        limiterLight.schedule(() =>
-          util_fb_pageToken({
-            pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-          }),
-        ),
-      { runId, retries: 3, baseDelayMs: 600 },
-    )
-    pageAccessToken = res?.data ?? null
-  } catch {
-    pageAccessToken = null
-  }
+    if (!isAuthorizedCron(req)) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
 
-  // 1) Pick posts to consider (cheap scan)
-  const { data: posts, error: postsErr } = await supabase
-    .from('facebook_posts')
-    .select('post_id,user_id')
-    .order('last_synced_at', { ascending: true, nullsFirst: true })
-    .limit(BATCH_SIZE)
+    const supabase = await createAdmin()
+    const started = Date.now()
 
-  if (postsErr) {
-    return NextResponse.json(
-      {
-        ok: false as const,
-        runId,
-        error: 'select-facebook_posts',
-        details: postsErr.message,
-      },
-      { status: 500 },
-    )
-  }
+    const SCAN_PAGE_SIZE = 400
+    const PROCESS_LIMIT = 80
+    const WORKER_CONCURRENCY = 3
+    const SYNC_COOLDOWN_MINUTES = 2
 
-  const postIds = (posts ?? []).map((p) => p.post_id).filter(Boolean)
-  if (!postIds.length) {
+    const cooldownCutoffISO = new Date(
+      Date.now() - SYNC_COOLDOWN_MINUTES * 60_000
+    ).toISOString()
+
+    let pageAccessToken: string | null = null
+    try {
+      const { data } = await util_fb_pageToken({
+        pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+      })
+      pageAccessToken = data
+    } catch {
+      pageAccessToken = null
+    }
+
+    let offset = 0
+    let processed = 0
+    const allResults: JobResult[] = []
+
+    while (!timeExceeded(started) && processed < PROCESS_LIMIT) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id,facebook_insights(*),facebook_posts(post_id)')
+        .range(offset, offset + SCAN_PAGE_SIZE - 1)
+
+      if (error) {
+        return NextResponse.json(
+          {
+            ok: false as const,
+            error: 'select-users',
+            details: error.message,
+            processed,
+            results: allResults,
+          },
+          { status: 500 }
+        )
+      }
+
+      const users = (data ?? []) as unknown as UserRow[]
+      if (!users.length) break
+
+      const candidates: UserRow[] = []
+      for (const u of users) {
+        if (!u.facebook_posts?.post_id) {
+          allResults.push({ userId: u.id, status: 'skipped:no-postid' })
+          continue
+        }
+        const rows = Array.isArray(u.facebook_insights)
+          ? u.facebook_insights
+          : []
+        if (rows.length === 0) {
+          candidates.push(u)
+          continue
+        }
+        rows.sort((a, b) => {
+          const A = a.last_synced_at || a.created_at || ''
+          const B = b.last_synced_at || b.created_at || ''
+          return A < B ? 1 : A > B ? -1 : 0
+        })
+        const latest = rows[0]
+        if (!latest || (latest.last_synced_at ?? '') < cooldownCutoffISO) {
+          candidates.push(u)
+        } else {
+          allResults.push({ userId: u.id, status: 'skipped:cooldown' })
+        }
+      }
+
+      if (!candidates.length) {
+        offset += SCAN_PAGE_SIZE
+        continue
+      }
+
+      const toProcess = candidates.slice(
+        0,
+        Math.max(0, PROCESS_LIMIT - processed)
+      )
+
+      const worker = async (user: UserRow): Promise<JobResult> => {
+        try {
+          if (timeExceeded(started)) {
+            return {
+              userId: user.id,
+              status: 'error:exception',
+              message: 'time-budget-exceeded',
+            }
+          }
+
+          const post_id = user.facebook_posts!.post_id
+
+          // Shares + reactions (best-effort)
+          let shares = 0
+          let total_reactions = 0
+          try {
+            if (pageAccessToken) {
+              const [sharesRes, reactionsRes] = await Promise.all([
+                util_fb_shares({ postID: post_id, pageAccessToken }),
+                util_fb_reactions_total(post_id),
+              ])
+              shares = sharesRes.count ?? 0
+              total_reactions = reactionsRes.totalReactions ?? 0
+            }
+          } catch {
+            shares = 0
+            total_reactions = 0
+          }
+
+          const rows = Array.isArray(user.facebook_insights)
+            ? user.facebook_insights
+            : []
+          rows.sort((a, b) => {
+            const A = a.last_synced_at || a.created_at || ''
+            const B = b.last_synced_at || b.created_at || ''
+            return A < B ? 1 : A > B ? -1 : 0
+          })
+          const latest = rows[0]
+
+          if (!latest) {
+            // Initialize → 37 months
+            const init = await util_fb_reachByRegion_multiAds({
+              endAnchor: '37mon',
+              post_id,
+            })
+            const { error } = await supa_insert_facebook_insights({
+              user_id: user.id,
+              insights: init,
+              post_id,
+              shares,
+              total_reactions,
+              last_synced_at: new Date().toISOString(),
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:insert' : 'ok:insert',
+              ...(error ? { message: String(error) } : {}),
+            }
+          }
+
+          // Always update shares & reactions
+          const existingInsights = latest.insights
+
+          // Fetch today's insights
+          const fresh = await util_fb_reachByRegion_multiAds({
+            endAnchor: 'today',
+            post_id,
+          })
+
+          // Check if insights changed (e.g., new date bucket or updated today)
+          const hasNewInsights = fresh.days?.length > 0
+
+          if (hasNewInsights) {
+            // Merge + update everything (including last_synced_at)
+            const merged = merge_old_and_new_regionInsightsByDate(
+              existingInsights as any,
+              fresh
+            )
+            const { error } = await supa_update_facebook_insights({
+              insights: merged,
+              post_id,
+              shares,
+              total_reactions,
+              last_synced_at: new Date().toISOString(), // only update when new insights exist
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:update' : 'ok:update',
+              ...(error ? { message: String(error) } : {}),
+            }
+          } else {
+            // Update shares/reactions only (no last_synced_at update)
+            const { error } = await supa_update_facebook_insights({
+              insights: existingInsights,
+              post_id,
+              shares,
+              total_reactions,
+            })
+            return {
+              userId: user.id,
+              status: error ? 'error:update' : 'ok:shares-only',
+              ...(error ? { message: String(error) } : {}),
+            }
+          }
+        } catch (e: any) {
+          return {
+            userId: user.id,
+            status: 'error:exception',
+            message: e?.message ?? String(e),
+          }
+        }
+      }
+
+      const pageResults = await runWithConcurrency(
+        toProcess,
+        WORKER_CONCURRENCY,
+        worker
+      )
+      allResults.push(...pageResults)
+      processed += pageResults.length
+      offset += SCAN_PAGE_SIZE
+    }
+
     return NextResponse.json({
       ok: true as const,
-      runId,
-      processed: 0,
-      results: [] as JobResult[],
+      processed,
+      results: allResults,
+      note: `Cooldown=${SYNC_COOLDOWN_MINUTES}m. Users updated at most once per ${SYNC_COOLDOWN_MINUTES} minutes.`,
     })
-  }
-
-  // 2) Load existing insights rows for those posts (one row per post)
-  const { data: insightRows, error: insErr } = await supabase
-    .from('facebook_insights')
-    .select('post_id, last_synced_at, insights')
-    .in('post_id', postIds)
-
-  if (insErr) {
+  } catch (err: any) {
     return NextResponse.json(
       {
         ok: false as const,
-        runId,
-        error: 'select-facebook_insights',
-        details: insErr.message,
+        error: 'unhandled',
+        details: err?.message ?? String(err),
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
-
-  const insightMap = new Map(
-    (insightRows ?? []).map((r: any) => [r.post_id, r]),
-  )
-
-  // 3) Filter by cooldown
-  const candidates = (posts ?? []).filter((p) => {
-    const row = insightMap.get(p.post_id)
-    const last = row?.last_synced_at ?? ''
-    return !last || last < cooldownCutoffISO
-  })
-
-  const worker = async (p: {
-    post_id: string
-    user_id: string | null
-  }): Promise<JobResult> => {
-    const postId = p.post_id
-    const userId = p.user_id ?? null
-
-    try {
-      if (timeExceeded(started)) {
-        return {
-          postId,
-          userId,
-          status: 'error:exception',
-          message: 'time-budget-exceeded',
-        }
-      }
-
-      // shares + reactions (light)
-      let shares = 0
-      let total_reactions = 0
-
-      if (pageAccessToken) {
-        try {
-          const [sharesRes, reactionsRes] = await Promise.all([
-            withRetry(
-              'SHARES',
-              () =>
-                limiterLight.schedule(() =>
-                  util_fb_shares({ postID: postId, pageAccessToken }),
-                ),
-              { runId, postId, userId, retries: 3, baseDelayMs: 500 },
-            ),
-            withRetry(
-              'REACTIONS',
-              () =>
-                limiterLight.schedule(() => util_fb_reactions_total(postId)),
-              { runId, postId, userId, retries: 3, baseDelayMs: 500 },
-            ),
-          ])
-
-          shares = sharesRes?.count ?? 0
-          total_reactions = reactionsRes?.totalReactions ?? 0
-        } catch {
-          shares = 0
-          total_reactions = 0
-        }
-      }
-
-      const existing = insightMap.get(postId)
-
-      const fetchHeavy = (endAnchor: 'today' | '37mon') =>
-        heavyMutex.run(() =>
-          withRetry(
-            endAnchor === 'today' ? 'REACH_TODAY' : 'REACH_37MON',
-            () =>
-              limiterHeavy.schedule(() =>
-                util_fb_reachByRegion_multiAds({ endAnchor, post_id: postId }),
-              ),
-            {
-              runId,
-              postId,
-              userId,
-              retries: 5,
-              baseDelayMs: 900,
-              rateLimitExtraDelayMs: 3500,
-            },
-          ),
-        )
-
-      if (!existing) {
-        const init = await fetchHeavy('37mon')
-        const { error } = await supa_insert_facebook_insights({
-          user_id: userId ?? undefined,
-          post_id: postId,
-          insights: init,
-          shares,
-          total_reactions,
-          last_synced_at: new Date().toISOString(),
-        } as any)
-
-        return {
-          postId,
-          userId,
-          status: error ? 'error:insert' : 'ok:insert',
-          ...(error ? { message: String(error) } : {}),
-        }
-      }
-
-      const fresh = await fetchHeavy('today')
-      const hasNewInsights =
-        Array.isArray((fresh as any)?.days) && (fresh as any).days.length > 0
-
-      if (hasNewInsights) {
-        const merged = merge_old_and_new_regionInsightsByDate(
-          existing.insights as any,
-          fresh as any,
-        )
-
-        const { error } = await supa_update_facebook_insights({
-          post_id: postId,
-          insights: merged,
-          shares,
-          total_reactions,
-          last_synced_at: new Date().toISOString(),
-        } as any)
-
-        return {
-          postId,
-          userId,
-          status: error ? 'error:update' : 'ok:update',
-          ...(error ? { message: String(error) } : {}),
-        }
-      }
-
-      const { error } = await supa_update_facebook_insights({
-        post_id: postId,
-        insights: existing.insights,
-        shares,
-        total_reactions,
-      } as any)
-
-      return {
-        postId,
-        userId,
-        status: error ? 'error:update' : 'ok:shares-only',
-        ...(error ? { message: String(error) } : {}),
-      }
-    } catch (e: any) {
-      return {
-        postId,
-        userId,
-        status: 'error:exception',
-        message: e?.message ?? String(e),
-      }
-    }
-  }
-
-  const results = await runWithConcurrency(
-    candidates,
-    WORKER_CONCURRENCY,
-    worker,
-  )
-
-  return NextResponse.json({
-    ok: true as const,
-    runId,
-    scanned: posts?.length ?? 0,
-    candidates: candidates.length,
-    processed: results.length,
-    results,
-    note: `Cooldown=${SYNC_COOLDOWN_MINUTES}m. Concurrency=${WORKER_CONCURRENCY}. Light=${limiterLight.minTimeMs}ms Heavy=${limiterHeavy.minTimeMs}ms (single-flight).`,
-  })
 }
