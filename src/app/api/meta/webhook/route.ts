@@ -7,31 +7,18 @@ import {
   markCommentHidden,
 } from '@/app/utilities/facebook/helpers/webhookWrites'
 
-// ✅ kept: your utils
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
+import { metaFetchJson } from './metaFetch'
 
-// Ensure Node runtime (you are using 'crypto')
 export const runtime = 'nodejs'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// helpers (unchanged, plus small debug-only findMatchedKeyword)
+// helpers
 // ─────────────────────────────────────────────────────────────────────────────
-async function resolveOwnerUserIdForPost(
-  supabase: Awaited<ReturnType<typeof createAdmin>>,
-  postId: string
-): Promise<string | null> {
-  const { data: existing } = await supabase
-    .from('facebook_posts')
-    .select('user_id')
-    .eq('post_id', postId)
-    .maybeSingle()
-  return existing?.user_id ?? null
-}
-
 function verifySignature(req: NextRequest, rawBody: string) {
-  const secret = process.env.META_APP_SECRET!
+  const secret = process.env.META_APP_SECRET
   if (!secret) {
     console.error('WEBHOOK: APP_SECRET missing in env (META_APP_SECRET)')
     return process.env.NODE_ENV !== 'production'
@@ -52,10 +39,7 @@ function verifySignature(req: NextRequest, rawBody: string) {
       return false
     }
     const ok = crypto.timingSafeEqual(their, ours)
-    if (!ok)
-      console.error(
-        `WEBHOOK: timingSafeEqual failed (bad signature), header is: ${header}`
-      )
+    if (!ok) console.error(`WEBHOOK: bad signature, header is: ${header}`)
     return ok
   } catch (e) {
     console.error('WEBHOOK: signature verification threw', e)
@@ -82,32 +66,91 @@ const dbgFindFirstMatch = (text: string | null, list: string[]) => {
   return null
 }
 
+const chunkArr = <T>(arr: T[], size: number) =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size),
+  )
+
+/**
+ * Batch-check is_hidden for up to 50 comment IDs in one HTTP request.
+ */
+const graphBatchIsHidden = async (args: {
+  version: string
+  pageAccessToken: string
+  commentIds: string[]
+}) => {
+  const { version, pageAccessToken, commentIds } = args
+  const ids = Array.from(new Set(commentIds.filter(Boolean))).slice(0, 50)
+  if (!ids.length) return [] as Array<{ cid: string; is_hidden: boolean }>
+
+  const batch = ids.map((cid) => ({
+    method: 'GET',
+    // ✅ IMPORTANT: do NOT encode the whole id/path; Graph batch expects path-like strings
+    relative_url: `${cid}?fields=is_hidden`,
+  }))
+
+  const url = `https://graph.facebook.com/${version}/`
+  const { ok, status, data, text } = await metaFetchJson<
+    Array<{ code: number; body: string }>
+  >({
+    url,
+    label: 'HIDDEN_FLAG_BATCH',
+    init: {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: pageAccessToken, batch }),
+    },
+    retries: 4,
+    baseDelayMs: 500,
+  })
+
+  if (!ok || !Array.isArray(data)) {
+    console.error('HIDDEN_FLAG_BATCH failed', {
+      status,
+      text: text?.slice(0, 300),
+    })
+    return ids.map((cid) => ({ cid, is_hidden: false }))
+  }
+
+  return data.map((item, idx) => {
+    const cid = ids[idx]
+    try {
+      if (item.code !== 200) return { cid, is_hidden: false }
+      const body = JSON.parse(item.body)
+      return { cid, is_hidden: !!body?.is_hidden }
+    } catch {
+      return { cid, is_hidden: false }
+    }
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET = Verification
+// ─────────────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
   const mode = url.searchParams.get('hub.mode')
   const token = url.searchParams.get('hub.verify_token')
   const challenge = url.searchParams.get('hub.challenge')
 
-  // Loud, structured logs at each gate
   console.info('WEBHOOK[GET]: verification request', {
     mode,
     hasToken: !!token,
     hasChallenge: !!challenge,
   })
 
-  if (
-    mode === 'subscribe' &&
-    token === process.env.META_WEBHOOK_VERIFY_TOKEN!
-  ) {
+  if (mode === 'subscribe' && token === process.env.META_WEBHOOK_VERIFY_TOKEN) {
     console.info('WEBHOOK[GET]: verification OK')
     return new NextResponse(challenge ?? '', { status: 200 })
   }
-  console.warn('WEBHOOK[GET]: verification FAILED', { mode, tokenOk: false })
+
+  console.warn('WEBHOOK[GET]: verification FAILED', { mode })
   return new NextResponse('Forbidden', { status: 403 })
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 // POST = Events
+// ─────────────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   console.time('WEBHOOK_TOTAL')
   console.info('WEBHOOK[POST]: received', {
@@ -115,18 +158,11 @@ export async function POST(req: NextRequest) {
     hasSigHeader: !!req.headers.get('x-hub-signature-256'),
   })
 
-  // Use req.text() ONCE for HMAC; then JSON.parse(raw)
-  console.time('READ_RAW')
   const raw = await req.text()
-  console.timeEnd('READ_RAW')
-
   const supabase = await createAdmin()
 
   try {
-    console.time('VERIFY_SIG')
     const sigOk = verifySignature(req, raw)
-    console.timeEnd('VERIFY_SIG')
-
     if (!sigOk) {
       console.error('WEBHOOK: signature check failed', {
         hasHeader: !!req.headers.get('x-hub-signature-256'),
@@ -137,23 +173,14 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Invalid signature', { status: 401 })
     }
 
-    console.time('PARSE_JSON')
     const body = JSON.parse(raw)
-    console.timeEnd('PARSE_JSON')
 
-    // Audit log
-    console.time('AUDIT_INSERT')
+    // Audit log (don’t fail webhook on audit failure)
     const { error: logErr } = await supabase
       .from('facebook_webhook_logs')
       .insert({ event: body })
-    console.timeEnd('AUDIT_INSERT')
     if (logErr) {
-      console.error('WEBHOOK: audit insert error', {
-        message: logErr.message,
-        details: (logErr as any).details,
-        hint: (logErr as any).hint,
-        code: (logErr as any).code,
-      })
+      console.error('WEBHOOK: audit insert error', { message: logErr.message })
     }
 
     if (body?.object !== 'page') {
@@ -165,7 +192,8 @@ export async function POST(req: NextRequest) {
     }
 
     const touchedPosts = new Set<string>()
-    const failedPosts = new Set<string>() // if post upsert fails, skip its comments
+    const failedPosts = new Set<string>()
+
     const batchedRows: Array<{
       comment_id: string
       post_id: string
@@ -181,13 +209,12 @@ export async function POST(req: NextRequest) {
       is_edited: boolean
       raw: any
       updated_at: string
-      is_hidden: boolean // ← you already store this
+      is_hidden: boolean
     }> = []
 
-    // local maps for avatar enrichment by page
-    const pageToFromIds = new Map<string, Set<string>>() // page_id -> set(from_id)
+    const pageToFromIds = new Map<string, Set<string>>() // page_id -> from_ids
     const commentToPage = new Map<string, string>() // comment_id -> page_id
-    const pageToCommentIds = new Map<string, Set<string>>()
+    const pageToCommentIds = new Map<string, Set<string>>() // page_id -> comment_ids
 
     const entries = Array.isArray(body?.entry) ? body.entry : []
     const pageIds: string[] = Array.from(
@@ -196,55 +223,34 @@ export async function POST(req: NextRequest) {
           .map((e: any) => e?.id)
           .filter(
             (id: unknown): id is string =>
-              typeof id === 'string' && id.length > 0
-          )
-      )
+              typeof id === 'string' && id.length > 0,
+          ),
+      ),
     )
 
-    console.info('WEBHOOK[POST]: parsed payload summary', {
-      entriesCount: entries.length,
-      distinctPageIds: pageIds.length,
-      pageIds,
-    })
-
-    // page -> connected_by_user_id mapping (for RLS/audit if needed)
-    console.time('PAGES_QUERY')
+    // Map page_id -> connector (skip unknown pages)
     const { data: pageRows, error: pageErr } = await supabase
       .from('facebook_pages')
       .select('page_id, connected_by_user_id')
       .in('page_id', pageIds)
-    console.timeEnd('PAGES_QUERY')
 
     if (pageErr) {
-      console.error('DB mapping error:', {
-        message: pageErr.message,
-        details: (pageErr as any).details,
-        hint: (pageErr as any).hint,
-        code: (pageErr as any).code,
-      })
+      console.error('DB mapping error:', { message: pageErr.message })
       console.timeEnd('WEBHOOK_TOTAL')
       return new NextResponse('DB mapping error', { status: 500 })
     }
 
-    const pageToConnector = new Map<string, string>()
-    for (const r of pageRows ?? [])
-      pageToConnector.set(r.page_id, r.connected_by_user_id)
+    const knownPages = new Set((pageRows ?? []).map((r) => r.page_id))
 
     let adds = 0,
       edits = 0,
       hides = 0,
       removes = 0
 
-    console.time('PROCESS_ENTRIES')
     // Collect adds/edits; apply remove/hide immediately
     for (const entry of entries) {
       const page_id: string = entry.id
-      if (!pageToConnector.has(page_id)) {
-        console.warn('WEBHOOK[POST]: unknown page_id; skipping changes', {
-          page_id,
-        })
-        continue
-      }
+      if (!knownPages.has(page_id)) continue
 
       const changes = entry?.changes ?? []
       for (const ch of changes) {
@@ -256,7 +262,6 @@ export async function POST(req: NextRequest) {
           ? new Date(v.created_time * 1000).toISOString()
           : new Date().toISOString()
 
-        // For edits, Facebook webhook gives the event time at entry.time (unix seconds).
         const eventISO =
           typeof entry?.time === 'number'
             ? new Date(entry.time * 1000).toISOString()
@@ -266,7 +271,7 @@ export async function POST(req: NextRequest) {
         const isPageComment = realFromId === page_id
         const realFromName = isPageComment
           ? 'Love Transfusion'
-          : v.from?.name ?? null
+          : (v.from?.name ?? null)
 
         const base = {
           comment_id: v.comment_id as string,
@@ -275,7 +280,7 @@ export async function POST(req: NextRequest) {
           message: (v.message as string) ?? null,
           from_id: realFromId,
           from_name: realFromName,
-          from_picture_url: null as string | null, // will be enriched below
+          from_picture_url: null as string | null,
           created_time: createdISO,
           like_count: (v.like_count as number) ?? null,
           comment_count: (v.comment_count as number) ?? null,
@@ -283,47 +288,38 @@ export async function POST(req: NextRequest) {
           raw: v ?? {},
         }
 
-        // Track from_ids by page for later avatar enrichment
         if (base.from_id) {
           if (!pageToFromIds.has(page_id)) pageToFromIds.set(page_id, new Set())
           pageToFromIds.get(page_id)!.add(base.from_id)
         }
-        // Map this comment to its page
-        commentToPage.set(base.comment_id, page_id)
 
+        commentToPage.set(base.comment_id, page_id)
         if (!pageToCommentIds.has(page_id))
           pageToCommentIds.set(page_id, new Set())
         pageToCommentIds.get(page_id)!.add(base.comment_id)
 
-        // Ensure the post exists/updated once per request
+        // ✅ SAFER post upsert:
+        // - don’t fetch ownerUserId per request
+        // - don’t overwrite user_id with null
         if (!touchedPosts.has(base.post_id) && !failedPosts.has(base.post_id)) {
-          console.time(`POST_UPSERT_${base.post_id}`)
-          const ownerUserId = await resolveOwnerUserIdForPost(
-            supabase,
-            base.post_id
-          )
           const { error: postUpErr } = await supabase
             .from('facebook_posts')
             .upsert(
               {
                 post_id: base.post_id,
-                page_id, // entry.id
+                page_id,
                 ad_id: null,
-                user_id: ownerUserId,
+                // do NOT set user_id here; keep existing
                 last_synced_at: new Date().toISOString(),
               } as any,
-              { onConflict: 'post_id' }
+              { onConflict: 'post_id' },
             )
-          console.timeEnd(`POST_UPSERT_${base.post_id}`)
 
           if (postUpErr) {
             console.error('WEBHOOK[POST]: facebook_posts upsert FAILED', {
               post_id: base.post_id,
               page_id,
               message: postUpErr.message,
-              details: (postUpErr as any).details,
-              hint: (postUpErr as any).hint,
-              code: (postUpErr as any).code,
             })
             failedPosts.add(base.post_id)
           } else {
@@ -331,18 +327,8 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // If the post upsert failed, skip processing comments for that post
-        if (failedPosts.has(base.post_id)) {
-          console.warn(
-            'WEBHOOK[POST]: skipping comments due to post upsert failure',
-            {
-              post_id: base.post_id,
-            }
-          )
-          continue
-        }
+        if (failedPosts.has(base.post_id)) continue
 
-        // Handle verbs
         if (v.verb === 'remove') {
           removes++
           await markCommentDeleted(supabase, {
@@ -352,6 +338,7 @@ export async function POST(req: NextRequest) {
           })
           continue
         }
+
         if (v.verb === 'hide') {
           hides++
           await markCommentHidden(supabase, {
@@ -362,14 +349,12 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        // add/edited → batch
         const isEdited = v.verb === 'edited'
         if (isEdited) edits++
         else adds++
 
         const willBeHidden = containsBanned(base.message ?? '', BANNED_KEYWORDS)
 
-        // 🔍 optional debug: which keyword likely matched
         if (willBeHidden) {
           const hit = dbgFindFirstMatch(base.message ?? null, BANNED_KEYWORDS)
           console.info('BANNED_DEBUG', {
@@ -379,18 +364,14 @@ export async function POST(req: NextRequest) {
           })
         }
 
-        const rowWithCreated = {
+        batchedRows.push({
           ...base,
-          created_time: createdISO,
           is_edited: isEdited,
           updated_at: isEdited ? eventISO : createdISO,
           is_hidden: willBeHidden,
-        }
-
-        batchedRows.push(rowWithCreated)
+        })
       }
     }
-    console.timeEnd('PROCESS_ENTRIES')
 
     console.info('WEBHOOK[POST]: verb counts', {
       adds,
@@ -398,65 +379,39 @@ export async function POST(req: NextRequest) {
       hides,
       removes,
       toUpsert: batchedRows.length,
-      touchedPosts: touchedPosts.size,
-      failedPosts: failedPosts.size,
     })
 
-    // ✅ Avatar enrichment using PAGE ACCESS TOKENS (no schema changes)
+    // Avatar enrichment
     if (batchedRows.length > 0 && pageToFromIds.size > 0) {
       try {
-        console.time('AVATAR_ENRICHMENT')
-        let totalFilled = 0
         for (const [page_id, fromSet] of pageToFromIds.entries()) {
           const fromIds = Array.from(fromSet)
           if (!fromIds.length) continue
 
-          const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN!
-          let pageAccessToken: string | null = null
-          try {
-            const { data } = await util_fb_pageToken({
-              pageId: page_id,
-              systemToken,
-            })
-            pageAccessToken = data
-          } catch (e: any) {
-            console.error('WEBHOOK[POST]: util_fb_pageToken failed', {
-              page_id,
-              message: e?.message,
-            })
-            continue
-          }
-          if (!pageAccessToken) {
-            console.warn('WEBHOOK[POST]: no page access token resolved', {
-              page_id,
-            })
-            continue
-          }
+          const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
+          if (!systemToken) continue
 
-          // Fetch avatars for this page’s commenters
+          const { data: pageAccessToken } = await util_fb_pageToken({
+            pageId: page_id,
+            systemToken,
+          })
+
+          if (!pageAccessToken) continue
+
           const avatars = await util_fb_profile_picture({
             clIDs: fromIds,
             clAccessToken: pageAccessToken,
             clImageDimensions: 128,
           })
 
-          // Apply to rows that belong to this page
           for (const row of batchedRows) {
             if (!row.from_id) continue
             const rowPage = commentToPage.get(row.comment_id)
             if (rowPage !== page_id) continue
             const hit = avatars[row.from_id]
-            if (hit?.url) {
-              row.from_picture_url = hit.url
-              totalFilled++
-            }
+            if (hit?.url) row.from_picture_url = hit.url
           }
         }
-        console.timeEnd('AVATAR_ENRICHMENT')
-        console.info('WEBHOOK[POST]: avatar enrichment done', {
-          pagesProcessed: pageToFromIds.size,
-          totalFilled,
-        })
       } catch (e: any) {
         console.error('WEBHOOK[POST]: avatar enrichment failed', {
           message: e?.message,
@@ -464,58 +419,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 🔎 Transition logging (prev → new) — without changing your schema
+    // Bulk upsert
     if (batchedRows.length > 0) {
       const CHUNK = 500
-      console.time('COMMENTS_BULK_UPSERT')
       for (let i = 0; i < batchedRows.length; i += CHUNK) {
         const chunk = batchedRows.slice(i, i + CHUNK)
-
-        // Read existing to log transitions
-        const ids = chunk.map((c) => c.comment_id)
-        const { data: existing, error: readErr } = await supabase
-          .from('facebook_comments')
-          .select('comment_id, is_hidden, message, updated_at')
-          .in('comment_id', ids)
-
-        if (readErr) {
-          console.error('WEBHOOK[POST]: read existing failed', {
-            message: readErr.message,
-            code: (readErr as any).code,
-          })
-        }
-
-        const prevMap = new Map(
-          (existing ?? []).map((e) => [
-            e.comment_id,
-            {
-              is_hidden: !!e.is_hidden,
-              message: e.message ?? null,
-              updated_at: e.updated_at,
-            },
-          ])
-        )
-
-        for (const row of chunk) {
-          const prev = prevMap.get(row.comment_id)
-          const changedMsg = (prev?.message ?? null) !== (row.message ?? null)
-          const changedHidden = (prev?.is_hidden ?? false) !== row.is_hidden
-          if (changedMsg || changedHidden || row.is_edited) {
-            console.info('COMMENT_TRANSITION', {
-              comment_id: row.comment_id,
-              post_id: row.post_id,
-              verb_edited: row.is_edited,
-              prev_hidden: prev?.is_hidden ?? false,
-              new_hidden: row.is_hidden,
-              prev_message: prev?.message ?? null,
-              new_message: row.message ?? null,
-              prev_updated_at: prev?.updated_at ?? null,
-              new_updated_at: row.updated_at,
-            })
-          }
-        }
-
-        // Upsert (NO page_id in this table)
         const { error: upErr } = await supabase
           .from('facebook_comments')
           .upsert(chunk as any, { onConflict: 'comment_id' } as any)
@@ -523,89 +431,71 @@ export async function POST(req: NextRequest) {
         if (upErr) {
           console.error('WEBHOOK[POST]: batch upsert error', {
             message: upErr.message,
-            details: (upErr as any).details,
-            hint: (upErr as any).hint,
-            code: (upErr as any).code,
-            batchSize: chunk.length,
           })
         }
       }
-      console.timeEnd('COMMENTS_BULK_UPSERT')
     }
 
-    // ===== Hidden-flag sync against Graph (unchanged)
+    // Hidden-flag sync (batched + safe)
+    // Guard: don’t do this if there are too many IDs (webhook should be fast)
+    const MAX_HIDDEN_SYNC_IDS_PER_PAGE = 500
+
     if (pageToCommentIds.size > 0) {
-      console.time('HIDDEN_FLAG_SYNC')
-
-      const chunkArr = <T>(arr: T[], size: number) =>
-        Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-          arr.slice(i * size, i * size + size)
-        )
-
       for (const [page_id, idSet] of pageToCommentIds.entries()) {
         const commentIds = Array.from(idSet)
         if (!commentIds.length) continue
 
-        let pageAccessToken: string | null = null
-        try {
-          const { data } = await util_fb_pageToken({
-            pageId: page_id,
-            systemToken: process.env.FACEBOOK_SYSTEM_TOKEN!,
-          })
-          pageAccessToken = data
-        } catch (e: any) {
-          console.error('HIDDEN_FLAG_SYNC: page token error', {
+        if (commentIds.length > MAX_HIDDEN_SYNC_IDS_PER_PAGE) {
+          console.warn('HIDDEN_FLAG_SYNC: skipped (too many ids)', {
             page_id,
-            message: e?.message,
+            count: commentIds.length,
           })
+          continue
         }
+
+        const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
+        if (!systemToken) continue
+
+        const { data: pageAccessToken } = await util_fb_pageToken({
+          pageId: page_id,
+          systemToken,
+        })
         if (!pageAccessToken) continue
 
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []
 
         for (const group of chunkArr(commentIds, 50)) {
-          const requests = group.map((cid) =>
-            fetch(
-              `https://graph.facebook.com/${VERSION}/${cid}?fields=is_hidden`,
-              {
-                headers: { Authorization: `Bearer ${pageAccessToken}` },
-              }
-            )
-              .then((r) => r.json())
-              .then((j) => ({ cid, is_hidden: !!j?.is_hidden }))
-              .catch(() => ({ cid, is_hidden: false }))
-          )
-
-          const results = await Promise.all(requests)
+          const results = await graphBatchIsHidden({
+            version: VERSION,
+            pageAccessToken,
+            commentIds: group,
+          })
           for (const r of results) if (r.is_hidden) hiddenToMark.push(r.cid)
         }
 
-        if (hiddenToMark.length) {
-          const { data: existing } = await supabase
+        if (!hiddenToMark.length) continue
+
+        // Only set is_hidden:true if DB currently believes it's hidden (still hidden locally).
+        const { data: existing } = await supabase
+          .from('facebook_comments')
+          .select('comment_id, is_hidden')
+          .in('comment_id', hiddenToMark)
+
+        const locallyHidden = new Set(
+          (existing ?? [])
+            .filter((e) => e.is_hidden === true)
+            .map((e) => e.comment_id),
+        )
+
+        const toUpdate = hiddenToMark.filter((id) => locallyHidden.has(id))
+        if (toUpdate.length) {
+          await supabase
             .from('facebook_comments')
-            .select('comment_id, is_hidden')
-            .in('comment_id', hiddenToMark)
-
-          const stillHiddenIds = (existing ?? [])
-            .filter((e) => e.is_hidden === false) // locally considered clean
-            .map((e) => e.comment_id)
-
-          // Only re-hide those that are still locally hidden
-          const toUpdate = hiddenToMark.filter(
-            (id) => !stillHiddenIds.includes(id)
-          )
-
-          if (toUpdate.length) {
-            await supabase
-              .from('facebook_comments')
-              .update({ is_hidden: true })
-              .in('comment_id', toUpdate)
-          }
+            .update({ is_hidden: true })
+            .in('comment_id', toUpdate)
         }
       }
-
-      console.timeEnd('HIDDEN_FLAG_SYNC')
     }
 
     console.timeEnd('WEBHOOK_TOTAL')
