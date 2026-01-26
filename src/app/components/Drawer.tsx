@@ -9,8 +9,12 @@ const loadFeatures = () =>
 
 interface I_clWidth {
   sm?: `${number}px` | `${number}%` | `${number}vw`
+  md?: `${number}px` | `${number}%` | `${number}vw`
+  lg?: `${number}px` | `${number}%` | `${number}vw`
   xl?: `${number}px` | `${number}%` | `${number}vw`
-  bigScreens?: `${number}px` | `${number}%` | `${number}vw`
+  '2xl'?: `${number}px` | `${number}%` | `${number}vw`
+  '3xl'?: `${number}px` | `${number}%` | `${number}vw`
+  '4xl'?: `${number}px` | `${number}%` | `${number}vw`
 }
 
 interface I_Drawer extends I_clWidth {
@@ -79,10 +83,18 @@ const Drawer = ({
   useEffect(() => {
     if (clDeviceSize === 'sm' && clWidth?.sm) {
       setminWidth(clWidth.sm)
+    } else if (clDeviceSize === 'md' && clWidth?.md) {
+      setminWidth(clWidth.md)
+    } else if (clDeviceSize === 'lg' && clWidth?.lg) {
+      setminWidth(clWidth.lg)
     } else if (clDeviceSize === 'xl' && clWidth?.xl) {
       setminWidth(clWidth.xl)
-    } else if (clWidth?.bigScreens) {
-      setminWidth(clWidth.bigScreens)
+    } else if (clDeviceSize === '2xl' && clWidth?.['2xl']) {
+      setminWidth(clWidth['2xl'])
+    } else if (clDeviceSize === '3xl' && clWidth?.['3xl']) {
+      setminWidth(clWidth['3xl'])
+    } else if (clDeviceSize === '4xl' && clWidth?.['4xl']) {
+      setminWidth(clWidth['4xl'])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clDeviceSize])
@@ -112,7 +124,7 @@ const Drawer = ({
               exit="initial"
               className={twMerge(
                 'flex h-full shadow-md bg-white relative z-[999] overflow-y-auto',
-                clContainerStyle
+                clContainerStyle,
               )}
               style={{ minWidth, ...clStyle }}
             >

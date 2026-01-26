@@ -24,10 +24,10 @@ const PublicNavigationMenu = ({
     >
       <div
         className={
-          'max-w-[1304px] mx-auto gap-2 md:gap-0 px-2 md:px-6 lg:px-10 xl:px-0 flex justify-between items-center text-white relative'
+          'max-w-[1384px] mx-auto gap-2 md:gap-0 px-2 md:px-6 lg:px-10 xl:px-10 flex justify-between items-center text-white relative'
         }
       >
-        <div className={'w-fit flex flex-nowrap items-center gap-2'}>
+        <div className={'w-fit flex flex-nowrap items-center gap-2 md:gap-5'}>
           <MobilePublicNavigation />
           <Link href={'/'}>
             <Image
@@ -78,7 +78,7 @@ const PublicNavigationMenu = ({
                       ? clIsAdmin
                         ? 'Admin'
                         : util_capitalizeFirstLetter(
-                            clUser.recipient_name ?? ''
+                            clUser.recipient_name ?? '',
                           )
                       : 'Login'
                   }`}

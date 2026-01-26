@@ -39,9 +39,9 @@ const MobilePublicNavigation = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
   return (
-    <div className="block md:hidden">
+    <div className="block lg:hidden">
       <Icon_menu
-        className="min-w-7 min-h-7 cursor-pointer"
+        className="min-w-7 min-h-7 md:min-w-8 md:min-h-8 cursor-pointer"
         onClick={() => clToggleDrawer()}
       />
       <Drawer
@@ -49,7 +49,7 @@ const MobilePublicNavigation = () => {
         clToggleDrawer={clToggleDrawer}
         clMoveLeftToRight
         className="text-white px-9"
-        clWidth={{ sm: '80%', bigScreens: '50%' }}
+        clWidth={{ sm: '80%', md: '50%' }}
         clStyle={{
           background:
             'linear-gradient(rgb(47, 142, 221) 0%, rgb(47, 157, 221) 33%, rgb(47, 171, 221) 69%, rgb(47, 186, 221) 97%)',

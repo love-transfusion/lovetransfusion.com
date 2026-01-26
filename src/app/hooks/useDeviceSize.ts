@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react'
  * ```
  */
 export interface I_DeviceSize {
-  clDeviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | null
+  clDeviceSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | null
   clWindowWidth: number
   clWindowHeight: number
 }
@@ -40,10 +40,12 @@ const useDeviceSize = (): I_DeviceSize => {
       setValues('lg')
     } else if (window.innerWidth >= 1280 && window.innerWidth <= 1535) {
       setValues('xl')
-    } else if (window.innerWidth >= 1536 && window.innerWidth <= 1920) {
+    } else if (window.innerWidth >= 1536 && window.innerWidth <= 1767) {
       setValues('2xl')
-    } else if (window.innerWidth >= 1930) {
+    } else if (window.innerWidth >= 1768 && window.innerWidth <= 1919) {
       setValues('3xl')
+    } else if (window.innerWidth >= 1920) {
+      setValues('4xl')
     }
   }
 

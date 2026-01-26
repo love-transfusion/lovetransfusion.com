@@ -23,7 +23,7 @@ const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
   return (
     <>
       <Icon_menu
-        className="min-w-5 min-h-5 sm:min-w-6 sm:min-h-6 text-white 2xl:hidden cursor-pointer"
+        className="min-w-5 min-h-5 sm:min-w-6 sm:min-h-6 text-white 3xl:hidden cursor-pointer"
         onClick={() => clToggleDrawer()}
       />
       <Drawer
@@ -34,7 +34,7 @@ const MobileDashboardMenu = ({ clIsAdmin }: I_MobileDashboardMenu) => {
           background:
             'linear-gradient(rgb(47, 142, 221) 0%, rgb(47, 157, 221) 33%, rgb(47, 171, 221) 69%, rgb(47, 186, 221) 97%)',
         }}
-        clWidth={{ bigScreens: '50%', sm: '80%', xl: '30%' }}
+        clWidth={{ sm: '80%', md: '50%', lg: '30%', xl: '30%', '2xl': '30%' }}
         className="text-white px-9"
       >
         <MenuTopPart />

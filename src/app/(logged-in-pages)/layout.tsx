@@ -23,7 +23,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
     <>
       <div
         className={
-          'grid grid-cols-1 2xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
+          'grid grid-cols-1 3xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
         }
       >
         <NavigationMenu clIsAdmin={isadmin} />
@@ -51,11 +51,17 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                 <div className="flex gap-5 sm:gap-[40px] xl:gap-8 2xl:gap-[90px] w-full items-center">
                   <p
                     className={
-                      'font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[2px] sm:tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
+                      'md:hidden 3xl:block font-acumin-variable-90 md:text-lg 2xl:text-2xl tracking-[2px] sm:tracking-[3px] md:tracking-[5.8px] -mt-[1px]'
                     }
                   >
                     DASHBOARD
                   </p>
+                  <Image
+                    src={ltLogo}
+                    quality={100}
+                    alt="Love Transfusion logo"
+                    className="hidden md:block 3xl:hidden max-w-[230px] lg:max-w-[200px] 2xl:max-w-[230px]"
+                  />
                   <div className="w-full flex xl:gap-8 2xl:gap-[90px] justify-end md:justify-between xl:pr-[3.7vw] 2xl:pr-20">
                     <Image
                       src={dots}
@@ -70,7 +76,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                         src={doubleHeart}
                         alt="dots"
                         quality={100}
-                        className="hidden lg:block max-w-[134px]"
+                        className="hidden lg:block max-w-[93px] xl:max-w-[134px]"
                       />
                       <p
                         className={
@@ -81,7 +87,7 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
                       </p>
                       <Image
                         src={doubleHeart}
-                        className="hidden lg:block max-w-[134px]"
+                        className="hidden lg:block max-w-[93px] xl:max-w-[134px]"
                         alt="dots"
                         quality={100}
                       />

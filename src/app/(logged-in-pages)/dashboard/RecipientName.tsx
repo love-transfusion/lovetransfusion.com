@@ -9,7 +9,7 @@ const RecipientName = () => {
       {userInStore?.first_name ? (
         <div
           className={
-            'sm:text-lg md:text-2xl flex justify-end gap-2 md:gap-[11px]'
+            'sm:text-lg md:text-2xl lg:text-xl xl:text-2xl flex justify-end gap-2 md:gap-[11px]'
           }
         >
           <p className={'font-light font-acumin-variable-92'}>RECIPIENT:</p>
