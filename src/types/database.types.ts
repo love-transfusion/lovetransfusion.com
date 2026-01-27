@@ -162,6 +162,8 @@ export type Database = {
           next_cursor: string | null
           page_id: string
           post_id: string
+          reactions_checked_at: string | null
+          reactions_supported: boolean | null
           retry_count: number
           sync_status: Database["public"]["Enums"]["posts_sync_status"]
           user_id: string | null
@@ -174,6 +176,8 @@ export type Database = {
           next_cursor?: string | null
           page_id: string
           post_id: string
+          reactions_checked_at?: string | null
+          reactions_supported?: boolean | null
           retry_count?: number
           sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
@@ -186,6 +190,8 @@ export type Database = {
           next_cursor?: string | null
           page_id?: string
           post_id?: string
+          reactions_checked_at?: string | null
+          reactions_supported?: boolean | null
           retry_count?: number
           sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
@@ -507,10 +513,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       posts_sync_status: "idle" | "running" | "deferred" | "error"

@@ -58,10 +58,11 @@ const MapChart = ({
       registerMap('world', worldJson)
 
       const combinedAnalytics = [...analytics, ...defaultPoint]
+      console.log({ combinedAnalytics })
 
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
-        (item) => item.clViews
+        (item) => item.clViews,
       )
 
       const mapped = await mapAnalyticsToGeoPoints(removedHugsAndMessages)
@@ -98,7 +99,7 @@ const MapChart = ({
             params: any,
             dom: { offsetWidth: number; offsetHeight: number },
             rect: any,
-            size: { viewSize: any[] }
+            size: { viewSize: any[] },
           ) {
             const [x, y] = point
             const tipW = dom?.offsetWidth || 266

@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_shares } from '@/app/utilities/facebook/util_fb_shares'
 import { util_fb_reactions_total } from '@/app/utilities/facebook/util_fb_reactions_total'
 import { util_fb_reachByRegion_multiAds } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
@@ -21,7 +20,16 @@ type JobResult =
   | {
       postId: string
       userId: string | null
-      status: 'skipped:cooldown' | 'ok:insert' | 'ok:update' | 'ok:shares-only'
+      status:
+        | 'skipped:cooldown'
+        | 'ok:insert'
+        | 'ok:update'
+        | 'ok:shares-only'
+        | 'ok:shares-reactions-only'
+      reactions_supported?: boolean
+      reactions_error?: string
+      total_reactions?: number
+      shares?: number
     }
   | {
       postId: string
@@ -43,7 +51,8 @@ const jitter = (ms: number) => Math.floor(ms * (0.75 + Math.random() * 0.5))
 const timeExceeded = (startedMs: number, softMs = 250_000) =>
   Date.now() - startedMs >= softMs
 
-export const createMinTimeLimiter = (minTimeMs: number) => {
+// NOTE: keep this local (NOT exported) to avoid "Server Actions must be async"
+const createMinTimeLimiter = (minTimeMs: number) => {
   let chain: Promise<unknown> = Promise.resolve()
   let last = 0
 
@@ -85,8 +94,8 @@ const createMutex = () => {
 }
 const heavyMutex = createMutex()
 
-const isRateLimitError = (e: any) => {
-  const status = e?.status ?? e?.response?.status ?? undefined
+const extractMetaErr = (e: any) => {
+  const status = e?.status ?? e?.response?.status ?? e?.error?.status
   const code =
     e?.code ?? e?.error?.code ?? e?.response?.data?.error?.code ?? undefined
   const subcode =
@@ -94,15 +103,47 @@ const isRateLimitError = (e: any) => {
     e?.error?.error_subcode ??
     e?.response?.data?.error?.error_subcode ??
     undefined
+
   const msg: string =
     e?.message ??
     e?.error?.message ??
     e?.response?.data?.error?.message ??
     String(e ?? '')
 
+  return { status, code, subcode, msg }
+}
+
+// For util_fb_reactions_total "returned error object"
+const isReactionUnsupported = (err: any) => {
+  const msg = String(err?.message ?? '')
+  const code = err?.code
+  const subcode = err?.error_subcode
+
+  return (
+    (code === 100 && subcode === 33) ||
+    /Unsupported get request/i.test(msg) ||
+    /does not exist|cannot be loaded|missing permissions|does not support this operation/i.test(
+      msg,
+    )
+  )
+}
+
+const isAdsAccountRateLimited = (e: any) => {
+  const { code, subcode, msg } = extractMetaErr(e)
+  // your screenshot shows code 80004, subcode 2446079
+  return (
+    code === 80004 ||
+    subcode === 2446079 ||
+    /too many calls to this ad-account/i.test(msg ?? '')
+  )
+}
+
+const isRateLimitError = (e: any) => {
+  const { status, code, subcode, msg } = extractMetaErr(e)
+
   const metaThrottleCodes = code === 4 || code === 17 || code === 32
   const textThrottle =
-    /rate limit|too many calls|user request limit reached|please wait/i.test(
+    /rate limit|too many calls|user request limit reached|please wait|too many calls/i.test(
       msg,
     )
   const http429 = status === 429
@@ -126,6 +167,7 @@ const withRetry = async <T>(
     retries?: number
     baseDelayMs?: number
     rateLimitExtraDelayMs?: number
+    nonRetryable?: (e: any) => boolean
   },
 ): Promise<T> => {
   const retries = opts.retries ?? 4
@@ -139,6 +181,18 @@ const withRetry = async <T>(
       return await fn()
     } catch (e: any) {
       lastErr = e
+
+      if (opts.nonRetryable?.(e)) {
+        console.warn(`[${label}] non-retryable`, {
+          runId: opts.runId,
+          userId: opts.userId,
+          postId: opts.postId,
+          attempt,
+          message: extractMetaErr(e).msg?.slice(0, 250),
+        })
+        throw e
+      }
+
       const rl = isRateLimitError(e)
       const delay =
         jitter(baseDelayMs * 2 ** attempt) + (rl.ok ? rateLimitExtra : 0)
@@ -189,6 +243,9 @@ const runWithConcurrency = async <T, R>(
 
 export const GET = async (req: NextRequest) => {
   const runId = crypto.randomUUID()
+  const url = new URL(req.url)
+  const mode = url.searchParams.get('mode') // "light" | null
+  const LIGHT_ONLY = mode === 'light'
 
   if (!isAuthorizedCron(req))
     return new NextResponse('Unauthorized', { status: 401 })
@@ -204,29 +261,25 @@ export const GET = async (req: NextRequest) => {
     Date.now() - SYNC_COOLDOWN_MINUTES * 60_000,
   ).toISOString()
 
-  // Resolve page token once (for shares)
-  let pageAccessToken: string | null = null
-  try {
-    const res = await withRetry(
-      'PAGE_TOKEN',
-      () =>
-        limiterLight.schedule(() =>
-          util_fb_pageToken({
-            pageId: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
-          }),
-        ),
-      { runId, retries: 3, baseDelayMs: 600 },
+  // ✅ env guard (cron-proof)
+  const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN
+  if (!pageAccessToken) {
+    return NextResponse.json(
+      { ok: false as const, runId, error: 'missing FACEBOOK_PAGE_TOKEN' },
+      { status: 500 },
     )
-    pageAccessToken = res?.data ?? null
-  } catch {
-    pageAccessToken = null
   }
+
+  // Global flag: once ads endpoint is rate-limited, skip all remaining heavy calls in this run
+  let adsThrottledThisRun = false
 
   // 1) Pick posts to consider (cheap scan)
   const { data: posts, error: postsErr } = await supabase
     .from('facebook_posts')
-    .select('post_id,user_id')
-    .order('last_synced_at', { ascending: true, nullsFirst: true })
+    .select('post_id,user_id,reactions_supported,reactions_checked_at')
+    // you can keep this .not(...) or remove it; either way we handle nulls safely below
+    .not('user_id', 'is', null)
+    .order('reactions_checked_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
 
   if (postsErr) {
@@ -273,19 +326,38 @@ export const GET = async (req: NextRequest) => {
     (insightRows ?? []).map((r: any) => [r.post_id, r]),
   )
 
-  // 3) Filter by cooldown
-  const candidates = (posts ?? []).filter((p) => {
+  const hasUserId = <T extends { user_id: string | null }>(
+    p: T,
+  ): p is T & { user_id: string } => !!p.user_id
+
+  // ✅ IMPORTANT: compute "eligible" first so "skipped" stays accurate
+  const eligible = (posts ?? []).filter(hasUserId)
+
+  // 3) Split by cooldown (accurate)
+  const candidates = eligible.filter((p) => {
     const row = insightMap.get(p.post_id)
     const last = row?.last_synced_at ?? ''
     return !last || last < cooldownCutoffISO
   })
 
+  const skipped = eligible
+    .filter((p) => !candidates.some((c) => c.post_id === p.post_id))
+    .map(
+      (p): JobResult => ({
+        postId: p.post_id,
+        userId: p.user_id,
+        status: 'skipped:cooldown',
+      }),
+    )
+
   const worker = async (p: {
     post_id: string
-    user_id: string | null
+    user_id: string
+    reactions_supported: boolean | null
+    reactions_checked_at: string | null
   }): Promise<JobResult> => {
     const postId = p.post_id
-    const userId = p.user_id ?? null
+    const userId = p.user_id
 
     try {
       if (timeExceeded(started)) {
@@ -300,87 +372,229 @@ export const GET = async (req: NextRequest) => {
       // shares + reactions (light)
       let shares = 0
       let total_reactions = 0
+      let reactions_supported = true
+      let reactions_error: string | undefined = undefined
 
-      if (pageAccessToken) {
-        try {
-          const [sharesRes, reactionsRes] = await Promise.all([
-            withRetry(
-              'SHARES',
-              () =>
-                limiterLight.schedule(() =>
-                  util_fb_shares({ postID: postId, pageAccessToken }),
-                ),
-              { runId, postId, userId, retries: 3, baseDelayMs: 500 },
-            ),
-            withRetry(
-              'REACTIONS',
-              () =>
-                limiterLight.schedule(() => util_fb_reactions_total(postId)),
-              { runId, postId, userId, retries: 3, baseDelayMs: 500 },
-            ),
-          ])
+      // 1) Shares (retry ok)
+      const sharesRes = await withRetry(
+        'SHARES',
+        () =>
+          limiterLight.schedule(() =>
+            util_fb_shares({ postID: postId, pageAccessToken }),
+          ),
+        { runId, postId, userId, retries: 3, baseDelayMs: 500 },
+      )
+      shares = sharesRes?.count ?? 0
 
-          shares = sharesRes?.count ?? 0
-          total_reactions = reactionsRes?.totalReactions ?? 0
-        } catch {
-          shares = 0
-          total_reactions = 0
+      // 2) Reactions (best-effort, NO retry, and cache unsupported in DB)
+      const knownUnsupported = p.reactions_supported === false
+      if (knownUnsupported) {
+        reactions_supported = false
+        total_reactions = 0
+      } else {
+        const reactionsRes = await limiterLight.schedule(() =>
+          util_fb_reactions_total({ postId, pageAccessToken }),
+        )
+
+        if (reactionsRes?.error) {
+          if (isReactionUnsupported(reactionsRes.error)) {
+            reactions_supported = false
+            total_reactions = 0
+
+            console.warn('[REACTIONS] unsupported/best-effort', {
+              runId,
+              postId,
+              userId,
+              message: reactionsRes.error.message?.slice(0, 250),
+              status: reactionsRes.error.status,
+              code: reactionsRes.error.code,
+              subcode: reactionsRes.error.error_subcode,
+            })
+
+            await supabase
+              .from('facebook_posts')
+              .update({
+                reactions_supported: false,
+                reactions_checked_at: new Date().toISOString(),
+              })
+              .eq('post_id', postId)
+          } else {
+            reactions_supported = true // unknown, not proven unsupported
+            total_reactions = 0
+            reactions_error = String(reactionsRes.error.message ?? 'unknown')
+
+            console.warn('[REACTIONS] error/best-effort', {
+              runId,
+              postId,
+              userId,
+              message: reactionsRes.error.message?.slice(0, 250),
+              status: reactionsRes.error.status,
+              code: reactionsRes.error.code,
+              subcode: reactionsRes.error.error_subcode,
+            })
+          }
+        } else {
+          total_reactions = reactionsRes.data.totalReactions
+          reactions_supported = true
+
+          await supabase
+            .from('facebook_posts')
+            .update({
+              reactions_supported: true,
+              reactions_checked_at: new Date().toISOString(),
+            })
+            .eq('post_id', postId)
         }
       }
 
       const existing = insightMap.get(postId)
 
-      const fetchHeavy = (endAnchor: 'today' | '37mon') =>
-        heavyMutex.run(() =>
-          withRetry(
-            endAnchor === 'today' ? 'REACH_TODAY' : 'REACH_37MON',
-            () =>
-              limiterHeavy.schedule(() =>
-                util_fb_reachByRegion_multiAds({ endAnchor, post_id: postId }),
-              ),
-            {
-              runId,
+      const fetchHeavy = async (endAnchor: 'today' | '37mon') => {
+        if (LIGHT_ONLY) throw new Error('light-mode-skip-heavy')
+        if (adsThrottledThisRun) throw new Error('ads-throttled-skip-heavy')
+
+        try {
+          return await heavyMutex.run(() =>
+            withRetry(
+              endAnchor === 'today' ? 'REACH_TODAY' : 'REACH_37MON',
+              () =>
+                limiterHeavy.schedule(() =>
+                  util_fb_reachByRegion_multiAds({
+                    endAnchor,
+                    post_id: postId,
+                  }),
+                ),
+              {
+                runId,
+                postId,
+                userId,
+                retries: 5,
+                baseDelayMs: 900,
+                rateLimitExtraDelayMs: 3500,
+                // ✅ KEY FIX: don't spam-retry ads-account throttle
+                nonRetryable: (e) => isAdsAccountRateLimited(e),
+              },
+            ),
+          )
+        } catch (e: any) {
+          if (isAdsAccountRateLimited(e)) {
+            adsThrottledThisRun = true
+            console.warn(
+              '[ADS_THROTTLE] detected - skipping remaining heavy calls this run',
+              {
+                runId,
+                postId,
+                userId,
+                message: extractMetaErr(e).msg?.slice(0, 250),
+              },
+            )
+          }
+          throw e
+        }
+      }
+
+      // Insert path
+      if (!existing) {
+        try {
+          const init = await fetchHeavy('37mon')
+
+          const { error } = await supa_insert_facebook_insights({
+            user_id: userId ?? undefined,
+            post_id: postId,
+            insights: init,
+            shares,
+            total_reactions,
+            last_synced_at: new Date().toISOString(),
+          } as any)
+
+          return {
+            postId,
+            userId,
+            status: error ? 'error:insert' : 'ok:insert',
+            ...(error ? { message: String(error) } : {}),
+            reactions_supported,
+            ...(reactions_error ? { reactions_error } : {}),
+            total_reactions,
+            shares,
+          }
+        } catch (e: any) {
+          const msg = extractMetaErr(e).msg ?? String(e)
+          const isThrottled =
+            adsThrottledThisRun ||
+            String(e?.message).includes('ads-throttled-skip-heavy')
+
+          if (isThrottled) {
+            const placeholderInsights = {
+              days: [],
+              meta: {
+                skippedHeavy: true,
+                reason: 'ads-throttled',
+                runId,
+                at: new Date().toISOString(),
+              },
+            }
+
+            const { error } = await supa_insert_facebook_insights({
+              user_id: userId ?? undefined,
+              post_id: postId,
+              insights: placeholderInsights,
+              shares,
+              total_reactions,
+              last_synced_at: new Date().toISOString(),
+            } as any)
+
+            return {
               postId,
               userId,
-              retries: 5,
-              baseDelayMs: 900,
-              rateLimitExtraDelayMs: 3500,
-            },
-          ),
-        )
+              status: error ? 'error:insert' : 'ok:shares-reactions-only',
+              ...(error ? { message: String(error) } : {}),
+              reactions_supported,
+              ...(reactions_error ? { reactions_error } : {}),
+              total_reactions,
+              shares,
+            }
+          }
 
-      if (!existing) {
-        const init = await fetchHeavy('37mon')
-        const { error } = await supa_insert_facebook_insights({
-          user_id: userId ?? undefined,
-          post_id: postId,
-          insights: init,
-          shares,
-          total_reactions,
-          last_synced_at: new Date().toISOString(),
-        } as any)
-
-        return {
-          postId,
-          userId,
-          status: error ? 'error:insert' : 'ok:insert',
-          ...(error ? { message: String(error) } : {}),
+          return { postId, userId, status: 'error:insert', message: msg }
         }
       }
 
-      const fresh = await fetchHeavy('today')
-      const hasNewInsights =
-        Array.isArray((fresh as any)?.days) && (fresh as any).days.length > 0
+      // Update path
+      try {
+        const fresh = await fetchHeavy('today')
+        const hasNewInsights =
+          Array.isArray((fresh as any)?.days) && (fresh as any).days.length > 0
 
-      if (hasNewInsights) {
-        const merged = merge_old_and_new_regionInsightsByDate(
-          existing.insights as any,
-          fresh as any,
-        )
+        if (hasNewInsights) {
+          const merged = merge_old_and_new_regionInsightsByDate(
+            existing.insights as any,
+            fresh as any,
+          )
 
+          const { error } = await supa_update_facebook_insights({
+            post_id: postId,
+            insights: merged,
+            shares,
+            total_reactions,
+            last_synced_at: new Date().toISOString(),
+          } as any)
+
+          return {
+            postId,
+            userId,
+            status: error ? 'error:update' : 'ok:update',
+            ...(error ? { message: String(error) } : {}),
+            reactions_supported,
+            ...(reactions_error ? { reactions_error } : {}),
+            total_reactions,
+            shares,
+          }
+        }
+
+        // No new heavy insights. Still update shares/reactions.
         const { error } = await supa_update_facebook_insights({
           post_id: postId,
-          insights: merged,
+          insights: existing.insights,
           shares,
           total_reactions,
           last_synced_at: new Date().toISOString(),
@@ -389,46 +603,82 @@ export const GET = async (req: NextRequest) => {
         return {
           postId,
           userId,
-          status: error ? 'error:update' : 'ok:update',
+          status: error ? 'error:update' : 'ok:shares-only',
           ...(error ? { message: String(error) } : {}),
+          reactions_supported,
+          ...(reactions_error ? { reactions_error } : {}),
+          total_reactions,
+          shares,
         }
-      }
+      } catch (e: any) {
+        if (
+          adsThrottledThisRun ||
+          String(e?.message).includes('ads-throttled-skip-heavy')
+        ) {
+          const { error } = await supa_update_facebook_insights({
+            post_id: postId,
+            insights: existing.insights,
+            shares,
+            total_reactions,
+            last_synced_at: new Date().toISOString(),
+          } as any)
 
-      const { error } = await supa_update_facebook_insights({
-        post_id: postId,
-        insights: existing.insights,
-        shares,
-        total_reactions,
-      } as any)
+          return {
+            postId,
+            userId,
+            status: error ? 'error:update' : 'ok:shares-only',
+            ...(error ? { message: String(error) } : {}),
+            reactions_supported,
+            ...(reactions_error ? { reactions_error } : {}),
+            total_reactions,
+            shares,
+          }
+        }
 
-      return {
-        postId,
-        userId,
-        status: error ? 'error:update' : 'ok:shares-only',
-        ...(error ? { message: String(error) } : {}),
+        return {
+          postId,
+          userId,
+          status: 'error:update',
+          message: extractMetaErr(e).msg ?? String(e),
+        }
       }
     } catch (e: any) {
       return {
         postId,
         userId,
         status: 'error:exception',
-        message: e?.message ?? String(e),
+        message: extractMetaErr(e).msg ?? String(e),
       }
     }
   }
 
-  const results = await runWithConcurrency(
+  const processed = await runWithConcurrency(
     candidates,
     WORKER_CONCURRENCY,
     worker,
   )
+
+  const results = [...processed, ...skipped]
+
+  // For reporting (computed from processed to avoid concurrency issues)
+  const reactionsOkCount = processed.filter(
+    (r: any) => 'reactions_supported' in r && r.reactions_supported === true,
+  ).length
+
+  const reactionsUnsupportedCount = processed.filter(
+    (r: any) => 'reactions_supported' in r && r.reactions_supported === false,
+  ).length
 
   return NextResponse.json({
     ok: true as const,
     runId,
     scanned: posts?.length ?? 0,
     candidates: candidates.length,
-    processed: results.length,
+    processed: processed.length,
+    skipped: skipped.length,
+    adsThrottledThisRun,
+    reactionsOkCount,
+    reactionsUnsupportedCount,
     results,
     note: `Cooldown=${SYNC_COOLDOWN_MINUTES}m. Concurrency=${WORKER_CONCURRENCY}. Light=${limiterLight.minTimeMs}ms Heavy=${limiterHeavy.minTimeMs}ms (single-flight).`,
   })

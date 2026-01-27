@@ -8,7 +8,6 @@ import {
 } from '@/app/utilities/facebook/helpers/webhookWrites'
 
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
-import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
 import { metaFetchJson } from './metaFetch'
 
@@ -391,12 +390,7 @@ export async function POST(req: NextRequest) {
           const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
           if (!systemToken) continue
 
-          const { data: pageAccessToken } = await util_fb_pageToken({
-            pageId: page_id,
-            systemToken,
-          })
-
-          if (!pageAccessToken) continue
+          const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
 
           const avatars = await util_fb_profile_picture({
             clIDs: fromIds,
@@ -456,11 +450,7 @@ export async function POST(req: NextRequest) {
         const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
         if (!systemToken) continue
 
-        const { data: pageAccessToken } = await util_fb_pageToken({
-          pageId: page_id,
-          systemToken,
-        })
-        if (!pageAccessToken) continue
+        const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
 
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []

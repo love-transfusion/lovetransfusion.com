@@ -1,8 +1,8 @@
 {
   "crons": [
-    { "path": "/api/cron/reconcile", "schedule": "*/4 * * * *" },
-    { "path": "/api/cron/insights", "schedule": "1-59/4 * * * *" },
-    { "path": "/api/cron/ga", "schedule": "2-59/4 * * * *" },
-    { "path": "/api/cron/recipients", "schedule": "3-59/4 * * * *" }
+    { "path": "/api/cron/reconcile", "schedule": "*/10 * * * *" },
+    { "path": "/api/cron/insights", "schedule": "7 */6 * * *" },
+    { "path": "/api/cron/ga", "schedule": "17 */1 * * *" },
+    { "path": "/api/cron/recipients", "schedule": "*/4 * * * *" }
   ]
 }

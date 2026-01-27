@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RegionInsightByDate } from '@/app/utilities/facebook/util_fb_reachByRegion_multiAds'
 
 type Row = {
@@ -10,7 +11,6 @@ type Row = {
 const makeKey = (region: string, country: string) =>
   `${region}|${(country || '').toUpperCase()}`
 
-/** Merge rows within ONE date (dedupe per region+country; sum reach/imp). */
 const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
   const map = new Map<string, Row>()
   for (const r of [...a, ...b]) {
@@ -38,54 +38,51 @@ const mergeRegionRows = (a: Row[] = [], b: Row[] = []): Row[] => {
   return Array.from(map.values()).sort((a, b) => b.cl_reach - a.cl_reach)
 }
 
-/**
- * Replace-on-overlap strategy:
- * - Keep all old days that don't appear in fresh.
- * - For any date that exists in fresh, REPLACE that date's rows with fresh rows.
- * - Always union adIds.
- */
+const isValidRegionInsight = (x: any): x is RegionInsightByDate =>
+  !!x && Array.isArray(x.days) && Array.isArray(x.adIds)
+
+const isPlaceholderInsight = (x: any) =>
+  !!x &&
+  Array.isArray(x.days) &&
+  x.days.length === 0 &&
+  !!x.meta?.skippedHeavy
+
 export const merge_old_and_new_regionInsightsByDate = (
   oldI: RegionInsightByDate | undefined,
-  freshI: RegionInsightByDate
+  freshI: RegionInsightByDate,
 ): RegionInsightByDate => {
-  if (!oldI || !oldI.days?.length) {
+  // ✅ If old is missing/invalid/placeholder → just take fresh (normalized)
+  if (!isValidRegionInsight(oldI) || isPlaceholderInsight(oldI)) {
     return {
-      adIds: [...new Set(freshI.adIds)],
-      days: [...freshI.days].map((d) => ({
+      adIds: [...new Set(freshI.adIds ?? [])],
+      days: (freshI.days ?? []).map((d) => ({
         date: d.date,
-        rows: mergeRegionRows([], d.rows),
+        rows: mergeRegionRows([], d.rows as any),
       })),
     }
   }
 
   const adIds = Array.from(
-    new Set([...(oldI.adIds ?? []), ...(freshI.adIds ?? [])])
+    new Set([...(oldI.adIds ?? []), ...(freshI.adIds ?? [])]),
   )
 
-  // Index fresh by date for O(1) replacement checks.
   const freshByDate = new Map<string, Row[]>()
   for (const d of freshI.days ?? []) {
-    // normalize/dedupe within the day just in case
-    freshByDate.set(d.date, mergeRegionRows([], d.rows))
+    freshByDate.set(d.date, mergeRegionRows([], d.rows as any))
   }
 
   const outDaysMap = new Map<string, Row[]>()
 
-  // 1) Start with all old days that are NOT in fresh
   for (const d of oldI.days ?? []) {
     if (!freshByDate.has(d.date)) {
-      // keep old day (normalize/dedupe within day)
-      outDaysMap.set(d.date, mergeRegionRows([], d.rows))
+      outDaysMap.set(d.date, mergeRegionRows([], d.rows as any))
     }
-    // if fresh has this date, we will replace later
   }
 
-  // 2) Add/replace with fresh days
   for (const [date, rows] of freshByDate.entries()) {
-    outDaysMap.set(date, rows) // replace-on-overlap
+    outDaysMap.set(date, rows)
   }
 
-  // 3) Build sorted array
   const days = [...outDaysMap.entries()]
     .map(([date, rows]) => ({ date, rows }))
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))

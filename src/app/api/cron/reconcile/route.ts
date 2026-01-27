@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import pLimit from 'p-limit'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
-import { util_fb_pageToken } from '@/app/utilities/facebook/util_fb_pageToken'
 import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
@@ -376,26 +375,7 @@ async function reconcilePost(
 
   // 0) Resolve page token (IMPORTANT: pass systemToken if available)
   console.time(postSpan('PAGE_TOKEN'))
-  const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
-  const { data: pageToken, error: tokErr } = await util_fb_pageToken({
-    pageId: post.page_id,
-    ...(systemToken ? { systemToken } : {}),
-  } as any)
-  console.timeEnd(postSpan('PAGE_TOKEN'))
-
-  if (!pageToken || tokErr) {
-    console.error(postSpan('PAGE_TOKEN_ERR'), { error: tokErr })
-    await markPostError(
-      supabase,
-      post.post_id,
-      `page token retrieval failed: ${tokErr?.message ?? 'no token'}`,
-    )
-    return false
-  } else {
-    console.info(postSpan('PAGE_TOKEN_OK'), {
-      tokenSuffix: pageToken.slice(-6),
-    })
-  }
+  const pageToken = process.env.FACEBOOK_PAGE_TOKEN!
 
   const since = post.last_synced_at ?? undefined
   let after: string | undefined = post.next_cursor ?? undefined
