@@ -393,7 +393,7 @@ export const GET = async (req: NextRequest) => {
         total_reactions = 0
       } else {
         const reactionsRes = await limiterLight.schedule(() =>
-          util_fb_reactions_total({ postId, pageAccessToken }),
+          util_fb_reactions_total({ postId }),
         )
 
         if (reactionsRes?.error) {
@@ -458,12 +458,13 @@ export const GET = async (req: NextRequest) => {
             withRetry(
               endAnchor === 'today' ? 'REACH_TODAY' : 'REACH_37MON',
               () =>
-                limiterHeavy.schedule(() =>
-                  util_fb_reachByRegion_multiAds({
+                limiterHeavy.schedule(async () => {
+                  const result = await util_fb_reachByRegion_multiAds({
                     endAnchor,
                     post_id: postId,
-                  }),
-                ),
+                  })
+                  return result
+                }),
               {
                 runId,
                 postId,

@@ -58,7 +58,6 @@ const MapChart = ({
       registerMap('world', worldJson)
 
       const combinedAnalytics = [...analytics, ...defaultPoint]
-      console.log({ combinedAnalytics })
 
       // Remove item with hugs and messages
       const removedHugsAndMessages = combinedAnalytics.filter(
