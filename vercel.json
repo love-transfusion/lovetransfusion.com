@@ -3,6 +3,10 @@
     { "path": "/api/cron/ga", "schedule": "*/20 * * * *" },
     { "path": "/api/cron/recipients", "schedule": "*/3 * * * *" },
     { "path": "/api/cron/insights", "schedule": "*/10 * * * *" },
-    { "path": "/api/cron/reconcile", "schedule": "*/6 * * * *" }
+    { "path": "/api/cron/reconcile", "schedule": "*/6 * * * *" },
+    {
+      "path": "/api/cron/delete_in_memoriam_recipients",
+      "schedule": "*/3 * * * *"
+    }
   ]
 }

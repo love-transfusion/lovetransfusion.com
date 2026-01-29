@@ -7,7 +7,7 @@ import { createServer } from '@/app/config/supabase/supabaseServer'
 
 export const supa_upsert_recipients = async (
   recipients: I_supa_recipients_insert[],
-  CRON?: string
+  CRON?: string,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
@@ -36,7 +36,7 @@ export const supa_select_recipients_all = async (
         clCurrentPage: number
       }
     | undefined,
-  CRON?: string
+  CRON?: string,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
@@ -58,6 +58,7 @@ export const supa_select_recipients_all = async (
       .from('recipients')
       .select('*', { count: 'estimated' })
       .order('created_at', { ascending: false })
+      .eq('is_deleted', false)
 
     if (to) {
       query = query.limit(newLimit).range(from, to)
@@ -73,18 +74,22 @@ export const supa_select_recipients_all = async (
   }
 }
 
-export const supa_select_recipients = async (recipientID: string) => {
+export const supa_select_recipients = async (
+  recipientID: string | string[],
+) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
   if (!isadmin) return { data: null, error: 'You are not authorized.' }
   const supabase = isadmin ? await createAdmin() : await createServer()
-
   try {
-    const { data, error } = await supabase
-      .from('recipients')
-      .select('*')
-      .eq('id', recipientID)
-      .single()
+    const { data, error } =
+      typeof recipientID === 'string'
+        ? await supabase
+            .from('recipients')
+            .select('*')
+            .eq('id', recipientID)
+            .single()
+        : await supabase.from('recipients').select('*').in('id', recipientID)
 
     if (error) throw new Error(error.message)
     return { data, error: null }
@@ -96,7 +101,7 @@ export const supa_select_recipients = async (recipientID: string) => {
 }
 
 export const supa_update_recipients = async (
-  recipientObj: I_supa_recipients_update
+  recipientObj: I_supa_recipients_update,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })

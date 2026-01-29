@@ -27,7 +27,7 @@ const RecipientPage = async (props: { params: Params }) => {
 
   const { data: recipientData } = await supa_select_recipients(recipient)
 
-  if (!recipientData) return
+  if (!recipientData || Array.isArray(recipientData)) return
 
   const unknown_recipientObject = recipientData.recipient as unknown
   const recipientObject = unknown_recipientObject as I_supaorg_recipient

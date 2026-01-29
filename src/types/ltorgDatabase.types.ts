@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '12.0.2 (a4e00ff)'
+    PostgrestVersion: "12.0.2 (a4e00ff)"
   }
   public: {
     Tables: {
@@ -134,40 +134,40 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'chat_conversations_2_conversation_status_fkey'
-            columns: ['conversation_status']
+            foreignKeyName: "chat_conversations_2_conversation_status_fkey"
+            columns: ["conversation_status"]
             isOneToOne: false
-            referencedRelation: 'chat_conversations_status'
-            referencedColumns: ['id']
+            referencedRelation: "chat_conversations_status"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_conversations_2_last_message_id_fkey'
-            columns: ['last_message_id']
+            foreignKeyName: "chat_conversations_2_last_message_id_fkey"
+            columns: ["last_message_id"]
             isOneToOne: false
-            referencedRelation: 'chat_messages'
-            referencedColumns: ['id']
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_conversations_2_user1_id_fkey'
-            columns: ['user1_id']
+            foreignKeyName: "chat_conversations_2_user1_id_fkey"
+            columns: ["user1_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_conversations_2_user2_id_fkey'
-            columns: ['user2_id']
+            foreignKeyName: "chat_conversations_2_user2_id_fkey"
+            columns: ["user2_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_conversations_has_unread_fkey'
-            columns: ['has_unread']
+            foreignKeyName: "chat_conversations_has_unread_fkey"
+            columns: ["has_unread"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_conversations_status: {
@@ -176,7 +176,7 @@ export type Database = {
           id: string
           made_by: string | null
           made_to: string | null
-          status: Database['public']['Enums']['chat_conversation_status'] | null
+          status: Database["public"]["Enums"]["chat_conversation_status"] | null
         }
         Insert: {
           created_at?: string
@@ -184,7 +184,7 @@ export type Database = {
           made_by?: string | null
           made_to?: string | null
           status?:
-            | Database['public']['Enums']['chat_conversation_status']
+            | Database["public"]["Enums"]["chat_conversation_status"]
             | null
         }
         Update: {
@@ -193,24 +193,24 @@ export type Database = {
           made_by?: string | null
           made_to?: string | null
           status?:
-            | Database['public']['Enums']['chat_conversation_status']
+            | Database["public"]["Enums"]["chat_conversation_status"]
             | null
         }
         Relationships: [
           {
-            foreignKeyName: 'chat_conversations_status_made_by_fkey'
-            columns: ['made_by']
+            foreignKeyName: "chat_conversations_status_made_by_fkey"
+            columns: ["made_by"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_conversations_status_made_to_fkey'
-            columns: ['made_to']
+            foreignKeyName: "chat_conversations_status_made_to_fkey"
+            columns: ["made_to"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_messages: {
@@ -221,9 +221,9 @@ export type Database = {
           is_edit: boolean
           receiver_id: string
           sender_id: string
-          status: Database['public']['Enums']['chat_message_status'] | null
+          status: Database["public"]["Enums"]["chat_message_status"] | null
           text: string
-          type: Database['public']['Enums']['chat_message_type']
+          type: Database["public"]["Enums"]["chat_message_type"]
         }
         Insert: {
           conversation_id?: string | null
@@ -232,9 +232,9 @@ export type Database = {
           is_edit?: boolean
           receiver_id: string
           sender_id?: string
-          status?: Database['public']['Enums']['chat_message_status'] | null
+          status?: Database["public"]["Enums"]["chat_message_status"] | null
           text: string
-          type?: Database['public']['Enums']['chat_message_type']
+          type?: Database["public"]["Enums"]["chat_message_type"]
         }
         Update: {
           conversation_id?: string | null
@@ -243,32 +243,32 @@ export type Database = {
           is_edit?: boolean
           receiver_id?: string
           sender_id?: string
-          status?: Database['public']['Enums']['chat_message_status'] | null
+          status?: Database["public"]["Enums"]["chat_message_status"] | null
           text?: string
-          type?: Database['public']['Enums']['chat_message_type']
+          type?: Database["public"]["Enums"]["chat_message_type"]
         }
         Relationships: [
           {
-            foreignKeyName: 'chat_messages_2_conversation_id_fkey'
-            columns: ['conversation_id']
+            foreignKeyName: "chat_messages_2_conversation_id_fkey"
+            columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: 'chat_conversations'
-            referencedColumns: ['id']
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_messages_2_receiver_id_fkey'
-            columns: ['receiver_id']
+            foreignKeyName: "chat_messages_2_receiver_id_fkey"
+            columns: ["receiver_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'chat_messages_2_sender_id_fkey'
-            columns: ['sender_id']
+            foreignKeyName: "chat_messages_2_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       comments: {
@@ -281,6 +281,7 @@ export type Database = {
           name: string | null
           owner_id: string | null
           post_id: string
+          status: Database["public"]["Enums"]["post_status"]
         }
         Insert: {
           comment?: string | null
@@ -291,6 +292,7 @@ export type Database = {
           name?: string | null
           owner_id?: string | null
           post_id: string
+          status?: Database["public"]["Enums"]["post_status"]
         }
         Update: {
           comment?: string | null
@@ -301,22 +303,23 @@ export type Database = {
           name?: string | null
           owner_id?: string | null
           post_id?: string
+          status?: Database["public"]["Enums"]["post_status"]
         }
         Relationships: [
           {
-            foreignKeyName: 'comments_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "comments_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'comments_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_post_comments_lvl1: {
@@ -346,19 +349,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'community_post_comments_lvl1_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community_post_comments_lvl1_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community-post-comments_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "community-post-comments_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'community-posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "community-posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_post_comments_lvl2: {
@@ -391,26 +394,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'community_post_comments_lvl2_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community_post_comments_lvl2_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community-post-comments-lvl2_comment_id_fkey'
-            columns: ['comment_id']
+            foreignKeyName: "community-post-comments-lvl2_comment_id_fkey"
+            columns: ["comment_id"]
             isOneToOne: false
-            referencedRelation: 'community_post_comments_lvl1'
-            referencedColumns: ['id']
+            referencedRelation: "community_post_comments_lvl1"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community-post-comments-lvl2_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "community-post-comments-lvl2_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'community-posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "community-posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_post_likes: {
@@ -434,19 +437,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'community_post_likes_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community_post_likes_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community_post_likes_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "community_post_likes_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'community-posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "community-posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_post_likes_for_comments_lvl1: {
@@ -473,26 +476,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl1_comment_id_fkey'
-            columns: ['comment_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl1_comment_id_fkey"
+            columns: ["comment_id"]
             isOneToOne: false
-            referencedRelation: 'community_post_comments_lvl1'
-            referencedColumns: ['id']
+            referencedRelation: "community_post_comments_lvl1"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl1_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl1_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl1_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl1_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'community-posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "community-posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_post_likes_for_comments_lvl2: {
@@ -519,36 +522,36 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl2_comment_id_fkey'
-            columns: ['comment_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl2_comment_id_fkey"
+            columns: ["comment_id"]
             isOneToOne: false
-            referencedRelation: 'community_post_comments_lvl2'
-            referencedColumns: ['id']
+            referencedRelation: "community_post_comments_lvl2"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl2_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl2_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'community_post_likes_for_comments_lvl2_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "community_post_likes_for_comments_lvl2_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'community-posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "community-posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      'community-posts': {
+      "community-posts": {
         Row: {
           created_at: string
           description: Json | null
           id: string
           owner_id: string | null
           path_url: string | null
-          post_type: Database['public']['Enums']['post_type']
+          post_type: Database["public"]["Enums"]["post_type"]
           status: string | null
           tags: Json
           title: string | null
@@ -559,7 +562,7 @@ export type Database = {
           id?: string
           owner_id?: string | null
           path_url?: string | null
-          post_type?: Database['public']['Enums']['post_type']
+          post_type?: Database["public"]["Enums"]["post_type"]
           status?: string | null
           tags?: Json
           title?: string | null
@@ -570,24 +573,24 @@ export type Database = {
           id?: string
           owner_id?: string | null
           path_url?: string | null
-          post_type?: Database['public']['Enums']['post_type']
+          post_type?: Database["public"]["Enums"]["post_type"]
           status?: string | null
           tags?: Json
           title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'community-posts_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "community-posts_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       donations: {
         Row: {
-          amount: number
+          amount_cents: number
           created_at: string | null
           donor_email: string | null
           first_name: string | null
@@ -601,7 +604,7 @@ export type Database = {
           test_status: boolean
         }
         Insert: {
-          amount: number
+          amount_cents: number
           created_at?: string | null
           donor_email?: string | null
           first_name?: string | null
@@ -615,7 +618,7 @@ export type Database = {
           test_status?: boolean
         }
         Update: {
-          amount?: number
+          amount_cents?: number
           created_at?: string | null
           donor_email?: string | null
           first_name?: string | null
@@ -654,19 +657,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'hugs_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "hugs_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'hugs_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "hugs_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       new_comment_likes: {
@@ -690,19 +693,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'new_comment_likes_comment_id_fkey'
-            columns: ['comment_id']
+            foreignKeyName: "new_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
             isOneToOne: false
-            referencedRelation: 'new_comments'
-            referencedColumns: ['id']
+            referencedRelation: "new_comments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'new_comment_likes_user_id_fkey'
-            columns: ['user_id']
+            foreignKeyName: "new_comment_likes_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       new_comments: {
@@ -735,26 +738,26 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'new_comments_author_id_fkey'
-            columns: ['author_id']
+            foreignKeyName: "new_comments_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'new_comments_parent_id_fkey'
-            columns: ['parent_id']
+            foreignKeyName: "new_comments_parent_id_fkey"
+            columns: ["parent_id"]
             isOneToOne: false
-            referencedRelation: 'new_comments'
-            referencedColumns: ['id']
+            referencedRelation: "new_comments"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'new_comments_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "new_comments_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'new_posts'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "new_posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       new_post_likes: {
@@ -778,19 +781,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'new_post_likes_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "new_post_likes_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'new_posts'
-            referencedColumns: ['id']
+            referencedRelation: "new_posts"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'new_post_likes_user_id_fkey'
-            columns: ['user_id']
+            foreignKeyName: "new_post_likes_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       new_posts: {
@@ -800,8 +803,8 @@ export type Database = {
           created_at: string
           id: string
           path_url: string
-          post_status: Database['public']['Enums']['post_status']
-          post_type: Database['public']['Enums']['post_type']
+          post_status: Database["public"]["Enums"]["post_status"]
+          post_type: Database["public"]["Enums"]["post_type"]
           tags: Json
           title: string
           total_comments: number
@@ -815,8 +818,8 @@ export type Database = {
           created_at?: string
           id?: string
           path_url: string
-          post_status?: Database['public']['Enums']['post_status']
-          post_type?: Database['public']['Enums']['post_type']
+          post_status?: Database["public"]["Enums"]["post_status"]
+          post_type?: Database["public"]["Enums"]["post_type"]
           tags?: Json
           title: string
           total_comments?: number
@@ -830,8 +833,8 @@ export type Database = {
           created_at?: string
           id?: string
           path_url?: string
-          post_status?: Database['public']['Enums']['post_status']
-          post_type?: Database['public']['Enums']['post_type']
+          post_status?: Database["public"]["Enums"]["post_status"]
+          post_type?: Database["public"]["Enums"]["post_type"]
           tags?: Json
           title?: string
           total_comments?: number
@@ -841,12 +844,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'new_posts_author_id_fkey1'
-            columns: ['author_id']
+            foreignKeyName: "new_posts_author_id_fkey1"
+            columns: ["author_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notifications: {
@@ -873,12 +876,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'notifications_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "notifications_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       oldRecipients: {
@@ -932,19 +935,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'prayer_recipients_prays_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "prayer_recipients_prays_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'prayer_recipients_prays_post_id_fkey'
-            columns: ['post_id']
+            foreignKeyName: "prayer_recipients_prays_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       public_gallery: {
@@ -983,7 +986,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_name: string | null
-          role: Database['public']['Enums']['role'] | null
+          role: Database["public"]["Enums"]["role"] | null
         }
         Insert: {
           avatar?: string | null
@@ -993,7 +996,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_name?: string | null
-          role?: Database['public']['Enums']['role'] | null
+          role?: Database["public"]["Enums"]["role"] | null
         }
         Update: {
           avatar?: string | null
@@ -1003,16 +1006,16 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_name?: string | null
-          role?: Database['public']['Enums']['role'] | null
+          role?: Database["public"]["Enums"]["role"] | null
         }
         Relationships: [
           {
-            foreignKeyName: 'public_profiles_id_fkey1'
-            columns: ['id']
+            foreignKeyName: "public_profiles_id_fkey1"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       recipient_counters: {
@@ -1033,38 +1036,38 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'recipients_share_count_id_fkey'
-            columns: ['id']
+            foreignKeyName: "recipients_share_count_id_fkey"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       recipient_layout: {
         Row: {
           created_at: string
           recipient_id: string
-          title_section_bg: Database['public']['Enums']['title_section_bg']
+          title_section_bg: Database["public"]["Enums"]["title_section_bg"]
         }
         Insert: {
           created_at?: string
           recipient_id: string
-          title_section_bg?: Database['public']['Enums']['title_section_bg']
+          title_section_bg?: Database["public"]["Enums"]["title_section_bg"]
         }
         Update: {
           created_at?: string
           recipient_id?: string
-          title_section_bg?: Database['public']['Enums']['title_section_bg']
+          title_section_bg?: Database["public"]["Enums"]["title_section_bg"]
         }
         Relationships: [
           {
-            foreignKeyName: 'recipient_layout_recipient_id_fkey'
-            columns: ['recipient_id']
+            foreignKeyName: "recipient_layout_recipient_id_fkey"
+            columns: ["recipient_id"]
             isOneToOne: true
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       recipients: {
@@ -1083,7 +1086,7 @@ export type Database = {
           email: string
           end_of_campaign: string | null
           first_name: string
-          gender: Database['public']['Enums']['gender'] | null
+          gender: Database["public"]["Enums"]["gender"] | null
           id: string
           in_memoriam: boolean
           is_archived: boolean
@@ -1092,19 +1095,22 @@ export type Database = {
           journey_updates: Json
           journey_updates_2: Json | null
           last_name: string | null
+          last_updated: string
           learn_more_text: string | null
           learn_more_url: string | null
+          location: Json | null
           more_ways_to_support: Json | null
           more_ways_to_support____: Json | null
           opengraph: Json | null
           otherCategories: Json
           otherPages: string | null
           package_image: Json | null
-          page_status: Database['public']['Enums']['page_status']
+          page_status: Database["public"]["Enums"]["page_status"]
           parent_name: string | null
           path_url: string | null
           poster_image: Json | null
-          recipient_template: Database['public']['Enums']['recipient_template']
+          profile_picture: Json | null
+          recipient_template: Database["public"]["Enums"]["recipient_template"]
           recipientInterests: string | null
           recipientSituation: string | null
           relationship: string
@@ -1114,7 +1120,7 @@ export type Database = {
           soc_post_pinterest: string | null
           soc_post_twitter: string | null
           sub_title: string | null
-          type: Database['public']['Enums']['recipient_type']
+          type: Database["public"]["Enums"]["recipient_type"]
           what_is: string | null
           first_name_parent_name_id_email: string | null
         }
@@ -1133,7 +1139,7 @@ export type Database = {
           email: string
           end_of_campaign?: string | null
           first_name: string
-          gender?: Database['public']['Enums']['gender'] | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
           in_memoriam?: boolean
           is_archived?: boolean
@@ -1142,19 +1148,22 @@ export type Database = {
           journey_updates?: Json
           journey_updates_2?: Json | null
           last_name?: string | null
+          last_updated?: string
           learn_more_text?: string | null
           learn_more_url?: string | null
+          location?: Json | null
           more_ways_to_support?: Json | null
           more_ways_to_support____?: Json | null
           opengraph?: Json | null
           otherCategories?: Json
           otherPages?: string | null
           package_image?: Json | null
-          page_status?: Database['public']['Enums']['page_status']
+          page_status?: Database["public"]["Enums"]["page_status"]
           parent_name?: string | null
           path_url?: string | null
           poster_image?: Json | null
-          recipient_template?: Database['public']['Enums']['recipient_template']
+          profile_picture?: Json | null
+          recipient_template?: Database["public"]["Enums"]["recipient_template"]
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship: string
@@ -1164,7 +1173,7 @@ export type Database = {
           soc_post_pinterest?: string | null
           soc_post_twitter?: string | null
           sub_title?: string | null
-          type?: Database['public']['Enums']['recipient_type']
+          type?: Database["public"]["Enums"]["recipient_type"]
           what_is?: string | null
         }
         Update: {
@@ -1182,7 +1191,7 @@ export type Database = {
           email?: string
           end_of_campaign?: string | null
           first_name?: string
-          gender?: Database['public']['Enums']['gender'] | null
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
           in_memoriam?: boolean
           is_archived?: boolean
@@ -1191,19 +1200,22 @@ export type Database = {
           journey_updates?: Json
           journey_updates_2?: Json | null
           last_name?: string | null
+          last_updated?: string
           learn_more_text?: string | null
           learn_more_url?: string | null
+          location?: Json | null
           more_ways_to_support?: Json | null
           more_ways_to_support____?: Json | null
           opengraph?: Json | null
           otherCategories?: Json
           otherPages?: string | null
           package_image?: Json | null
-          page_status?: Database['public']['Enums']['page_status']
+          page_status?: Database["public"]["Enums"]["page_status"]
           parent_name?: string | null
           path_url?: string | null
           poster_image?: Json | null
-          recipient_template?: Database['public']['Enums']['recipient_template']
+          profile_picture?: Json | null
+          recipient_template?: Database["public"]["Enums"]["recipient_template"]
           recipientInterests?: string | null
           recipientSituation?: string | null
           relationship?: string
@@ -1213,7 +1225,7 @@ export type Database = {
           soc_post_pinterest?: string | null
           soc_post_twitter?: string | null
           sub_title?: string | null
-          type?: Database['public']['Enums']['recipient_type']
+          type?: Database["public"]["Enums"]["recipient_type"]
           what_is?: string | null
         }
         Relationships: []
@@ -1242,19 +1254,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'recipients_profile_pictures_id_fkey'
-            columns: ['id']
+            foreignKeyName: "recipients_profile_pictures_id_fkey"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'recipients'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "recipients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       split_testing_segmented: {
         Row: {
           assigned_variant: string
           conversion_date: string | null
-          conversion_status: Database['public']['Enums']['conversion_status']
+          conversion_status: Database["public"]["Enums"]["conversion_status"]
           created_at: string
           email: string | null
           id: string
@@ -1264,7 +1276,7 @@ export type Database = {
         Insert: {
           assigned_variant: string
           conversion_date?: string | null
-          conversion_status?: Database['public']['Enums']['conversion_status']
+          conversion_status?: Database["public"]["Enums"]["conversion_status"]
           created_at?: string
           email?: string | null
           id?: string
@@ -1274,7 +1286,7 @@ export type Database = {
         Update: {
           assigned_variant?: string
           conversion_date?: string | null
-          conversion_status?: Database['public']['Enums']['conversion_status']
+          conversion_status?: Database["public"]["Enums"]["conversion_status"]
           created_at?: string
           email?: string | null
           id?: string
@@ -1305,7 +1317,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
-          role: Database['public']['Enums']['role']
+          role: Database["public"]["Enums"]["role"]
         }
         Insert: {
           avatar?: string | null
@@ -1313,7 +1325,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
-          role?: Database['public']['Enums']['role']
+          role?: Database["public"]["Enums"]["role"]
         }
         Update: {
           avatar?: string | null
@@ -1321,7 +1333,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
-          role?: Database['public']['Enums']['role']
+          role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
       }
@@ -1349,19 +1361,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'users_profile_pictures_id_fkey'
-            columns: ['id']
+            foreignKeyName: "users_profile_pictures_id_fkey"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'public_profiles'
-            referencedColumns: ['id']
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'users_profile_pictures_id_fkey1'
-            columns: ['id']
+            foreignKeyName: "users_profile_pictures_id_fkey1"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users_stripe_data: {
@@ -1382,12 +1394,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'users_stripe_data_id_fkey'
-            columns: ['id']
+            foreignKeyName: "users_stripe_data_id_fkey"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users_stripe_data_test: {
@@ -1408,12 +1420,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'users_stripe_data_test_id_fkey'
-            columns: ['id']
+            foreignKeyName: "users_stripe_data_test_id_fkey"
+            columns: ["id"]
             isOneToOne: true
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users_stripe_subscriptions: {
@@ -1446,12 +1458,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'users_stripe_subscriptions_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "users_stripe_subscriptions_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users_stripe_subscriptions_test: {
@@ -1484,12 +1496,38 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'users_stripe_subscriptions_test_owner_id_fkey'
-            columns: ['owner_id']
+            foreignKeyName: "users_stripe_subscriptions_test_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users_utilities: {
+        Row: {
+          date_seen: string
+          has_seen_welcome_message: boolean
+          id: string
+        }
+        Insert: {
+          date_seen?: string
+          has_seen_welcome_message?: boolean
+          id?: string
+        }
+        Update: {
+          date_seen?: string
+          has_seen_welcome_message?: boolean
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_utilities_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -1502,10 +1540,10 @@ export type Database = {
         Returns: undefined
       }
       first_name_parent_name_id_email: {
-        Args: { '': Database['public']['Tables']['recipients']['Row'] }
+        Args: { "": Database["public"]["Tables"]["recipients"]["Row"] }
         Returns: {
           error: true
-        } & 'the function public.first_name_parent_name_id_email with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache'
+        } & "the function public.first_name_parent_name_id_email with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
       }
       get_all_nested_comments: {
         Args: { input_path_url: string; input_user_id: string }
@@ -1530,18 +1568,18 @@ export type Database = {
       }
     }
     Enums: {
-      chat_conversation_status: 'blocked' | 'accepted' | 'waiting'
-      chat_message_status: 'sent' | 'delivered' | 'read'
-      chat_message_type: 'text' | 'image' | 'file'
-      conversion_status: 'converted' | 'initiated' | 'abandoned'
-      gender: 'male' | 'female' | 'other'
-      page_status: 'draft' | 'published'
-      post_status: 'approved' | 'rejected' | 'pending'
-      post_type: 'recipient-support' | 'community-support-request'
-      recipient_template: 'original' | 'church'
-      recipient_type: 'child' | 'adult' | 'family'
-      role: 'admin' | 'super_admin' | 'user'
-      title_section_bg: 'gradient' | 'hearts'
+      chat_conversation_status: "blocked" | "accepted" | "waiting"
+      chat_message_status: "sent" | "delivered" | "read"
+      chat_message_type: "text" | "image" | "file"
+      conversion_status: "converted" | "initiated" | "abandoned"
+      gender: "male" | "female" | "other"
+      page_status: "draft" | "published"
+      post_status: "approved" | "rejected" | "pending"
+      post_type: "recipient-support" | "community-support-request"
+      recipient_template: "original" | "church"
+      recipient_type: "child" | "adult" | "family"
+      role: "admin" | "super_admin" | "user" | "moderator"
+      title_section_bg: "gradient" | "hearts"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1549,138 +1587,138 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
-    : never = never
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
-      DefaultSchema['Views'])
-  ? (DefaultSchema['Tables'] &
-      DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never = never
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-  ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
-    : never = never
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-  ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema['Enums']
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
-    : never = never
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
-  ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
-  : never
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema['CompositeTypes']
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
-    : never = never
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
-  ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
-  : never
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
     Enums: {
-      chat_conversation_status: ['blocked', 'accepted', 'waiting'],
-      chat_message_status: ['sent', 'delivered', 'read'],
-      chat_message_type: ['text', 'image', 'file'],
-      conversion_status: ['converted', 'initiated', 'abandoned'],
-      gender: ['male', 'female', 'other'],
-      page_status: ['draft', 'published'],
-      post_status: ['approved', 'rejected', 'pending'],
-      post_type: ['recipient-support', 'community-support-request'],
-      recipient_template: ['original', 'church'],
-      recipient_type: ['child', 'adult', 'family'],
-      role: ['admin', 'super_admin', 'user'],
-      title_section_bg: ['gradient', 'hearts'],
+      chat_conversation_status: ["blocked", "accepted", "waiting"],
+      chat_message_status: ["sent", "delivered", "read"],
+      chat_message_type: ["text", "image", "file"],
+      conversion_status: ["converted", "initiated", "abandoned"],
+      gender: ["male", "female", "other"],
+      page_status: ["draft", "published"],
+      post_status: ["approved", "rejected", "pending"],
+      post_type: ["recipient-support", "community-support-request"],
+      recipient_template: ["original", "church"],
+      recipient_type: ["child", "adult", "family"],
+      role: ["admin", "super_admin", "user", "moderator"],
+      title_section_bg: ["gradient", "hearts"],
     },
   },
 } as const

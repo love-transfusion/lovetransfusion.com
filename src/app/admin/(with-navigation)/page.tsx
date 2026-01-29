@@ -155,7 +155,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                           <td className="py-[6px] px-3">
                             <p className={''}>
                               {new Date(
-                                recipientData.created_at
+                                recipientData.created_at,
                               ).toLocaleDateString()}
                             </p>
                           </td>
@@ -163,7 +163,7 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
                             <p className={''}>
                               {item.user?.birthday
                                 ? new Date(
-                                    item.user.birthday
+                                    item.user.birthday,
                                   ).toLocaleDateString()
                                 : '-'}
                             </p>
