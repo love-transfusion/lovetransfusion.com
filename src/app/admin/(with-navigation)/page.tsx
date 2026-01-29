@@ -48,10 +48,6 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
     mode: 'search',
     searchIDs: recipients && recipients.map((item) => item.id),
   })
-  console.log(
-    'selected users:',
-    users?.map((item) => item.recipient_name),
-  )
 
   // users[0].facebook_posts[0].facebook_comments[0].count
   const combinedData: I_combineddataOfRecipient[] =
@@ -69,10 +65,6 @@ const AdminDashboard = async (props: AdminDashboard_Types) => {
         }
       })) ??
     []
-  console.log(
-    'combined data:',
-    combinedData?.map((item) => item.user?.recipient_name),
-  )
   return (
     <>
       <div

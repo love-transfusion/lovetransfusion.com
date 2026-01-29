@@ -1,5 +1,8 @@
 import { supa_admin_delete_auth_user } from '@/app/_actions/admin/actions'
-import { supa_select_recipients } from '@/app/_actions/recipients/actions'
+import {
+  supa_delete_recipient,
+  supa_select_recipients,
+} from '@/app/_actions/recipients/actions'
 import { supa_select_users_all } from '@/app/_actions/users/actions'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -25,6 +28,15 @@ export async function GET(req: NextRequest) {
     if (recipientError) errors.push(recipientError)
 
     if (!selectedRecipients || !Array.isArray(selectedRecipients)) return
+
+    const deleteRecipientsTasks = selectedRecipients.map((recipient) =>
+      supa_delete_recipient({
+        recipient_id: recipient.id,
+        CRON: req.headers.get('authorization'),
+      }),
+    )
+
+    await Promise.all(deleteRecipientsTasks)
 
     const { data: selectedUsers, error } = await supa_select_users_all(
       {

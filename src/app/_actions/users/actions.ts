@@ -99,10 +99,9 @@ export const supa_select_users_all = async (
 
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  // console.log({ options })
 
   const isCronSecretCorrect = CRON_SECRET === `Bearer ${process.env.CRON_SECRET}`
-  console.log({ CRON_SECRET, isCronSecretCorrect, isadmin })
+  
   const supabase =
     isadmin || isCronSecretCorrect ? await createAdmin() : await createServer()
 

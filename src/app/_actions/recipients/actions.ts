@@ -89,9 +89,6 @@ type Supa_select_recipientsTypes = InMemoriamTypes | RecipientIdTypes
 export const supa_select_recipients = async (
   props: Supa_select_recipientsTypes,
 ) => {
-  if (props.in_memoriam) {
-    console.log({ recipient_id: props.recipient_id })
-  }
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
   if (!isadmin) return { data: null, error: 'You are not authorized.' }
@@ -141,6 +138,30 @@ export const supa_update_recipients = async (
       .eq('id', recipientObj.id)
 
     if (error) throw new Error(error.message)
+    return { error: null }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const thisError = error?.message as string
+    return { error: thisError }
+  }
+}
+
+export const supa_delete_recipient = async (props: {
+  recipient_id: string
+  CRON?: string | null
+}) => {
+  const { CRON, recipient_id } = props
+  if (!CRON || CRON !== `Bearer ${process.env.CRON_SECRET}`) return
+  const supabase = await createAdmin()
+
+  try {
+    const { error } = await supabase
+      .from('recipients')
+      .delete()
+      .eq('id', recipient_id)
+
+    if (error) throw new Error(error.message)
+
     return { error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
