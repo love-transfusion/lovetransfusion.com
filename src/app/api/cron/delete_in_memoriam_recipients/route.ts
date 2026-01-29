@@ -16,15 +16,16 @@ export async function GET(req: NextRequest) {
     console.error('Unauthorized request: missing or invalid Bearer token')
     return new NextResponse('Unauthorized', { status: 401 })
   }
-
   const errors: string[] = []
 
   try {
     const { data: selectedRecipients, error: recipientError } =
-      await supa_select_recipients({
-        in_memoriam: true,
-      })
-
+      await supa_select_recipients(
+        {
+          in_memoriam: true,
+        },
+        req.headers.get('authorization'),
+      )
     if (recipientError) errors.push(recipientError)
 
     if (!selectedRecipients || !Array.isArray(selectedRecipients)) return
@@ -35,7 +36,6 @@ export async function GET(req: NextRequest) {
         CRON: req.headers.get('authorization'),
       }),
     )
-
     await Promise.all(deleteRecipientsTasks)
 
     const { data: selectedUsers, error } = await supa_select_users_all(

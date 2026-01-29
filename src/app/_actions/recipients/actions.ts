@@ -40,7 +40,7 @@ export const supa_select_recipients_all = async (
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  if (CRON !== `Bearer ${process.env.CRON_SECRET}` && !isadmin)
+  if (CRON !== `Bearer ${process.env.CRON_SECRET}` || !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
@@ -88,11 +88,16 @@ type Supa_select_recipientsTypes = InMemoriamTypes | RecipientIdTypes
 
 export const supa_select_recipients = async (
   props: Supa_select_recipientsTypes,
+  CRON?: string | null,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  if (!isadmin) return { data: null, error: 'You are not authorized.' }
-  const supabase = isadmin ? await createAdmin() : await createServer()
+
+  if (!isadmin && CRON !== `Bearer ${process.env.CRON_SECRET}`)
+    return { data: null, error: 'You are not authorized.' }
+
+  const supabase = await createAdmin()
+
   try {
     let newData
     let newError
@@ -114,6 +119,7 @@ export const supa_select_recipients = async (
     }
 
     if (newError) throw new Error(newError.message)
+      
     return { data: newData, error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
@@ -151,6 +157,7 @@ export const supa_delete_recipient = async (props: {
   CRON?: string | null
 }) => {
   const { CRON, recipient_id } = props
+
   if (!CRON || CRON !== `Bearer ${process.env.CRON_SECRET}`) return
   const supabase = await createAdmin()
 
