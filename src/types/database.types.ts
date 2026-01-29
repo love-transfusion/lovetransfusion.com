@@ -351,6 +351,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          in_memoriam: boolean
           is_deleted: boolean
           recipient: Json | null
           user_id: string | null
@@ -358,6 +359,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id: string
+          in_memoriam?: boolean
           is_deleted?: boolean
           recipient?: Json | null
           user_id?: string | null
@@ -365,6 +367,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          in_memoriam?: boolean
           is_deleted?: boolean
           recipient?: Json | null
           user_id?: string | null

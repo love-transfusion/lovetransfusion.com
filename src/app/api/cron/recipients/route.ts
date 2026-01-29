@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { data: comRecipients, error: selectError } =
-    await supa_select_recipients_all(undefined, process.env.CRON_SECRET!)
+    await supa_select_recipients_all(undefined, req.headers.get('authorization'))
 
   if (selectError) {
     console.error('Error selecting comRecipients:', selectError)
@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
         created_at: item.created_at,
         recipient: newItem,
         is_deleted: false,
+        in_memoriam: item.in_memoriam
       }
     }),
     ...deletedRecipients,

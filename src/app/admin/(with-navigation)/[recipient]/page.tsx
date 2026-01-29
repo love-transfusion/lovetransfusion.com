@@ -25,7 +25,9 @@ const RecipientPage = async (props: { params: Params }) => {
 
   const { data: user } = await supa_select_user(recipient)
 
-  const { data: recipientData } = await supa_select_recipients(recipient)
+  const { data: recipientData } = await supa_select_recipients({
+    recipient_id: recipient,
+  })
 
   if (!recipientData || Array.isArray(recipientData)) return
 

@@ -36,11 +36,11 @@ export const supa_select_recipients_all = async (
         clCurrentPage: number
       }
     | undefined,
-  CRON?: string,
+  CRON?: string | null,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  if (CRON !== process.env.CRON_SECRET && !isadmin)
+  if (CRON !== `Bearer ${process.env.CRON_SECRET}` && !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
@@ -59,6 +59,7 @@ export const supa_select_recipients_all = async (
       .select('*', { count: 'estimated' })
       .order('created_at', { ascending: false })
       .eq('is_deleted', false)
+      .eq('in_memoriam', false)
 
     if (to) {
       query = query.limit(newLimit).range(from, to)
@@ -74,25 +75,49 @@ export const supa_select_recipients_all = async (
   }
 }
 
+interface InMemoriamTypes {
+  in_memoriam: boolean
+  recipient_id?: never
+}
+interface RecipientIdTypes {
+  recipient_id: string
+  in_memoriam?: never
+}
+
+type Supa_select_recipientsTypes = InMemoriamTypes | RecipientIdTypes
+
 export const supa_select_recipients = async (
-  recipientID: string | string[],
+  props: Supa_select_recipientsTypes,
 ) => {
+  if (props.in_memoriam) {
+    console.log({ recipient_id: props.recipient_id })
+  }
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
   if (!isadmin) return { data: null, error: 'You are not authorized.' }
   const supabase = isadmin ? await createAdmin() : await createServer()
   try {
-    const { data, error } =
-      typeof recipientID === 'string'
-        ? await supabase
-            .from('recipients')
-            .select('*')
-            .eq('id', recipientID)
-            .single()
-        : await supabase.from('recipients').select('*').in('id', recipientID)
+    let newData
+    let newError
+    if (props.in_memoriam) {
+      const { data, error } = await supabase
+        .from('recipients')
+        .select('*')
+        .eq('in_memoriam', props.in_memoriam)
+      newData = data
+      newError = error
+    } else if (props.recipient_id) {
+      const { data, error } = await supabase
+        .from('recipients')
+        .select('*')
+        .eq('id', props.recipient_id)
+        .single()
+      newData = data
+      newError = error
+    }
 
-    if (error) throw new Error(error.message)
-    return { data, error: null }
+    if (newError) throw new Error(newError.message)
+    return { data: newData, error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     const thisError = error?.message as string

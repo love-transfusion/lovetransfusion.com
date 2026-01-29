@@ -35,7 +35,7 @@ export interface I_supa_select_user_Response_Types extends I_supa_users_row {
 }
 
 export const supa_select_user = async (
-  user_id: string
+  user_id: string,
 ): Promise<{
   data: I_supa_select_user_Response_Types | null
   error: string | null
@@ -46,7 +46,7 @@ export const supa_select_user = async (
   const { data, error } = await supabase
     .from('users')
     .select(
-      '*, recipient_prays(*), profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)'
+      '*, recipient_prays(*), profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*), google_analytics(*)',
     )
     .eq('id', user_id)
     .single()
@@ -67,13 +67,11 @@ type I_supa_select_users_all_options =
   | I_supa_select_users_all_paginated
   | I_supa_select_users_all_search
 
-interface I_supa_facebook_posts_row_with_count
-  extends I_supa_facebook_posts_row {
+interface I_supa_facebook_posts_row_with_count extends I_supa_facebook_posts_row {
   facebook_comments: Array<{ count: number }>
 }
 
-export interface I_supa_select_user_Response_Types_withCommentsCount
-  extends I_supa_users_row {
+export interface I_supa_select_user_Response_Types_withCommentsCount extends I_supa_users_row {
   profile_pictures: I_supa_profile_pictures_row_unextended | null
   receipients_deleted_messages: I_supa_receipients_deleted_messages_row[]
   recipients?: I_supa_recipients_row[] | null
@@ -83,7 +81,8 @@ export interface I_supa_select_user_Response_Types_withCommentsCount
 }
 
 export const supa_select_users_all = async (
-  options: I_supa_select_users_all_options
+  options: I_supa_select_users_all_options,
+  CRON_SECRET?: string | null,
 ): Promise<{
   data: I_supa_select_user_Response_Types_withCommentsCount[] | null
   error: string | null
@@ -100,13 +99,18 @@ export const supa_select_users_all = async (
 
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  const supabase = isadmin ? await createAdmin() : await createServer()
+  // console.log({ options })
+
+  const isCronSecretCorrect = CRON_SECRET === `Bearer ${process.env.CRON_SECRET}`
+  console.log({ CRON_SECRET, isCronSecretCorrect, isadmin })
+  const supabase =
+    isadmin || isCronSecretCorrect ? await createAdmin() : await createServer()
 
   try {
     let query = supabase
       .from('users')
       .select(
-        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(count)), google_analytics(*)'
+        '*, profile_pictures(*), receipients_deleted_messages(*), recipients(*), facebook_insights(*), facebook_posts(*, facebook_comments(count)), google_analytics(*)',
       )
 
     if (options.mode === 'search' && options.searchIDs) {
@@ -115,7 +119,6 @@ export const supa_select_users_all = async (
     if (options.mode === 'paginate' && options.clLimit) {
       query = query.limit(newLimit).range(from, to)
     }
-
     const { data, error } = await query
 
     if (error) throw new Error(error.message)
