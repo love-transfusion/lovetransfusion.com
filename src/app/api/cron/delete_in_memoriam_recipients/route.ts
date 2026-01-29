@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
     console.error('Unauthorized request: missing or invalid Bearer token')
     return new NextResponse('Unauthorized', { status: 401 })
   }
-  const errors: string[] = []
+
+  const CRON = req.headers.get('authorization') ?? ''
 
   try {
     const { data: selectedRecipients, error: recipientError } =
@@ -24,16 +25,27 @@ export async function GET(req: NextRequest) {
         {
           in_memoriam: true,
         },
-        req.headers.get('authorization'),
+        CRON,
       )
-    if (recipientError) errors.push(recipientError)
+    if (recipientError) {
+      return NextResponse.json(
+        { ok: false, error: recipientError },
+        { status: 500 },
+      )
+    }
 
-    if (!selectedRecipients || !Array.isArray(selectedRecipients)) return
+    if (
+      !selectedRecipients ||
+      !Array.isArray(selectedRecipients) ||
+      !!!selectedRecipients.length
+    ) {
+      return NextResponse.json({ ok: true, deletedRecipientsCount: 0 })
+    }
 
     const deleteRecipientsTasks = selectedRecipients.map((recipient) =>
       supa_delete_recipient({
         recipient_id: recipient.id,
-        CRON: req.headers.get('authorization'),
+        CRON,
       }),
     )
     await Promise.all(deleteRecipientsTasks)
@@ -43,22 +55,19 @@ export async function GET(req: NextRequest) {
         mode: 'search',
         searchIDs: selectedRecipients.map((recipient) => recipient.id),
       },
-      req.headers.get('authorization'),
+      CRON,
     )
-    if (error) errors.push(error)
+    if (error) {
+      return NextResponse.json({ ok: false, error }, { status: 500 })
+    }
 
-    if (selectedUsers) {
+    if (!!selectedUsers?.length) {
       const tasks = selectedUsers.map((recipient) =>
         supa_admin_delete_auth_user(recipient.id),
       )
       await Promise.all(tasks)
-    }
-
-    if (errors.length) {
-      return NextResponse.json(
-        { ok: false, error: errors.join(', ') },
-        { status: 500 },
-      )
+    } else {
+      return NextResponse.json({ ok: true, deletedUsers: 0 })
     }
 
     return NextResponse.json({ ok: true })
