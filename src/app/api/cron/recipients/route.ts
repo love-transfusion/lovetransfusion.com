@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
     console.error('Unauthorized request: missing or invalid Bearer token')
     return new NextResponse('Unauthorized', { status: 401 })
   }
+  const CRON = req.headers.get('authorization')
 
   const { data: orgRecipients, error } = await supa_select_orgRecipients()
   if (error || !orgRecipients) {
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { data: comRecipients, error: selectError } =
-    await supa_select_recipients_all(undefined, req.headers.get('authorization'))
+    await supa_select_recipients_all(undefined, CRON)
 
   if (selectError) {
     console.error('Error selecting comRecipients:', selectError)

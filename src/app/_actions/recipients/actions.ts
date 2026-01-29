@@ -40,7 +40,7 @@ export const supa_select_recipients_all = async (
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  if (CRON !== `Bearer ${process.env.CRON_SECRET}` || !isadmin)
+  if (CRON !== `Bearer ${process.env.CRON_SECRET}` && !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
@@ -119,7 +119,7 @@ export const supa_select_recipients = async (
     }
 
     if (newError) throw new Error(newError.message)
-      
+
     return { data: newData, error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
