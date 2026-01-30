@@ -47,7 +47,7 @@ const RecipientPage = async (props: { params: Params }) => {
       </div>
       <div
         className={
-          'flex px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 pt-[120px] md:pt-[unset] md:pl-[195px] lg:pl-[191px] text-white relative animate-slide-up'
+          'flex items-center px-4 md:px-8 py-[30px] rounded-lg lg:rounded-bl-[100px] lg:rounded-tl-[100px] bg-gradient-to-r from-[#2F93DD] to-[#2FBADD] mt-20 mb-5 md:mt-11 md:mb-11 pt-[120px] md:pt-[30px] md:pl-[195px] lg:pl-[191px] text-white relative animate-slide-up'
         }
       >
         <div

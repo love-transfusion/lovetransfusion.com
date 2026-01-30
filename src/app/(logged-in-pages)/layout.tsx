@@ -21,13 +21,9 @@ const UserIDLayout = async (props: { children: ReactNode }) => {
   const isadmin = isAdmin({ clRole: user.role })
   return (
     <>
-      <div
-        className={
-          'grid grid-cols-1 3xl:grid-cols-[263px_calc(100%-263px)] max-w-[100vw]'
-        }
-      >
+      <div className={'grid grid-cols-1 3xl:grid-cols-[263px_1fr] w-full overflow-x-hidden'}>
         <NavigationMenu clIsAdmin={isadmin} />
-        <div className="h-full flex flex-col w-full">
+        <div className="h-full flex flex-col w-full min-w-0">
           <div
             className={
               'bg-gradient-to-r from-[#2F8EDD] to-[#2FBADD] text-[#E9F5FE] pt-2 pb-[7px] md:pt-[unset] md:pb-[unset] md:min-h-[84px] pl-3 pr-3 2xl:pl-[60px] 2xl:pr-11 flex flex-col justify-center items-center gap-[6px] flex-wrap'

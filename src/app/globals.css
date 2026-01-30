@@ -13,6 +13,10 @@
     --foreground: #ededed;
   }
 }
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
 .font-acumin-variable-68 {
   font-family: 'acumin-variable', sans-serif;
   font-variation-settings: 'wdth' 68;
@@ -39,7 +43,9 @@
 }
 .font-acumin-variable-102 {
   font-family: 'acumin-variable', sans-serif;
-  font-variation-settings: 'wdth' 102.5, 'slnt' -12;
+  font-variation-settings:
+    'wdth' 102.5,
+    'slnt' -12;
 }
 .font-acumin-variable-103 {
   font-family: 'acumin-variable', sans-serif;
