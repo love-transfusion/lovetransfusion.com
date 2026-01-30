@@ -162,11 +162,10 @@ export const supa_delete_recipient = async (props: {
   const supabase = await createAdmin()
 
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('recipients')
       .delete()
       .eq('id', recipient_id)
-      .select()
       
     if (error) throw new Error(error.message)
 
