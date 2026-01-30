@@ -1,8 +1,11 @@
+import { supa_admin_delete_auth_user } from '@/app/_actions/admin/actions'
 import { supa_select_orgRecipients } from '@/app/_actions/orgRecipients/actions'
 import {
+  supa_delete_recipient,
   supa_select_recipients_all,
   supa_upsert_recipients,
 } from '@/app/_actions/recipients/actions'
+import { supa_select_users_all } from '@/app/_actions/users/actions'
 import { Json } from '@/types/database.types'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -31,15 +34,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: selectError }, { status: 500 })
   }
 
+  const orgRecipientIds = new Set(orgRecipients.map((item) => item.id))
+
   const deletedRecipients =
     comRecipients
-      ?.filter((com) => !orgRecipients.some((item) => item.id === com.id))
+      ?.filter((com) => !orgRecipientIds.has(com.id))
       .map((item) => {
+        const recipient = item.recipient as unknown as I_supaOrg_recipients_row
         return {
           id: item.id,
           is_deleted: true,
           created_at: item.created_at,
           recipient: item.recipient,
+          in_memoriam: recipient.in_memoriam,
         }
       }) ?? []
 
@@ -52,15 +59,52 @@ export async function GET(req: NextRequest) {
         created_at: item.created_at,
         recipient: newItem,
         is_deleted: false,
-        in_memoriam: item.in_memoriam
+        in_memoriam: item.in_memoriam,
       }
     }),
     ...deletedRecipients,
   ]
 
+  const in_memoriam_recipients = formattedRecipients
+    .filter((item) => item.in_memoriam)
+    .map((item) => item.id)
+
+  const { data: selectedUsers, error: userSelectError } =
+    await supa_select_users_all(
+      {
+        mode: 'search',
+        searchIDs: in_memoriam_recipients,
+      },
+      CRON,
+    )
+
+  if (userSelectError) {
+    console.error('Error selecting users:', userSelectError)
+    return NextResponse.json(
+      { ok: false, error: userSelectError },
+      { status: 500 },
+    )
+  }
+
+  console.log({ selectedUsers })
+
+  if (in_memoriam_recipients && !!in_memoriam_recipients.length) {
+    const deleteRecipients = in_memoriam_recipients.map((recipientID) =>
+      supa_delete_recipient({ recipient_id: recipientID, CRON }),
+    )
+    await Promise.all(deleteRecipients)
+  }
+
+  if (selectedUsers && !!selectedUsers.length) {
+    const deleteUsersTasks = selectedUsers.map((user) =>
+      supa_admin_delete_auth_user(user.id),
+    )
+    await Promise.all(deleteUsersTasks)
+  }
+
   const { error: upsertError } = await supa_upsert_recipients(
     formattedRecipients,
-    process.env.CRON_SECRET!
+    CRON,
   )
 
   if (upsertError) {

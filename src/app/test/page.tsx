@@ -2,7 +2,7 @@ import React from 'react'
 
 const page = async () => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/cron/delete_in_memoriam_recipients`,
+    `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/cron/recipients`,
     {
       method: 'GET',
       headers: {

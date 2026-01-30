@@ -7,11 +7,11 @@ import { createServer } from '@/app/config/supabase/supabaseServer'
 
 export const supa_upsert_recipients = async (
   recipients: I_supa_recipients_insert[],
-  CRON?: string,
+  CRON?: string | null,
 ) => {
   const user = await getCurrentUser()
   const isadmin = isAdmin({ clRole: user?.role })
-  if (CRON !== process.env.CRON_SECRET && !isadmin)
+  if (CRON !== `Bearer ${process.env.CRON_SECRET}` && !isadmin)
     return { data: null, count: 0, error: 'You are not authorized.' }
 
   const supabase = await createAdmin()
