@@ -86,15 +86,12 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  console.log({ selectedUsers })
-
   if (in_memoriam_recipients && !!in_memoriam_recipients.length) {
     const deleteRecipients = in_memoriam_recipients.map((recipientID) =>
       supa_delete_recipient({ recipient_id: recipientID, CRON }),
     )
     await Promise.all(deleteRecipients)
   }
-  console.log({ in_memoriam_recipients })
 
   if (selectedUsers && !!selectedUsers.length) {
     const deleteUsersTasks = selectedUsers.map((user) =>
@@ -104,7 +101,9 @@ export async function GET(req: NextRequest) {
   }
 
   const { error: upsertError } = await supa_upsert_recipients(
-    formattedRecipients,
+    formattedRecipients.filter(
+      (rec) => !in_memoriam_recipients.includes(rec.id),
+    ),
     CRON,
   )
 
