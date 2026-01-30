@@ -94,6 +94,7 @@ export async function GET(req: NextRequest) {
     )
     await Promise.all(deleteRecipients)
   }
+  console.log({ in_memoriam_recipients })
 
   if (selectedUsers && !!selectedUsers.length) {
     const deleteUsersTasks = selectedUsers.map((user) =>
