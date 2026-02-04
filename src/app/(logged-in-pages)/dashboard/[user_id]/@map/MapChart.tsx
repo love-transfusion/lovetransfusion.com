@@ -47,6 +47,22 @@ const MapChart = ({
   const chartRef = useRef<any>(null)
   const intersectionRef = useRef<HTMLDivElement | null>(null)
 
+  const onEvents = {
+    click: (params: any) => {
+      if (!chartRef.current) return
+      if (params?.seriesName !== 'Hitbox') return
+
+      const chart = chartRef.current.getEchartsInstance()
+
+      // Show tooltip for the visible series (Effect Points)
+      chart.dispatchAction({
+        type: 'showTip',
+        seriesIndex: 1, // because Hitbox is index 0, Effect Points is index 1
+        dataIndex: params.dataIndex,
+      })
+    },
+  }
+
   useEffect(() => {
     const loadMap = async () => {
       if (mappedData.length < 1) setLoading(true)
@@ -86,9 +102,13 @@ const MapChart = ({
         }
       }
 
+      const hitboxSize = clWindowWidth > 768 ? 22 : 22 // bigger on mobile
+
       setOption({
         tooltip: {
           trigger: 'item',
+          triggerOn: 'click',
+          confine: true,
           padding: 0,
           borderColor: '#2F8EDD',
           extraCssText:
@@ -191,6 +211,18 @@ const MapChart = ({
         },
         series: [
           {
+            name: 'Hitbox',
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            data: mapped,
+            symbol: 'circle',
+            symbolSize: hitboxSize, // big tappable area
+            z: 50, // above the visible dots
+            itemStyle: { opacity: 0.01 }, // IMPORTANT: don't use 0
+            emphasis: { disabled: true },
+            tooltip: { show: false }, // we’ll show the tooltip manually
+          },
+          {
             name: 'Effect Points',
             type: 'effectScatter',
             coordinateSystem: 'geo',
@@ -230,6 +262,7 @@ const MapChart = ({
               ref={chartRef}
               option={option}
               style={{ width: '100%' }}
+              onEvents={onEvents}
             />
             {/* Floating Controls */}
             {user_id && <MapControls chartRef={chartRef} user_id={user_id} />}
