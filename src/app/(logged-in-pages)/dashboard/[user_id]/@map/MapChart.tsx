@@ -107,7 +107,7 @@ const MapChart = ({
       setOption({
         tooltip: {
           trigger: 'item',
-          triggerOn: 'click',
+          triggerOn: clWindowWidth > 768 ? 'mousemove' : 'click',
           confine: true,
           padding: 0,
           borderColor: '#2F8EDD',
@@ -220,7 +220,6 @@ const MapChart = ({
             z: 50, // above the visible dots
             itemStyle: { opacity: 0.01 }, // IMPORTANT: don't use 0
             emphasis: { disabled: true },
-            tooltip: { show: false }, // we’ll show the tooltip manually
           },
           {
             name: 'Effect Points',
