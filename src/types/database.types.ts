@@ -168,6 +168,8 @@ export type Database = {
           reactions_checked_at: string | null
           reactions_supported: boolean | null
           retry_count: number
+          sync_run_id: string | null
+          sync_started_at: string | null
           sync_status: Database["public"]["Enums"]["posts_sync_status"]
           user_id: string | null
         }
@@ -182,6 +184,8 @@ export type Database = {
           reactions_checked_at?: string | null
           reactions_supported?: boolean | null
           retry_count?: number
+          sync_run_id?: string | null
+          sync_started_at?: string | null
           sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
         }
@@ -196,6 +200,8 @@ export type Database = {
           reactions_checked_at?: string | null
           reactions_supported?: boolean | null
           retry_count?: number
+          sync_run_id?: string | null
+          sync_started_at?: string | null
           sync_status?: Database["public"]["Enums"]["posts_sync_status"]
           user_id?: string | null
         }

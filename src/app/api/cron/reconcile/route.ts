@@ -6,8 +6,6 @@ import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
-
-// ✅ adjust this import to match where your Database type is exported
 import type { Database } from '@/types/database.types'
 import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
 
@@ -23,8 +21,11 @@ const CONCURRENCY = 5
 const PER_POST_BUDGET_MS = 20000
 const RETRY_MAX = 10
 
-const NON_EXISTENT_MARKER = 'tombstoned: non-existent/off-surface'
+// if a run is killed mid-flight, a post can remain "running" forever.
+// this reaper resets those "stale running" posts to deferred.
+const STALE_RUNNING_MS = 10 * 60 * 1000 // 10 minutes
 
+const NON_EXISTENT_MARKER = 'tombstoned: non-existent/off-surface'
 const STATUSES: PostsSyncStatus[] = ['idle', 'deferred', 'error']
 
 const isAuthorizedCron = (req: NextRequest) => {
@@ -34,7 +35,6 @@ const isAuthorizedCron = (req: NextRequest) => {
   return auth === `Bearer ${secret}`
 }
 
-// --- small helpers for safe logging
 const trim = (v: unknown, max = 500) => {
   try {
     const s = typeof v === 'string' ? v : JSON.stringify(v)
@@ -54,7 +54,6 @@ const isRetryableHttpStatus = (status?: number) =>
   status === 503 ||
   status === 504
 
-// Pull status/message from many possible error shapes
 const extractErr = (e: any) => {
   const msg: string =
     (typeof e === 'string' && e) ||
@@ -67,7 +66,7 @@ const extractErr = (e: any) => {
   const status: number | undefined =
     e?.status ||
     e?.response?.status ||
-    e?.response?.data?.error?.code || // sometimes "code" is not HTTP, but still useful
+    e?.response?.data?.error?.code ||
     undefined
 
   const code =
@@ -85,7 +84,6 @@ const extractErr = (e: any) => {
   return { msg, status, code, subcode }
 }
 
-// --- classify common Graph errors so we can tombstone "gone" posts
 function classifyGraphError(e: any) {
   const { msg, status, code, subcode } = extractErr(e)
 
@@ -97,7 +95,6 @@ function classifyGraphError(e: any) {
     /permissions|not authorized|requires.*access|(#200)/i.test(msg) ||
     code === 200
 
-  // retryable: rate limit / transient
   const retryable =
     isRetryableHttpStatus(status) ||
     /rate limit|too many calls|reduce the amount of data|temporarily unavailable/i.test(
@@ -105,6 +102,52 @@ function classifyGraphError(e: any) {
     )
 
   return { nonExistent, permission, retryable, msg, status, code, subcode }
+}
+
+/**
+ * Fix for crazy historical values (e.g. retry_count = 14810).
+ * Any row with retry_count >= RETRY_MAX becomes terminal (idle) with a clear last_error.
+ */
+async function normalizeRetryCounts(supabase: Admin, runId: string) {
+  const span = (s: string) => `[CRON ${runId}] ${s}`
+
+  const { error } = await supabase
+    .from('facebook_posts')
+    .update({
+      sync_status: 'idle',
+      last_error: `retry exhausted (>= ${RETRY_MAX})`,
+      last_synced_at: new Date().toISOString(),
+      next_cursor: null,
+    })
+    .gte('retry_count', RETRY_MAX)
+    // only touch these because "idle" already terminal
+    .in('sync_status', ['error', 'deferred', 'running'] as any)
+
+  if (error) console.error(span('NORMALIZE_RETRY_ERR'), { message: error.message })
+  else console.info(span('NORMALIZE_RETRY_OK'))
+}
+
+/**
+ * Reap stale running posts (self-heal).
+ * Requires sync_started_at column.
+ */
+async function reapStaleRunning(supabase: Admin, runId: string) {
+  const span = (s: string) => `[CRON ${runId}] ${s}`
+  const cutoff = new Date(Date.now() - STALE_RUNNING_MS).toISOString()
+
+  const { error } = await supabase
+    .from('facebook_posts')
+    .update({
+      sync_status: 'deferred',
+      last_error: `stale running reaped (> ${Math.floor(
+        STALE_RUNNING_MS / 60000,
+      )}m)`,
+    })
+    .eq('sync_status', 'running')
+    .or(`sync_started_at.is.null,sync_started_at.lt.${cutoff}`)
+
+  if (error) console.error(span('REAP_STALE_RUNNING_ERR'), { message: error.message })
+  else console.info(span('REAP_STALE_RUNNING_OK'), { cutoff })
 }
 
 export async function GET(req: NextRequest) {
@@ -124,27 +167,32 @@ export async function GET(req: NextRequest) {
   if (!isAuthorizedCron(req)) {
     console.warn(span('AUTH_FAIL'))
     console.timeEnd(span('TOTAL'))
-    console.log('my req')
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
   const supabase = await createAdmin()
   console.info(span('SB_READY'))
 
+  // safety rails (run before picking)
+  await normalizeRetryCounts(supabase, runId)
+  await reapStaleRunning(supabase, runId)
+
   const { data: selectedFacebookPage } =
     await supa_select_facebook_pages_pageToken({
       clCRON: req.headers.get('authorization'),
       clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
     })
+
   const pageToken = selectedFacebookPage?.page_token
   if (!pageToken) {
+    console.timeEnd(span('TOTAL'))
     return NextResponse.json(
       { ok: false as const, runId, error: 'missing FACEBOOK_PAGE_TOKEN' },
       { status: 500 },
     )
   }
 
-  // ---------- PICK_POSTS (NULL-safe filters) ----------
+  // ---------- PICK_POSTS ----------
   console.time(span('PICK_POSTS'))
   const marker = `${NON_EXISTENT_MARKER}%`
 
@@ -153,11 +201,9 @@ export async function GET(req: NextRequest) {
     .select('*')
     .or(`last_error.is.null,last_error.not.ilike.${marker}`)
     .or(`retry_count.is.null,retry_count.lt.${RETRY_MAX}`)
-    .in('sync_status', STATUSES) // ✅ no `as any`
+    .in('sync_status', STATUSES)
     .order('last_synced_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
-
-  console.log({ postsRaw })
 
   console.timeEnd(span('PICK_POSTS'))
 
@@ -165,12 +211,12 @@ export async function GET(req: NextRequest) {
     console.error(span('PICK_POSTS_ERR'), { message: postsErr.message })
     console.timeEnd(span('TOTAL'))
     return NextResponse.json(
-      { ok: false, error: postsErr.message },
+      { ok: false, runId, error: postsErr.message },
       { status: 500 },
     )
   }
 
-  const posts: FbPostRow[] = postsRaw ?? [] // ✅ posts is now always an array
+  const posts: FbPostRow[] = postsRaw ?? []
 
   console.info(span('PICK_POSTS_OK'), {
     picked: posts.length,
@@ -185,17 +231,21 @@ export async function GET(req: NextRequest) {
 
   const limit = pLimit(CONCURRENCY)
 
-  // mark running
+  // mark running (+ timestamps so stale-running can be reaped later)
   const ids = posts.map((p) => p.post_id)
   console.time(span('MARK_RUNNING'))
   const { error: updErr } = await supabase
     .from('facebook_posts')
-    .update({ sync_status: 'running', last_error: null })
+    .update({
+      sync_status: 'running',
+      last_error: null,
+      sync_started_at: new Date().toISOString(),
+      sync_run_id: runId,
+    })
     .in('post_id', ids)
   console.timeEnd(span('MARK_RUNNING'))
 
-  if (updErr)
-    console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
+  if (updErr) console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
   else console.info(span('MARK_RUNNING_OK'), { ids })
 
   console.time(span('PROCESS_ALL'))
@@ -209,7 +259,9 @@ export async function GET(req: NextRequest) {
   ).length
 
   const failed = results.filter(
-    (r) => r.status === 'rejected' || r.value === false,
+    (r) =>
+      r.status === 'rejected' ||
+      (r.status === 'fulfilled' && r.value === false),
   ).length
 
   console.info(span('DONE'), { synced, failed, picked: posts.length })
@@ -220,15 +272,12 @@ export async function GET(req: NextRequest) {
     runId,
     picked: posts.length,
     synced,
+    failed,
   })
 }
 
 // ---------- helpers ----------
 
-/**
- * Graph batch call for author info.
- * Adds retry/backoff on 429/5xx (important).
- */
 async function fetchCommentAuthorsByIds(
   commentIds: string[],
   pageAccessToken: string,
@@ -239,43 +288,22 @@ async function fetchCommentAuthorsByIds(
 ): Promise<
   Record<
     string,
-    {
-      from_id: string | null
-      from_name: string | null
-      picture_url: string | null
-    }
+    { from_id: string | null; from_name: string | null; picture_url: string | null }
   >
 > {
-  const span = (s: string) => `[CRON ${runId}] [FALLBACK ${postId}] ${s}`
   const out: Record<
     string,
-    {
-      from_id: string | null
-      from_name: string | null
-      picture_url: string | null
-    }
+    { from_id: string | null; from_name: string | null; picture_url: string | null }
   > = {}
 
   const unique = Array.from(new Set(commentIds.filter(Boolean)))
-  if (!unique.length) {
-    console.info(span('SKIP_EMPTY'))
-    return out
-  }
+  if (!unique.length) return out
 
   const GRAPH_VER = process.env.NEXT_PUBLIC_GRAPH_VERSION!
   const chunkSize = 50
 
-  console.info(span('START'), {
-    total: unique.length,
-    chunkSize,
-    graphVer: GRAPH_VER,
-  })
-
   for (let i = 0; i < unique.length; i += chunkSize) {
-    if (deadlineMs && Date.now() > deadlineMs) {
-      console.warn(span('DEADLINE_STOP'), { atIndex: i })
-      break
-    }
+    if (deadlineMs && Date.now() > deadlineMs) break
 
     const chunk = unique.slice(i, i + chunkSize)
 
@@ -290,432 +318,323 @@ async function fetchCommentAuthorsByIds(
 
     let attempt = 0
     const maxAttempts = 4
-    let lastStatus: number | null = null
 
     while (attempt < maxAttempts) {
-      if (deadlineMs && Date.now() > deadlineMs) {
-        console.warn(span('DEADLINE_STOP_INNER'), { atIndex: i, attempt })
-        attempt = maxAttempts
-        break
-      }
+      if (deadlineMs && Date.now() > deadlineMs) break
 
-      console.time(span(`BATCH_${i / chunkSize}_POST_A${attempt}`))
       const res = await fetch(`https://graph.facebook.com/${GRAPH_VER}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: pageAccessToken, batch }),
       })
-      console.timeEnd(span(`BATCH_${i / chunkSize}_POST_A${attempt}`))
-
-      lastStatus = res.status
 
       if (!res.ok) {
-        const text = await res.text()
         const retryable = isRetryableHttpStatus(res.status)
-        console.warn(span('BATCH_HTTP_FAIL'), {
-          status: res.status,
-          retryable,
-          text: text?.slice(0, 250),
-        })
-
         if (!retryable) break
-
-        const delay = jitter(500 * 2 ** attempt)
-        await sleep(delay)
+        await sleep(jitter(500 * 2 ** attempt))
         attempt++
         continue
       }
 
       const json = (await res.json()) as Array<{ code: number; body: string }>
-      let ok = 0
-      let err = 0
-      const samples: Array<{ id: string; body: any }> = []
 
       json.forEach((item, idx) => {
         try {
           const body = JSON.parse(item.body)
-          if (samples.length < 3)
-            samples.push({ id: chunk[idx], body: body?.from ?? body })
-          if (item.code !== 200) {
-            err++
-            return
-          }
+          if (item.code !== 200) return
           const f = body?.from
           out[chunk[idx]] = {
             from_id: f?.id ?? null,
             from_name: f?.name ?? null,
             picture_url: f?.picture?.data?.url ?? null,
           }
-          ok++
-        } catch {
-          err++
-        }
+        } catch {}
       })
 
-      console.info(span('BATCH_RESULT'), { index: i / chunkSize, ok, err })
-      if (samples.length) {
-        console.info(
-          span('BATCH_SAMPLE_BODIES'),
-          samples.map((s) => ({ id: s.id, body: trim(s.body, 400) })),
-        )
-      }
-
-      attempt = maxAttempts
       break
-    }
-
-    if (lastStatus && isRetryableHttpStatus(lastStatus)) {
-      console.info(span('BATCH_STATUS_END'), { status: lastStatus })
     }
   }
 
-  console.info(span('END'), { resolved: Object.keys(out).length })
   return out
 }
 
 async function reconcilePost(
   supabase: Admin,
-  post: FbPostRow, // ✅ use typed row from Supabase
+  post: FbPostRow,
   runId: string,
   pageToken: string,
 ) {
   const postSpan = (s: string) => `[CRON ${runId}] [POST ${post.post_id}] ${s}`
 
-  const startedAt = Date.now()
-  const deadline = startedAt + PER_POST_BUDGET_MS
+  // ✅ Hard guarantee: no unexpected throw can leave the post "running"
+  try {
+    const startedAt = Date.now()
+    const deadline = startedAt + PER_POST_BUDGET_MS
 
-  console.info(postSpan('BEGIN'), {
-    page_id: post.page_id,
-    since: post.last_synced_at,
-    prevCursor: post.next_cursor,
-    budgetMs: PER_POST_BUDGET_MS,
-  })
+    const since = post.last_synced_at ?? undefined
+    let after: string | undefined = post.next_cursor ?? undefined
+    let finished = false
 
-  // 0) Resolve page token (IMPORTANT: pass systemToken if available)
-  console.time(postSpan('PAGE_TOKEN'))
+    const NEXT_PUBLIC_IDENTITY_ENABLED =
+      (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
 
-  const since = post.last_synced_at ?? undefined
-  let after: string | undefined = post.next_cursor ?? undefined
-  let finished = false
+    const canStillWork = () => Date.now() + 1500 < deadline
 
-  const NEXT_PUBLIC_IDENTITY_ENABLED =
-    (process.env.NEXT_PUBLIC_IDENTITY_ENABLED ?? 'false') === 'true'
+    const fetchCommentsWithRetry = async () => {
+      let attempt = 0
+      const maxAttempts = 4
 
-  const canStillWork = () => Date.now() + 1500 < deadline // leave buffer
+      while (attempt < maxAttempts) {
+        if (!canStillWork()) return { data: null, paging: null, error: 'deadline' }
 
-  // small retry wrapper for util_fb_comments
-  const fetchCommentsWithRetry = async () => {
-    let attempt = 0
-    const maxAttempts = 4
+        const { data, paging, error } = await util_fb_comments({
+          postId: post.post_id,
+          pageAccessToken: pageToken,
+          order: 'chronological',
+          identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
+          ...(since ? { since } : {}),
+          ...(after ? { after } : {}),
+        })
 
-    while (attempt < maxAttempts) {
-      if (!canStillWork())
-        return { data: null, paging: null, error: 'deadline' }
+        if (!error) return { data, paging, error: null }
 
-      const { data, paging, error } = await util_fb_comments({
-        postId: post.post_id,
-        pageAccessToken: pageToken,
-        order: 'chronological',
-        identityEnabled: NEXT_PUBLIC_IDENTITY_ENABLED,
-        ...(since ? { since } : {}),
-        ...(after ? { after } : {}),
-      })
+        const { nonExistent, permission, retryable, msg, status, code, subcode } =
+          classifyGraphError(error)
 
-      if (!error) return { data, paging, error: null }
+        console.error(postSpan('FETCH_ERR'), { msg, status, code, subcode, retryable })
 
-      const { nonExistent, permission, retryable, msg, status, code, subcode } =
-        classifyGraphError(error)
+        if (nonExistent || permission || !retryable) {
+          return { data: null, paging: null, error }
+        }
 
-      console.error(postSpan('FETCH_ERR'), {
-        msg,
-        status,
-        code,
-        subcode,
-        retryable,
-      })
-
-      if (nonExistent || permission || !retryable) {
-        return { data: null, paging: null, error }
+        await sleep(jitter(600 * 2 ** attempt))
+        attempt++
       }
 
-      const delay = jitter(600 * 2 ** attempt)
-      console.warn(postSpan('FETCH_RETRY'), { attempt, delay })
-      await sleep(delay)
-      attempt++
+      return { data: null, paging: null, error: 'retry-exhausted' }
     }
 
-    return { data: null, paging: null, error: 'retry-exhausted' }
-  }
-
-  do {
-    if (!canStillWork()) {
-      console.warn(postSpan('BUDGET_EXCEEDED'), { after })
-      await deferPost(supabase, post.post_id, after)
-      return false
-    }
-
-    console.time(postSpan('FETCH_COMMENTS'))
-    const { data, paging, error } = await fetchCommentsWithRetry()
-    console.timeEnd(postSpan('FETCH_COMMENTS'))
-
-    if (error) {
-      const { nonExistent, permission } = classifyGraphError(error)
-
-      if (error === 'deadline') {
+    do {
+      if (!canStillWork()) {
+        console.warn(postSpan('BUDGET_EXCEEDED'), { after })
         await deferPost(supabase, post.post_id, after)
         return false
       }
 
-      if (nonExistent) {
-        console.warn(postSpan('TOMBSTONE'), {
-          reason: 'non-existent/off-surface',
-        })
-        await supabase
-          .from('facebook_posts')
-          .update({
-            sync_status: 'idle',
-            next_cursor: null,
-            retry_count: 0,
-            last_error: NON_EXISTENT_MARKER,
-            last_synced_at: new Date().toISOString(),
+      const { data, paging, error } = await fetchCommentsWithRetry()
+
+      if (error) {
+        const { nonExistent, permission } = classifyGraphError(error)
+
+        if (error === 'deadline') {
+          await deferPost(supabase, post.post_id, after)
+          return false
+        }
+
+        if (nonExistent) {
+          console.warn(postSpan('TOMBSTONE'), { reason: 'non-existent/off-surface' })
+          const { error: tErr } = await supabase
+            .from('facebook_posts')
+            .update({
+              sync_status: 'idle',
+              next_cursor: null,
+              retry_count: 0,
+              last_error: NON_EXISTENT_MARKER,
+              last_synced_at: new Date().toISOString(),
+            })
+            .eq('post_id', post.post_id)
+          if (tErr) console.error(postSpan('TOMBSTONE_UPDATE_ERR'), { message: tErr.message })
+          return false
+        }
+
+        if (permission) {
+          await markPostError(supabase, post.post_id, 'permissions error')
+          return false
+        }
+
+        await markPostError(supabase, post.post_id, `util_fb_comments error`)
+        return false
+      }
+
+      if (data && data.length) {
+        // avatars
+        let avatarMap: Record<string, { url: string | null; isSilhouette: boolean | null }> =
+          {}
+
+        try {
+          const fromIds = Array.from(
+            new Set(
+              data
+                .map((c: any) => c.from?.id)
+                .filter((x: any): x is string => !!x),
+            ),
+          )
+
+          if (fromIds.length && canStillWork()) {
+            let attempt = 0
+            const maxAttempts = 4
+
+            while (attempt < maxAttempts) {
+              try {
+                avatarMap = await util_fb_profile_picture({
+                  clIDs: fromIds,
+                  clAccessToken: pageToken,
+                  clImageDimensions: 128,
+                })
+                break
+              } catch (e: any) {
+                const { msg, status } = extractErr(e)
+                const retryable =
+                  isRetryableHttpStatus(status) || /rate limit/i.test(msg)
+                if (!retryable) break
+                await sleep(jitter(500 * 2 ** attempt))
+                attempt++
+              }
+            }
+          }
+        } catch (e: any) {
+          console.error(postSpan('AVATAR_FATAL'), {
+            text: trim(e?.response?.data ?? e?.message, 700),
           })
-          .eq('post_id', post.post_id)
+        }
+
+        // fallback authors
+        let authorFallback: Record<
+          string,
+          { from_id: string | null; from_name: string | null; picture_url: string | null }
+        > = {}
+
+        try {
+          const needsAuthor = data
+            .filter((c: any) => !(c.from?.id && c.from?.name))
+            .map((c: any) => c.id)
+
+          if (needsAuthor.length && canStillWork()) {
+            authorFallback = await fetchCommentAuthorsByIds(
+              needsAuthor,
+              pageToken,
+              128,
+              runId,
+              post.post_id,
+              deadline,
+            )
+          }
+        } catch (e: any) {
+          console.error(postSpan('FALLBACK_ERR'), { message: e?.message })
+        }
+
+        const rows = data.map((c: any) => {
+          const fromId = c.from?.id ?? authorFallback[c.id]?.from_id ?? null
+          const fromName = c.from?.name ?? authorFallback[c.id]?.from_name ?? null
+
+          const apiPic = c?.from?.picture?.data?.url ?? null
+          const avatarPic = fromId ? (avatarMap[fromId]?.url ?? null) : null
+          const fallbackPic = authorFallback[c.id]?.picture_url ?? null
+
+          // avoid Date throwing
+          let createdISO = new Date().toISOString()
+          try {
+            const rawCreated = c.created_time as any
+            createdISO =
+              typeof rawCreated === 'number'
+                ? new Date(rawCreated * 1000).toISOString()
+                : new Date(rawCreated).toISOString()
+          } catch {}
+
+          const msgLower = (c.message ?? '').toLowerCase()
+          const containsBanned =
+            msgLower.length > 0 && BANNED_KEYWORDS.some((w) => msgLower.includes(w))
+
+          return {
+            comment_id: c.id,
+            post_id: post.post_id,
+            parent_id: c.parent?.id ?? null,
+            message: c.message ?? null,
+            from_id: fromId,
+            from_name: fromName,
+            from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
+            created_time: createdISO,
+            like_count: c.like_count ?? (c as any).like_count ?? null,
+            comment_count: c.comment_count ?? (c as any).comment_count ?? null,
+            permalink_url: c.permalink_url ?? (c as any).permalink_url ?? null,
+            ...(containsBanned ? { is_hidden: true } : {}),
+            is_deleted: false,
+            raw: c as any,
+            updated_at: new Date().toISOString(),
+          }
+        })
+
+        const chunkSize = 500
+        for (let i = 0; i < rows.length; i += chunkSize) {
+          if (!canStillWork()) {
+            await deferPost(supabase, post.post_id, after)
+            return false
+          }
+
+          const chunk = rows.slice(i, i + chunkSize)
+          const { error: upErr } = await supabase
+            .from('facebook_comments')
+            .upsert(chunk as any, { onConflict: 'comment_id' } as any)
+
+          if (upErr) {
+            await markPostError(
+              supabase,
+              post.post_id,
+              `comments upsert error: ${upErr.message}`,
+            )
+            return false
+          }
+        }
+      }
+
+      const pagingAfter = (paging as any)?.cursors?.after
+      after = pagingAfter
+
+      const { error: cursorErr } = await supabase
+        .from('facebook_posts')
+        .update({ next_cursor: after ?? null })
+        .eq('post_id', post.post_id)
+
+      if (cursorErr) {
+        console.error(postSpan('CURSOR_UPDATE_ERR'), { message: cursorErr.message })
+        await deferPost(supabase, post.post_id, after)
         return false
       }
 
-      if (permission) {
-        await markPostError(supabase, post.post_id, 'permissions error')
-        return false
-      }
+      finished = !after
+    } while (!finished)
 
-      await markPostError(supabase, post.post_id, `util_fb_comments error`)
+    const { error: finalizeErr } = await supabase
+      .from('facebook_posts')
+      .update({
+        next_cursor: null,
+        sync_status: 'idle',
+        retry_count: 0,
+        last_error: null,
+        last_synced_at: new Date().toISOString(),
+      })
+      .eq('post_id', post.post_id)
+
+    if (finalizeErr) {
+      await markPostError(supabase, post.post_id, `finalize failed: ${finalizeErr.message}`)
       return false
     }
 
-    if (data && data.length) {
-      // ---- avatars (wrap with retry)
-      let avatarMap: Record<
-        string,
-        { url: string | null; isSilhouette: boolean | null }
-      > = {}
-
-      try {
-        const fromIds = Array.from(
-          new Set(
-            data
-              .map((c: any) => c.from?.id)
-              .filter((x: any): x is string => !!x),
-          ),
-        )
-
-        console.info(postSpan('AVATAR_IDS'), { uniqueFromIds: fromIds.length })
-
-        if (fromIds.length && canStillWork()) {
-          let attempt = 0
-          const maxAttempts = 4
-
-          while (attempt < maxAttempts) {
-            try {
-              console.time(postSpan(`AVATAR_ENRICH_A${attempt}`))
-              avatarMap = await util_fb_profile_picture({
-                clIDs: fromIds,
-                clAccessToken: pageToken,
-                clImageDimensions: 128,
-              })
-              console.timeEnd(postSpan(`AVATAR_ENRICH_A${attempt}`))
-              console.info(postSpan('AVATAR_DONE'), {
-                resolved: Object.keys(avatarMap).length,
-              })
-              break
-            } catch (e: any) {
-              const { msg, status } = extractErr(e)
-              const retryable =
-                isRetryableHttpStatus(status) || /rate limit/i.test(msg)
-              console.error(postSpan('AVATAR_FAIL'), {
-                status,
-                retryable,
-                msg: msg?.slice(0, 200),
-              })
-              if (!retryable) break
-              const delay = jitter(500 * 2 ** attempt)
-              await sleep(delay)
-              attempt++
-            }
-          }
-        }
-      } catch (e: any) {
-        console.error(postSpan('AVATAR_FATAL'), {
-          text: trim(e?.response?.data ?? e?.message, 700),
-        })
-      }
-
-      // ---- fallback author fetch (batched + retry, deadline-aware)
-      let authorFallback: Record<
-        string,
-        {
-          from_id: string | null
-          from_name: string | null
-          picture_url: string | null
-        }
-      > = {}
-
-      try {
-        const needsAuthor = data
-          .filter((c: any) => !(c.from?.id && c.from?.name))
-          .map((c: any) => c.id)
-
-        console.info(postSpan('FALLBACK_NEED'), { count: needsAuthor.length })
-
-        if (needsAuthor.length && canStillWork()) {
-          authorFallback = await fetchCommentAuthorsByIds(
-            needsAuthor,
-            pageToken,
-            128,
-            runId,
-            post.post_id,
-            deadline,
-          )
-          const resolvedNames = Object.values(authorFallback).filter(
-            (v) => !!v.from_name,
-          ).length
-          console.info(postSpan('FALLBACK_DONE'), {
-            resolved: Object.keys(authorFallback).length,
-            resolvedNames,
-          })
-        }
-      } catch (e: any) {
-        console.error(postSpan('FALLBACK_ERR'), { message: e?.message })
-      }
-
-      const rows = data.map((c: any) => {
-        const fromId = c.from?.id ?? authorFallback[c.id]?.from_id ?? null
-        const fromName = c.from?.name ?? authorFallback[c.id]?.from_name ?? null
-
-        const apiPic = c?.from?.picture?.data?.url ?? null
-        const avatarPic = fromId ? (avatarMap[fromId]?.url ?? null) : null
-        const fallbackPic = authorFallback[c.id]?.picture_url ?? null
-
-        const rawCreated = c.created_time as any
-        const createdISO =
-          typeof rawCreated === 'number'
-            ? new Date(rawCreated * 1000).toISOString()
-            : new Date(rawCreated).toISOString()
-
-        const msgLower = (c.message ?? '').toLowerCase()
-        const containsBanned =
-          msgLower.length > 0 &&
-          BANNED_KEYWORDS.some((w) => msgLower.includes(w))
-
-        return {
-          comment_id: c.id,
-          post_id: post.post_id,
-          parent_id: c.parent?.id ?? null,
-          message: c.message ?? null,
-          from_id: fromId,
-          from_name: fromName,
-          from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
-          created_time: createdISO,
-          like_count: c.like_count ?? (c as any).like_count ?? null,
-          comment_count: c.comment_count ?? (c as any).comment_count ?? null,
-          permalink_url: c.permalink_url ?? (c as any).permalink_url ?? null,
-          ...(containsBanned ? { is_hidden: true } : {}),
-          is_deleted: false,
-          raw: c as any,
-          updated_at: new Date().toISOString(),
-        }
-      })
-
-      // Upsert
-      const chunkSize = 500
-      console.time(postSpan('UPSERT'))
-
-      for (let i = 0; i < rows.length; i += chunkSize) {
-        if (!canStillWork()) {
-          console.warn(postSpan('UPSERT_DEADLINE_DEFER'), {
-            atChunk: i / chunkSize,
-          })
-          await deferPost(supabase, post.post_id, after)
-          console.timeEnd(postSpan('UPSERT'))
-          return false
-        }
-
-        const chunk = rows.slice(i, i + chunkSize)
-        console.info(postSpan('UPSERT_CHUNK'), {
-          index: i / chunkSize,
-          size: chunk.length,
-        })
-
-        const { error: upErr } = await supabase
-          .from('facebook_comments')
-          .upsert(chunk as any, { onConflict: 'comment_id' } as any)
-
-        if (upErr) {
-          console.error(postSpan('UPSERT_ERR'), {
-            message: upErr.message,
-            index: i / chunkSize,
-            size: chunk.length,
-          })
-          await markPostError(
-            supabase,
-            post.post_id,
-            `comments upsert error: ${upErr.message}`,
-          )
-          console.timeEnd(postSpan('UPSERT'))
-          return false
-        }
-      }
-
-      console.timeEnd(postSpan('UPSERT'))
-      console.info(postSpan('UPSERT_OK'), { total: rows.length })
-    } else {
-      console.info(postSpan('NO_DATA_PAGE'))
-    }
-
-    const pagingAfter = (paging as any)?.cursors?.after
-    after = pagingAfter
-    console.info(postSpan('CURSOR_UPDATE'), { next_after: after ?? null })
-
-    await supabase
-      .from('facebook_posts')
-      .update({ next_cursor: after ?? null })
-      .eq('post_id', post.post_id)
-
-    finished = !after
-  } while (!finished)
-
-  console.time(postSpan('FINALIZE'))
-  const { error: updErr } = await supabase
-    .from('facebook_posts')
-    .update({
-      next_cursor: null,
-      sync_status: 'idle',
-      retry_count: 0,
-      last_error: null,
-      last_synced_at: new Date().toISOString(),
+    return true
+  } catch (e: any) {
+    const { msg, status, code, subcode } = extractErr(e)
+    console.error(postSpan('FATAL_THROW'), {
+      msg: msg?.slice(0, 500),
+      status,
+      code,
+      subcode,
     })
-    .eq('post_id', post.post_id)
-  console.timeEnd(postSpan('FINALIZE'))
-
-  if (updErr) {
-    console.error(postSpan('FINALIZE_ERR'), { message: updErr.message })
-    await markPostError(
-      supabase,
-      post.post_id,
-      `last_synced_at update failed: ${updErr.message}`,
-    )
+    await markPostError(supabase, post.post_id, `fatal: ${msg || 'unknown error'}`)
     return false
   }
-
-  console.info(postSpan('END_OK'))
-  return true
 }
 
-async function deferPost(
-  supabase: Admin,
-  post_id: string,
-  next_cursor?: string,
-) {
-  console.warn(`[DEFER ${post_id}]`, { next_cursor: next_cursor ?? null })
+async function deferPost(supabase: Admin, post_id: string, next_cursor?: string) {
   await supabase
     .from('facebook_posts')
     .update({
@@ -726,11 +645,7 @@ async function deferPost(
     .eq('post_id', post_id)
 }
 
-async function markPostError(
-  supabase: Admin,
-  post_id: string,
-  message: string,
-) {
+async function markPostError(supabase: Admin, post_id: string, message: string) {
   const current = await getCurrentRetry(supabase, post_id)
   const next = (current ?? 0) + 1
 
@@ -741,16 +656,13 @@ async function markPostError(
       retry_count: next,
       last_error: message.slice(0, 1000),
       ...(next >= RETRY_MAX
-        ? { last_synced_at: new Date().toISOString() }
+        ? { last_synced_at: new Date().toISOString(), next_cursor: null }
         : {}),
     })
     .eq('post_id', post_id)
 }
 
-async function getCurrentRetry(
-  supabase: Admin,
-  post_id: string,
-): Promise<number> {
+async function getCurrentRetry(supabase: Admin, post_id: string): Promise<number> {
   const { data } = await supabase
     .from('facebook_posts')
     .select('retry_count')
