@@ -11,6 +11,7 @@ import {
   supa_update_facebook_insights,
 } from '@/app/_actions/facebook_insights/actions'
 import { merge_old_and_new_regionInsightsByDate } from '@/app/api/cron/insights/helpers'
+import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -262,7 +263,13 @@ export const GET = async (req: NextRequest) => {
   ).toISOString()
 
   // ✅ env guard (cron-proof)
-  const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN
+  const { data: selectedFacebookPage } =
+    await supa_select_facebook_pages_pageToken({
+      clCRON: req.headers.get('authorization'),
+      clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+    })
+  const pageAccessToken = selectedFacebookPage?.page_token
+
   if (!pageAccessToken) {
     return NextResponse.json(
       { ok: false as const, runId, error: 'missing FACEBOOK_PAGE_TOKEN' },
@@ -393,7 +400,7 @@ export const GET = async (req: NextRequest) => {
         total_reactions = 0
       } else {
         const reactionsRes = await limiterLight.schedule(() =>
-          util_fb_reactions_total({ postId }),
+          util_fb_reactions_total({ postId, pageAccessToken }),
         )
 
         if (reactionsRes?.error) {

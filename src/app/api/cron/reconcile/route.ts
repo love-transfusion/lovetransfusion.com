@@ -9,6 +9,7 @@ import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
 
 // ✅ adjust this import to match where your Database type is exported
 import type { Database } from '@/types/database.types'
+import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
 
 type Admin = Awaited<ReturnType<typeof createAdmin>>
 type FbPostRow = Database['public']['Tables']['facebook_posts']['Row']
@@ -129,6 +130,19 @@ export async function GET(req: NextRequest) {
   const supabase = await createAdmin()
   console.info(span('SB_READY'))
 
+  const { data: selectedFacebookPage } =
+    await supa_select_facebook_pages_pageToken({
+      clCRON: req.headers.get('authorization'),
+      clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+    })
+  const pageToken = selectedFacebookPage?.page_token
+  if (!pageToken) {
+    return NextResponse.json(
+      { ok: false as const, runId, error: 'missing FACEBOOK_PAGE_TOKEN' },
+      { status: 500 },
+    )
+  }
+
   // ---------- PICK_POSTS (NULL-safe filters) ----------
   console.time(span('PICK_POSTS'))
   const marker = `${NON_EXISTENT_MARKER}%`
@@ -183,7 +197,7 @@ export async function GET(req: NextRequest) {
 
   console.time(span('PROCESS_ALL'))
   const results = await Promise.allSettled(
-    posts.map((p) => limit(() => reconcilePost(supabase, p, runId))),
+    posts.map((p) => limit(() => reconcilePost(supabase, p, runId, pageToken))),
   )
   console.timeEnd(span('PROCESS_ALL'))
 
@@ -360,6 +374,7 @@ async function reconcilePost(
   supabase: Admin,
   post: FbPostRow, // ✅ use typed row from Supabase
   runId: string,
+  pageToken: string,
 ) {
   const postSpan = (s: string) => `[CRON ${runId}] [POST ${post.post_id}] ${s}`
 
@@ -375,7 +390,6 @@ async function reconcilePost(
 
   // 0) Resolve page token (IMPORTANT: pass systemToken if available)
   console.time(postSpan('PAGE_TOKEN'))
-  const pageToken = process.env.FACEBOOK_PAGE_TOKEN!
 
   const since = post.last_synced_at ?? undefined
   let after: string | undefined = post.next_cursor ?? undefined

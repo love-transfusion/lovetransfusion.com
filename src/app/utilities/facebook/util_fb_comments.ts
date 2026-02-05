@@ -39,6 +39,16 @@ export async function util_fb_comments(options: {
     order = 'chronological',
   } = options
 
+  const token = (pageAccessToken ?? '').trim()
+
+  if (!token || token.length < 50) {
+    return {
+      data: null,
+      paging: undefined,
+      error: 'Missing/invalid token value.',
+    }
+  }
+
   // Always request author + parent + counts + a decent avatar size
   const fields = [
     'id',
@@ -53,7 +63,7 @@ export async function util_fb_comments(options: {
   ].join(',')
 
   const params: Record<string, string> = {
-    access_token: pageAccessToken,
+    access_token: token,
     fields,
     limit: String(limit),
     order,
@@ -66,7 +76,7 @@ export async function util_fb_comments(options: {
     const { data } = await axios.get(
       `https://graph.facebook.com/${process.env
         .NEXT_PUBLIC_GRAPH_VERSION!}/${postId}/comments`,
-      { params }
+      { params },
     )
 
     // Graph-level error (200 with error payload)

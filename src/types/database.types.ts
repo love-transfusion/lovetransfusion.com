@@ -130,18 +130,21 @@ export type Database = {
           created_at: string | null
           page_id: string
           page_name: string | null
+          page_token: string
         }
         Insert: {
           connected_by_user_id: string
           created_at?: string | null
           page_id: string
           page_name?: string | null
+          page_token: string
         }
         Update: {
           connected_by_user_id?: string
           created_at?: string | null
           page_id?: string
           page_name?: string | null
+          page_token?: string
         }
         Relationships: [
           {

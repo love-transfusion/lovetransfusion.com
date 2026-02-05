@@ -10,6 +10,7 @@ import {
 import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
 import { metaFetchJson } from './metaFetch'
+import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
 
 export const runtime = 'nodejs'
 
@@ -390,7 +391,20 @@ export async function POST(req: NextRequest) {
           const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
           if (!systemToken) continue
 
-          const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
+          const { data: selectedFacebookPage } =
+            await supa_select_facebook_pages_pageToken({
+              clCRON: req.headers.get('authorization'),
+              clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+            })
+
+          const pageAccessToken = selectedFacebookPage?.page_token
+
+          if (!pageAccessToken) {
+            return NextResponse.json(
+              { ok: false, error: 'missing FACEBOOK_PAGE_TOKEN' },
+              { status: 500 },
+            )
+          }
 
           const avatars = await util_fb_profile_picture({
             clIDs: fromIds,
@@ -450,7 +464,20 @@ export async function POST(req: NextRequest) {
         const systemToken = process.env.FACEBOOK_SYSTEM_TOKEN
         if (!systemToken) continue
 
-        const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
+        const { data: selectedFacebookPage } =
+          await supa_select_facebook_pages_pageToken({
+            clCRON: req.headers.get('authorization'),
+            clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
+          })
+
+        const pageAccessToken = selectedFacebookPage?.page_token
+
+        if (!pageAccessToken) {
+          return NextResponse.json(
+            { ok: false, error: 'missing FACEBOOK_PAGE_TOKEN' },
+            { status: 500 },
+          )
+        }
 
         const VERSION = process.env.NEXT_PUBLIC_GRAPH_VERSION!
         const hiddenToMark: string[] = []

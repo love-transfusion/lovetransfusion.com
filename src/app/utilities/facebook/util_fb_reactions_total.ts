@@ -91,6 +91,7 @@ const classifyGraphError = (args: {
 
 export const util_fb_reactions_total = async (args: {
   postId: string
+  pageAccessToken: string
   graphVersion?: string // optional override
 }): Promise<T_fbReactionsTotalRes> => {
   const GRAPH =
@@ -106,11 +107,21 @@ export const util_fb_reactions_total = async (args: {
       },
     }
 
-  const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
+  if (!args.pageAccessToken)
+    return {
+      data: null,
+      error: {
+        message: 'Facebook Page Access Token is required.',
+        is_non_retryable: true,
+        reason: 'permission',
+      },
+    }
+
+  // const pageAccessToken = process.env.FACEBOOK_PAGE_TOKEN!
   const url =
     `https://graph.facebook.com/${GRAPH}/${encodeURIComponent(args.postId)}` +
     `/reactions?summary=total_count&limit=0&access_token=${encodeURIComponent(
-      pageAccessToken,
+      args.pageAccessToken,
     )}`
 
   const res = await fetch(url, { method: 'GET' })
