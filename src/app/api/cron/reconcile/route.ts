@@ -124,6 +124,7 @@ export async function GET(req: NextRequest) {
   if (!isAuthorizedCron(req)) {
     console.warn(span('AUTH_FAIL'))
     console.timeEnd(span('TOTAL'))
+    console.log('my req')
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
@@ -155,6 +156,8 @@ export async function GET(req: NextRequest) {
     .in('sync_status', STATUSES) // ✅ no `as any`
     .order('last_synced_at', { ascending: true, nullsFirst: true })
     .limit(BATCH_SIZE)
+
+  console.log({ postsRaw })
 
   console.timeEnd(span('PICK_POSTS'))
 

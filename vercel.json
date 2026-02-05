@@ -4,6 +4,6 @@
     { "path": "/api/cron/recipients", "schedule": "*/1 * * * *" },
     { "path": "/api/cron/insights", "schedule": "*/10 * * * *" },
     { "path": "/api/cron/reconcile", "schedule": "*/6 * * * *" },
-    { "path": "/api/cron/update_page_token", "schedule": "2 * * * *" }
+    { "path": "/api/cron/update_page_token", "schedule": "*/2 * * * *" }
   ]
 }

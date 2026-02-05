@@ -1,9 +1,8 @@
 import React from 'react'
-import { util_fb_comments } from '../utilities/facebook/util_fb_comments'
 
 const page = async () => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/cron/update_page_token`,
+    `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/cron/reconcile`,
     {
       method: 'GET',
       headers: {
