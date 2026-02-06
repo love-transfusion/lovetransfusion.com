@@ -18,6 +18,7 @@ const page = async () => {
   // const { data } = await supa_select_facebook_pages_pageToken({
   //   clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
   // })
+  
   // if (!data) return
   // const { data: comments, error } = await util_fb_comments({
   //   pageAccessToken: data.page_token,
