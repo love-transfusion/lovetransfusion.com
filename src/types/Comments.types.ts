@@ -5,6 +5,7 @@ export interface I_Comments_Facebook {
   message: string | null
   created_at: string
   profile_picture?: string | null
+  commentator_id: string | null
 }
 
 export interface I_Comments_Instagram {

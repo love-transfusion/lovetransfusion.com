@@ -13,20 +13,18 @@ export const supa_select_facebook_comments = async (options: {
   const newLimit = options.clLimit
   const from = options.clCurrentPage * newLimit - newLimit
   const to = options.clCurrentPage * newLimit - newLimit + (newLimit - 1)
-
   const supabase = await createServer()
   try {
-    const query = supabase
+    const { data, error, count } = await supabase
       .from('facebook_comments')
       .select('*', { count: 'exact' })
-      .eq('post_id', options.post_id)
-      .neq('is_hidden', true)
-      .neq('is_deleted', true)
       .order('created_time', { ascending: false })
+      .eq('post_id', options.post_id)
+      .eq('is_deleted', false)
+      .or('is_hidden.eq.false,is_hidden.is.null')
       .limit(newLimit)
       .range(from, to)
 
-    const { data, error, count } = await query
     if (error) throw new Error(error.message)
     return { data, count: count ?? 0, error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

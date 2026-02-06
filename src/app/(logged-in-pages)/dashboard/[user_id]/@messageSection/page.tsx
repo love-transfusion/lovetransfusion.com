@@ -66,6 +66,7 @@ const MessageSlot = async (props: MessageSlot_Types) => {
         message: item.message,
         created_at: item.created_time,
         profile_picture: item.from_picture_url,
+        commentator_id: item.from_id,
       }
     }) ?? []
 
@@ -85,7 +86,7 @@ const MessageSlot = async (props: MessageSlot_Types) => {
   // Group the website comments to fit pagination of the other networks
   const groupedWebsiteComments = chunkArray(
     formattedWebsiteComments ?? [],
-    clLimit
+    clLimit,
   ) // clLimit is the basis of how many items per array
 
   const allComments = await filter_deleted_comments(
@@ -99,7 +100,7 @@ const MessageSlot = async (props: MessageSlot_Types) => {
       const dateB = new Date(b.created_at).getTime()
       return dateB - dateA
     }),
-    selectedUser.receipients_deleted_messages
+    selectedUser.receipients_deleted_messages,
   )
 
   const recipient_prays = selectedUser.recipient_prays

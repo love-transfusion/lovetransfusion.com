@@ -160,6 +160,7 @@ export async function POST(req: NextRequest) {
 
   const raw = await req.text()
   const supabase = await createAdmin()
+  const clCRON = `Bearer ${process.env.CRON_SECRET}`
 
   try {
     const sigOk = verifySignature(req, raw)
@@ -393,7 +394,7 @@ export async function POST(req: NextRequest) {
 
           const { data: selectedFacebookPage } =
             await supa_select_facebook_pages_pageToken({
-              clCRON: req.headers.get('authorization'),
+              clCRON,
               clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
             })
 
@@ -466,7 +467,7 @@ export async function POST(req: NextRequest) {
 
         const { data: selectedFacebookPage } =
           await supa_select_facebook_pages_pageToken({
-            clCRON: req.headers.get('authorization'),
+            clCRON,
             clFacebookPageID: process.env.NEXT_PUBLIC_FACEBOOK_PAGE_ID!,
           })
 

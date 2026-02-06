@@ -39,7 +39,7 @@ const Messages = ({
     setlastVisible((prev) => prev + 100)
   }
   const handleDelete = async (
-    item: I_supa_receipients_deleted_messages_insert
+    item: I_supa_receipients_deleted_messages_insert,
   ) => {
     setcomments((prev) => {
       return prev.filter((comment) => {
@@ -95,8 +95,17 @@ const Messages = ({
                             className="object-cover"
                           />
                         )}
-                        {(item.type === 'facebook' ||
-                          item.type === 'instagram') && (
+                        {item.type === 'facebook' && (
+                          <Image
+                            src={`/api/meta/avatar/${item.commentator_id}/64`}
+                            className="rounded-full bg-primary-50"
+                            alt={'User'}
+                            // width={32}
+                            // height={32}
+                            fill
+                          />
+                        )}
+                        {item.type === 'instagram' && (
                           <Image
                             src={
                               item.profile_picture ??

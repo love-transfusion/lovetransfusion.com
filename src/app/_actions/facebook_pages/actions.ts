@@ -48,6 +48,7 @@ export const supa_select_facebook_pages_pageToken = async (props: {
       .select('page_token')
       .eq('page_id', clFacebookPageID)
       .single()
+      
     if (error) throw new Error(error.message)
     return { data, error: null }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
