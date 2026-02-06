@@ -4,7 +4,6 @@ export interface I_Comments_Facebook {
   id: string
   message: string | null
   created_at: string
-  profile_picture?: string | null
   commentator_id: string | null
 }
 

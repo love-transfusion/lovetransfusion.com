@@ -7,7 +7,6 @@ import {
   markCommentHidden,
 } from '@/app/utilities/facebook/helpers/webhookWrites'
 
-import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS, containsBanned } from '@/app/lib/banned_keywords'
 import { metaFetchJson } from './metaFetch'
 import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
@@ -202,7 +201,6 @@ export async function POST(req: NextRequest) {
       message: string | null
       from_id: string | null
       from_name: string | null
-      from_picture_url: string | null
       created_time?: string
       like_count: number | null
       comment_count: number | null
@@ -281,7 +279,6 @@ export async function POST(req: NextRequest) {
           message: (v.message as string) ?? null,
           from_id: realFromId,
           from_name: realFromName,
-          from_picture_url: null as string | null,
           created_time: createdISO,
           like_count: (v.like_count as number) ?? null,
           comment_count: (v.comment_count as number) ?? null,
@@ -407,18 +404,10 @@ export async function POST(req: NextRequest) {
             )
           }
 
-          const avatars = await util_fb_profile_picture({
-            clIDs: fromIds,
-            clAccessToken: pageAccessToken,
-            clImageDimensions: 128,
-          })
-
           for (const row of batchedRows) {
             if (!row.from_id) continue
             const rowPage = commentToPage.get(row.comment_id)
             if (rowPage !== page_id) continue
-            const hit = avatars[row.from_id]
-            if (hit?.url) row.from_picture_url = hit.url
           }
         }
       } catch (e: any) {

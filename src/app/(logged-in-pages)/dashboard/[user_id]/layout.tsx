@@ -82,7 +82,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
     throw new Error('No recipient linked to this account.')
 
   const formattedFBComments: I_Comments[] = FBComments?.filter(
-    (item) => !item.is_deleted && item.message
+    (item) => !item.is_deleted && item.message,
   )?.map((item) => {
     return {
       type: 'facebook',
@@ -90,7 +90,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       name: item.from_name ?? 'Someone Who Cares',
       message: item.message,
       created_at: item.created_time,
-      profile_picture: item.from_picture_url,
+      commentator_id: item.from_id,
     }
   })
   const formattedWebsiteComments: I_Comments[] | null =
@@ -122,7 +122,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
         created_at: item.created_at,
         profile_picture_website: item.public_profiles,
       }
-    }
+    },
   )
 
   const facebook_insights = !!selectedUser.facebook_insights?.length
@@ -135,7 +135,7 @@ const UserDashboardLayout = async (props: I_userDashboardLayout) => {
       ...(formattedWebsiteComments ?? []),
       ...(formattedWebsiteHugs ?? []),
     ],
-    selectedUser.receipients_deleted_messages
+    selectedUser.receipients_deleted_messages,
   )
 
   return (

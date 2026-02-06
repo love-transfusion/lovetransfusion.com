@@ -4,7 +4,6 @@ import crypto from 'crypto'
 import pLimit from 'p-limit'
 import { createAdmin } from '@/app/config/supabase/supabaseAdmin'
 import { util_fb_comments } from '@/app/utilities/facebook/util_fb_comments'
-import { util_fb_profile_picture } from '@/app/utilities/facebook/util_fb_profile_picture'
 import { BANNED_KEYWORDS } from '@/app/lib/banned_keywords'
 import type { Database } from '@/types/database.types'
 import { supa_select_facebook_pages_pageToken } from '@/app/_actions/facebook_pages/actions'
@@ -123,7 +122,8 @@ async function normalizeRetryCounts(supabase: Admin, runId: string) {
     // only touch these because "idle" already terminal
     .in('sync_status', ['error', 'deferred', 'running'] as any)
 
-  if (error) console.error(span('NORMALIZE_RETRY_ERR'), { message: error.message })
+  if (error)
+    console.error(span('NORMALIZE_RETRY_ERR'), { message: error.message })
   else console.info(span('NORMALIZE_RETRY_OK'))
 }
 
@@ -146,7 +146,8 @@ async function reapStaleRunning(supabase: Admin, runId: string) {
     .eq('sync_status', 'running')
     .or(`sync_started_at.is.null,sync_started_at.lt.${cutoff}`)
 
-  if (error) console.error(span('REAP_STALE_RUNNING_ERR'), { message: error.message })
+  if (error)
+    console.error(span('REAP_STALE_RUNNING_ERR'), { message: error.message })
   else console.info(span('REAP_STALE_RUNNING_OK'), { cutoff })
 }
 
@@ -245,7 +246,8 @@ export async function GET(req: NextRequest) {
     .in('post_id', ids)
   console.timeEnd(span('MARK_RUNNING'))
 
-  if (updErr) console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
+  if (updErr)
+    console.error(span('MARK_RUNNING_ERR'), { message: updErr.message })
   else console.info(span('MARK_RUNNING_OK'), { ids })
 
   console.time(span('PROCESS_ALL'))
@@ -288,12 +290,20 @@ async function fetchCommentAuthorsByIds(
 ): Promise<
   Record<
     string,
-    { from_id: string | null; from_name: string | null; picture_url: string | null }
+    {
+      from_id: string | null
+      from_name: string | null
+      picture_url: string | null
+    }
   >
 > {
   const out: Record<
     string,
-    { from_id: string | null; from_name: string | null; picture_url: string | null }
+    {
+      from_id: string | null
+      from_name: string | null
+      picture_url: string | null
+    }
   > = {}
 
   const unique = Array.from(new Set(commentIds.filter(Boolean)))
@@ -385,7 +395,8 @@ async function reconcilePost(
       const maxAttempts = 4
 
       while (attempt < maxAttempts) {
-        if (!canStillWork()) return { data: null, paging: null, error: 'deadline' }
+        if (!canStillWork())
+          return { data: null, paging: null, error: 'deadline' }
 
         const { data, paging, error } = await util_fb_comments({
           postId: post.post_id,
@@ -398,10 +409,23 @@ async function reconcilePost(
 
         if (!error) return { data, paging, error: null }
 
-        const { nonExistent, permission, retryable, msg, status, code, subcode } =
-          classifyGraphError(error)
+        const {
+          nonExistent,
+          permission,
+          retryable,
+          msg,
+          status,
+          code,
+          subcode,
+        } = classifyGraphError(error)
 
-        console.error(postSpan('FETCH_ERR'), { msg, status, code, subcode, retryable })
+        console.error(postSpan('FETCH_ERR'), {
+          msg,
+          status,
+          code,
+          subcode,
+          retryable,
+        })
 
         if (nonExistent || permission || !retryable) {
           return { data: null, paging: null, error }
@@ -432,7 +456,9 @@ async function reconcilePost(
         }
 
         if (nonExistent) {
-          console.warn(postSpan('TOMBSTONE'), { reason: 'non-existent/off-surface' })
+          console.warn(postSpan('TOMBSTONE'), {
+            reason: 'non-existent/off-surface',
+          })
           const { error: tErr } = await supabase
             .from('facebook_posts')
             .update({
@@ -443,7 +469,10 @@ async function reconcilePost(
               last_synced_at: new Date().toISOString(),
             })
             .eq('post_id', post.post_id)
-          if (tErr) console.error(postSpan('TOMBSTONE_UPDATE_ERR'), { message: tErr.message })
+          if (tErr)
+            console.error(postSpan('TOMBSTONE_UPDATE_ERR'), {
+              message: tErr.message,
+            })
           return false
         }
 
@@ -457,10 +486,6 @@ async function reconcilePost(
       }
 
       if (data && data.length) {
-        // avatars
-        let avatarMap: Record<string, { url: string | null; isSilhouette: boolean | null }> =
-          {}
-
         try {
           const fromIds = Array.from(
             new Set(
@@ -476,11 +501,6 @@ async function reconcilePost(
 
             while (attempt < maxAttempts) {
               try {
-                avatarMap = await util_fb_profile_picture({
-                  clIDs: fromIds,
-                  clAccessToken: pageToken,
-                  clImageDimensions: 128,
-                })
                 break
               } catch (e: any) {
                 const { msg, status } = extractErr(e)
@@ -501,7 +521,11 @@ async function reconcilePost(
         // fallback authors
         let authorFallback: Record<
           string,
-          { from_id: string | null; from_name: string | null; picture_url: string | null }
+          {
+            from_id: string | null
+            from_name: string | null
+            picture_url: string | null
+          }
         > = {}
 
         try {
@@ -525,11 +549,8 @@ async function reconcilePost(
 
         const rows = data.map((c: any) => {
           const fromId = c.from?.id ?? authorFallback[c.id]?.from_id ?? null
-          const fromName = c.from?.name ?? authorFallback[c.id]?.from_name ?? null
-
-          const apiPic = c?.from?.picture?.data?.url ?? null
-          const avatarPic = fromId ? (avatarMap[fromId]?.url ?? null) : null
-          const fallbackPic = authorFallback[c.id]?.picture_url ?? null
+          const fromName =
+            c.from?.name ?? authorFallback[c.id]?.from_name ?? null
 
           // avoid Date throwing
           let createdISO = new Date().toISOString()
@@ -543,7 +564,8 @@ async function reconcilePost(
 
           const msgLower = (c.message ?? '').toLowerCase()
           const containsBanned =
-            msgLower.length > 0 && BANNED_KEYWORDS.some((w) => msgLower.includes(w))
+            msgLower.length > 0 &&
+            BANNED_KEYWORDS.some((w) => msgLower.includes(w))
 
           return {
             comment_id: c.id,
@@ -552,7 +574,6 @@ async function reconcilePost(
             message: c.message ?? null,
             from_id: fromId,
             from_name: fromName,
-            from_picture_url: apiPic ?? avatarPic ?? fallbackPic,
             created_time: createdISO,
             like_count: c.like_count ?? (c as any).like_count ?? null,
             comment_count: c.comment_count ?? (c as any).comment_count ?? null,
@@ -596,7 +617,9 @@ async function reconcilePost(
         .eq('post_id', post.post_id)
 
       if (cursorErr) {
-        console.error(postSpan('CURSOR_UPDATE_ERR'), { message: cursorErr.message })
+        console.error(postSpan('CURSOR_UPDATE_ERR'), {
+          message: cursorErr.message,
+        })
         await deferPost(supabase, post.post_id, after)
         return false
       }
@@ -616,7 +639,11 @@ async function reconcilePost(
       .eq('post_id', post.post_id)
 
     if (finalizeErr) {
-      await markPostError(supabase, post.post_id, `finalize failed: ${finalizeErr.message}`)
+      await markPostError(
+        supabase,
+        post.post_id,
+        `finalize failed: ${finalizeErr.message}`,
+      )
       return false
     }
 
@@ -629,12 +656,20 @@ async function reconcilePost(
       code,
       subcode,
     })
-    await markPostError(supabase, post.post_id, `fatal: ${msg || 'unknown error'}`)
+    await markPostError(
+      supabase,
+      post.post_id,
+      `fatal: ${msg || 'unknown error'}`,
+    )
     return false
   }
 }
 
-async function deferPost(supabase: Admin, post_id: string, next_cursor?: string) {
+async function deferPost(
+  supabase: Admin,
+  post_id: string,
+  next_cursor?: string,
+) {
   await supabase
     .from('facebook_posts')
     .update({
@@ -645,7 +680,11 @@ async function deferPost(supabase: Admin, post_id: string, next_cursor?: string)
     .eq('post_id', post_id)
 }
 
-async function markPostError(supabase: Admin, post_id: string, message: string) {
+async function markPostError(
+  supabase: Admin,
+  post_id: string,
+  message: string,
+) {
   const current = await getCurrentRetry(supabase, post_id)
   const next = (current ?? 0) + 1
 
@@ -662,7 +701,10 @@ async function markPostError(supabase: Admin, post_id: string, message: string) 
     .eq('post_id', post_id)
 }
 
-async function getCurrentRetry(supabase: Admin, post_id: string): Promise<number> {
+async function getCurrentRetry(
+  supabase: Admin,
+  post_id: string,
+): Promise<number> {
   const { data } = await supabase
     .from('facebook_posts')
     .select('retry_count')

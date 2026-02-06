@@ -39,7 +39,7 @@ const Engagements = ({ allEngagements, user_id }: Props) => {
     return allEngagements
       .sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
       .slice(0, 10)
   }, [allEngagements])
@@ -71,7 +71,7 @@ const Engagements = ({ allEngagements, user_id }: Props) => {
     // Persist current list (cap length)
     const nextSeen = [...new Set([...currentKeys, ...Array.from(seen)])].slice(
       0,
-      LS_LIMIT
+      LS_LIMIT,
     )
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(nextSeen))
@@ -126,7 +126,7 @@ const Engagements = ({ allEngagements, user_id }: Props) => {
                 )}
 
                 {item.type === 'facebook' && (
-                  <FacebookProfilePic fbProfilePicURL={item.profile_picture} />
+                  <FacebookProfilePic commentator_id={item.commentator_id} />
                 )}
 
                 <p className="text-[#009933] line-clamp-1">{item.name}</p>

@@ -65,7 +65,6 @@ const MessageSlot = async (props: MessageSlot_Types) => {
         name: item.from_name ?? 'Someone Who Cares',
         message: item.message,
         created_at: item.created_time,
-        profile_picture: item.from_picture_url,
         commentator_id: item.from_id,
       }
     }) ?? []
